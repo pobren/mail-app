@@ -14,7 +14,13 @@
 		],
 		"bindings": {
 			"DOMAINS": {
-				"description": "Your domain with [Email Routing](https://developers.cloudflare.com/email-routing/) enabled (e.g. `example.com`). After deploying, create a catch-all Email Routing rule pointing to this Worker."
+				"description": "Your domain, such as `example.com`. Mail App gets the email for it. After deploying, follow the steps in the README to switch on Email Routing and sign-in."
+			},
+			"POLICY_AUD": {
+				"description": "Leave this as it is for now. You'll set it after deploying, when you switch on Cloudflare Access (see the README)."
+			},
+			"TEAM_DOMAIN": {
+				"description": "Leave this as it is for now. You'll set it after deploying, when you switch on Cloudflare Access (see the README)."
 			}
 		}
 	},

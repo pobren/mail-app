@@ -24,7 +24,7 @@ Mail App gives you private email at your own domain. It installs into your own C
 
 ## Install
 
-There are two ways. Both install into your own Cloudflare account, and updating later keeps your mail and settings.
+There are three ways. All of them install into your own Cloudflare account, and updating later keeps your mail and settings.
 
 ### 1. The installer (recommended)
 
@@ -36,7 +36,20 @@ npx @mrpwob/mail-app setup
 
 `npx @mrpwob/mail-app help` lists the token permissions. Make the token at [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens) (Create Token, then Create Custom Token). It's only ever sent to Cloudflare.
 
-### 2. From the code, with Wrangler
+### 2. Deploy to Cloudflare
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/pobren/mail-app)
+
+The button copies Mail App to your GitHub account and deploys it to your Cloudflare account, with its storage. When it asks for **DOMAINS**, enter your domain. Leave the two Access settings as they are for now. Then:
+
+1. Open **Workers & Pages › mail-app › Settings › Domains & Routes** and add a custom domain, such as `mail.example.com`.
+2. On the same page, switch on **Cloudflare Access** for that address. Copy the **POLICY_AUD** and **TEAM_DOMAIN** values it shows into the Worker's **Variables and Secrets** (as secrets).
+3. Open your domain's **Email › Email Routing**, switch it on, and set the **Catch-all** to *Send to a Worker*, `mail-app`.
+4. Open `https://mail.example.com`. You're the first admin.
+
+The installer does all of this for you, and also sets up passkeys, download links and the API, so it's the easier way.
+
+### 3. From the code, with Wrangler
 
 ```sh
 git clone https://github.com/pobren/mail-app.git
