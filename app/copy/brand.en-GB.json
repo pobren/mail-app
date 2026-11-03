@@ -1,0 +1,23 @@
+{
+	"_note": "Mail App's name and help links, shown in the app. Edit the wording here.",
+	"name": "Mail App",
+	"helpTitle": "Help and support",
+	"guidesText": "Help",
+	"guidesUrl": "https://github.com/pobren/mail-app#readme",
+	"supportEmail": "",
+	"updateTitle": "Mail App {version} is ready.",
+	"updateText": "Your mail and settings are kept when you update.",
+	"updateLink": "Update now",
+	"tagline": "Your email, on your own Cloudflare account.",
+	"updateTitleNoVersion": "A new version of Mail App is ready.",
+	"updateChanges": "What's new",
+	"updateHide": "Hide",
+	"updateHideLabel": "Hide this until the next version",
+	"versionText": "Version {version}",
+	"signInText": "Mail App can't reach your mailbox. You may need to sign in again.",
+	"signInButton": "Sign in again",
+	"signInLater": "Not now",
+	"signOut": "Sign out",
+	"signOutUrl": "/cdn-cgi/access/logout",
+	"signOutHint": "Signs you out of Mail App on this device. You can sign back in at any time using a one-time verification code or your passkey."
+}

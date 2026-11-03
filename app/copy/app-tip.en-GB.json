@@ -1,0 +1,12 @@
+{
+	"_note": "The tip above the inbox that suggests installing Mail App as an app. Avoid Mac-only words like Dock in titles: Windows has a taskbar, Chrome says Install app. Steps come from settings.en-GB.json (device).",
+	"title": "Install Mail App",
+	"text": "It opens in its own window, like any other app, and alerts you to every new email.",
+	"install": "Install",
+	"howTo": "Show me how",
+	"guide": "Step-by-step guide",
+	"guideUrl": "https://github.com/pobren/mail-app#install-it-as-an-app",
+	"hide": "Hide",
+	"hideLabel": "Hide this tip. You can still find the steps in Settings, Account.",
+	"installed": "Mail App is installed. Open it from your Dock, taskbar or home screen, then switch on notifications in Settings, Account."
+}

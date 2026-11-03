@@ -1,0 +1,29 @@
+{
+	"title": "Email forwarding",
+	"intro": "Automatically forward incoming messages to an external address, such as a personal Gmail account or a colleague's inbox. Messages identified as spam are only forwarded if you turn on \"Forward spam too\".",
+	"switchLabel": "Forward incoming emails",
+	"to": "Forward to",
+	"toPlaceholder": "name@example.com",
+	"keepCopy": "Keep a copy in your inbox",
+	"keepCopyOff": "Forwarded emails are filed in Archive and marked as read, so your inbox stays clear and nothing is lost.",
+	"includeSpam": "Forward spam too",
+	"includeSpamHint": "Handy while you try Mail App alongside your old email: the other address gets everything, and spam stays in Spam here too. Spam only goes to an address verified in Cloudflare (see below), so it's never sent from your own address.",
+	"save": "Save",
+	"saved": "Forwarding saved",
+	"turnedOff": "Forwarding is off",
+	"failed": "That didn't save. Please try again.",
+	"howTitle": "For the best delivery, verify the address in Cloudflare",
+	"howSteps": [
+		"In your Cloudflare dashboard, go to Email Service, then Email Routing, then Destination addresses.",
+		"Add the address you're forwarding to.",
+		"Open the email Cloudflare sends to it and click Verify email address."
+	],
+	"howVerified": "Once it's verified, each email is passed on exactly as it arrived, from the original sender, and it passes SPF, DKIM and DMARC checks at the other end.",
+	"howCopy": "Until then, Mail App sends a copy from your own address, named after the person who wrote it, and replies go straight to them. That needs sending switched on in Cloudflare, counts towards your sending limits, and can't include emails over 5 MB.",
+	"dashboardLink": "Open Email Routing in Cloudflare",
+	"dashboardUrl": "https://dash.cloudflare.com/?to=/:account/email-service/routing",
+	"statusForward": "Working. The last email was forwarded at {when}.",
+	"statusCopy": "Working. The last email was forwarded as a copy at {when}. Verify the address in Cloudflare to pass emails on exactly as they arrive.",
+	"statusFailed": "The email at {when} wasn't forwarded. {error}",
+	"statusNone": "Nothing forwarded yet. This shows how the last email went."
+}

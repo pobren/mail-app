@@ -1,0 +1,25 @@
+{
+	"_note": "Words for Admin > Email disclaimer. Edit the wording here.",
+	"intro": "Paste your disclaimer once and we'll add it to the end of every email anyone sends from Mail App. UK companies must show their full name, company number, where they're registered and their registered office address on business emails.",
+	"switchLabel": "Add the disclaimer to every email",
+	"label": "Disclaimer",
+	"hint": "Paste or type it as you want it to look. Line breaks are kept.",
+	"placeholder": "Smith & Jones Limited. Registered in England and Wales, company number 01234567.\nRegistered office: 1 High Street, London AB1 2CD.",
+	"preview": "How it looks on an email",
+	"previewEmpty": "Paste your disclaimer to see how it looks.",
+	"example": {
+		"from": "Sam Smith",
+		"to": "Alex Taylor",
+		"subject": "Your quote",
+		"body": "Hi Alex,\n\nThanks for your time today. Your quote is attached, and I'm happy to talk it through whenever suits you.",
+		"signOff": "Kind regards,\nSam"
+	},
+	"fromLabel": "From",
+	"toLabel": "To",
+	"subjectLabel": "Subject",
+	"covers": "It goes on emails written in Mail App, replies and forwards (above the quoted email), auto-replies, and emails sent through the API or by the AI assistant. It isn't added to calendar invitations.",
+	"save": "Save",
+	"saved": "Email disclaimer saved. It's on every email from now on.",
+	"savedOff": "Email disclaimer saved. It isn't being added to emails.",
+	"failed": "That didn't save. Please try again."
+}

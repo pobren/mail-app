@@ -1,0 +1,13 @@
+{
+	"showAll": "Show all {count}",
+	"showAllMailboxes": "Show all {count} mailboxes",
+	"showAllFolders": "Show all {count} folders",
+	"showAllLabels": "Show all {count} labels",
+	"showAllCalendars": "Show all {count} calendars",
+	"showFewer": "Show fewer",
+	"find": "Find…",
+	"noMatch": "Nothing matches \"{text}\"",
+	"andMore": "{list} and {count} more",
+	"fold": "Hide list",
+	"unfold": "Show list"
+}

@@ -1,0 +1,28 @@
+name: Report a bug
+description: Something in Mail App isn't working as it should.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. Screenshots help.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Mail App version
+      description: Shown at the foot of the mailbox list, such as "Version 2.0".
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - The installer (npx @mrpwob/mail-app)
+        - From the code, with Wrangler
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Chrome on Windows, Safari on iPhone…

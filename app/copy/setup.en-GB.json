@@ -1,0 +1,78 @@
+{
+	"title": "Set up Mail App",
+	"intro": "We check each part of your setup and tell you, in plain English, if anything needs fixing.",
+	"checkAgain": "Check again",
+	"checking": "Checking…",
+	"loadError": "We couldn't run the checks. Check your internet connection, then press Check again.",
+	"status": {
+		"ok": "OK",
+		"fix": "Fix this",
+		"unknown": "Couldn't check"
+	},
+	"sections": {
+		"app": {
+			"title": "Your Mail App",
+			"intro": "These parts live on your Cloudflare account."
+		},
+		"domain": {
+			"title": "Mail for {domain}",
+			"intro": "Other mail services check these settings before they trust your messages. If any say Fix this, your mail may arrive late or land in spam."
+		}
+	},
+	"checks": {
+		"signin": {
+			"label": "Sign-in protection",
+			"ok": "Only you can open your inbox.",
+			"fix": "Sign-in protection isn't switched on, so anyone who finds this address could read your mail. Switch on Cloudflare Access for Mail App, then press Check again.",
+			"unknown": "Skipped while running on this computer for testing."
+		},
+		"storage": {
+			"label": "Storage",
+			"ok": "Mail App can save your mail and attachments.",
+			"fix": "Mail App can't reach its storage. Check the R2 bucket in wrangler.jsonc, then deploy again.",
+			"unknown": "We couldn't check your storage."
+		},
+		"sending": {
+			"label": "Sending",
+			"ok": "Mail App is connected to Cloudflare's email sending.",
+			"fix": "Mail App isn't connected to email sending. Check the send_email binding in wrangler.jsonc, then deploy again.",
+			"unknown": "We couldn't check sending."
+		},
+		"mx": {
+			"label": "Receiving",
+			"ok": "Mail for this domain comes to Mail App.",
+			"fix": "Mail for this domain goes somewhere else. In the Cloudflare dashboard, open this domain, go to Email, then Email Routing, and press Enable.",
+			"unknown": "We couldn't look this up. Press Check again in a minute."
+		},
+		"spf": {
+			"label": "Permission to send",
+			"ok": "Your domain says Cloudflare may send mail for it.",
+			"fix": "Your domain doesn't yet say Cloudflare may send mail for it. Add or change this record:",
+			"unknown": "We couldn't look this up. Press Check again in a minute."
+		},
+		"dkim": {
+			"label": "Signature",
+			"ok": "Your messages are signed, so others can tell they really came from you.",
+			"fix": "Your messages aren't signed yet. In the Cloudflare dashboard, open this domain, go to Email, then Email Routing, and follow its prompt to add the missing records.",
+			"unknown": "We couldn't look this up. Press Check again in a minute."
+		},
+		"dmarc": {
+			"label": "Protection from fakes",
+			"ok": "Your domain tells others what to do with fake mail pretending to be you.",
+			"fix": "Your domain doesn't yet tell others what to do with fake mail pretending to be you. Gmail and Outlook trust senders more when this is set. Add this record:",
+			"unknown": "We couldn't look this up. Press Check again in a minute."
+		}
+	},
+	"fix": {
+		"how": "In the Cloudflare dashboard, open {domain}, go to DNS, then Records, then Add record.",
+		"type": "Type",
+		"name": "Name",
+		"value": "Content",
+		"copy": "Copy",
+		"copied": "Copied"
+	},
+	"noDomains": "No domain is set up yet. Set DOMAINS in wrangler.jsonc, then deploy again.",
+	"found": "Found: {value}",
+	"allGood": "Everything is set up. You're ready to go.",
+	"openInbox": "Open my inbox"
+}

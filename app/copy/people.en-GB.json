@@ -1,0 +1,185 @@
+{
+	"find": "Find a user",
+	"title": "Users",
+	"intro": "Everyone with access to Mail App. Each user can only view and manage the mailboxes assigned to them.",
+	"back": "Mailboxes",
+	"columns": {
+		"person": "User",
+		"role": "Role",
+		"status": "Status",
+		"mailboxes": "Mailboxes"
+	},
+	"adminOnly": "Only an admin can see this page.",
+	"invite": "Invite a user",
+	"importButton": "Import users",
+	"you": "you",
+	"owner": "Owner",
+	"roles": {
+		"admin": "Admin",
+		"member": "Member"
+	},
+	"roleHelp": {
+		"admin": "Can invite users and manage all mailbox settings. Any access to mailbox contents is audited and logged.",
+		"member": "Access is restricted strictly to their assigned mailboxes."
+	},
+	"status": {
+		"invited": "Invited",
+		"active": "Active",
+		"suspended": "Paused"
+	},
+	"lastSeen": "Last signed in {when}",
+	"neverSeen": "Hasn't signed in yet",
+	"noMailbox": "No mailbox yet",
+	"noMailboxYet": "You don't have a mailbox yet. Please ask the person who runs this Mail App to give you one.",
+	"usedBy": "Used by {people}",
+	"plan": {
+		"count": "{count} of {limit} people.",
+		"full": "You've reached {limit} people, the most one install can have (Cloudflare Access is free for up to 50)."
+	},
+	"signIn": {
+		"manual": "To let people you invite sign in straight away, give Mail App a Cloudflare key once. Until then, add each person to your Cloudflare Access policy yourself.",
+		"failed": "Mail App couldn't update the sign-in list on Cloudflare: {error}. Your changes are saved; press Try again.",
+		"retry": "Try again",
+		"done": "Sign-in list updated.",
+		"setUp": "Set up once",
+		"keyTitle": "Let invited people in automatically",
+		"keyIntro": "Make a key in Cloudflare that can only change who is allowed to sign in. Mail App keeps it on your own account and uses it to add and remove people for you. It takes about two minutes, once.",
+		"keySteps": [
+			"Open Account API tokens in Cloudflare (the link below) and press Create Token, then Create Custom Token.",
+			"Name it \"Mail App sign-in list\".",
+			"Under Permissions, choose Account, then Access: Apps and Policies, then Edit.",
+			"Press Add more and choose Account, then Access: Organizations, Identity Providers, and Groups, then Edit. This lets Mail App sign someone out straight away when you pause or remove them.",
+			"Press Continue to summary, then Create Token, and copy the key it shows."
+		],
+		"keyLink": "Open Account API tokens in Cloudflare",
+		"keyPlaceholder": "Paste the key here",
+		"keySave": "Save key",
+		"keySaved": "Done. People you invite can now sign in straight away.",
+		"keyNeedsInstaller": "Set ACCESS_POLICY_ID and CF_ACCOUNT_ID first (see the README), then come back here.",
+		"howTo": "How to set this up"
+	},
+	"form": {
+		"title": "Invite a user",
+		"name": "Full name",
+		"email": "Sign-in email address",
+		"emailHelp": "The address used to sign in to Mail App (e.g. an existing personal or work account).",
+		"mailbox": "Mailbox access",
+		"newMailbox": "New mailbox",
+		"existingMailbox": "Assign an existing mailbox",
+		"noneMailbox": "No mailbox access yet",
+		"role": "Role",
+		"send": "Send invitation",
+		"cancel": "Cancel"
+	},
+	"actions": {
+		"menu": "Options for {name}",
+		"edit": "Change mailboxes",
+		"makeAdmin": "Make admin",
+		"makeMember": "Make member",
+		"resend": "Send the invite again",
+		"reset": "Reset sign-in",
+		"suspend": "Pause access",
+		"unsuspend": "Restore access",
+		"remove": "Remove"
+	},
+	"edit": {
+		"title": "Mailboxes for {name}",
+		"save": "Save"
+	},
+	"reset": {
+		"title": "Reset sign-in for {name}?",
+		"body": "This signs them out on every device and emails a fresh invite to {email}.",
+		"confirm": "Reset sign-in"
+	},
+	"suspend": {
+		"title": "Pause access for {name}?",
+		"body": "They're signed out at once and can't sign in. Their mail keeps arriving and nothing is lost. You can restore access any time.",
+		"confirm": "Pause access"
+	},
+	"remove": {
+		"title": "Remove {name}?",
+		"body": "They're signed out at once and can't sign in again. What should happen to their mailboxes?",
+		"bodyNoMailbox": "They're signed out at once and can't sign in again.",
+		"keep": "Keep them (you can give them to someone later)",
+		"handTo": "Give them to someone else",
+		"delete": "Delete them",
+		"deleteWarn": "Deleting can't be undone. Download a backup first if you might need the mail.",
+		"confirm": "Remove"
+	},
+	"open": {
+		"button": "Open",
+		"title": "Open {mailbox}?",
+		"body": "This mailbox belongs to {people}. If you open it, they'll see in their Settings that you did. You can close your access again afterwards.",
+		"bodyUnused": "Nobody uses this mailbox at the moment. Opening it is still logged, so anyone given it later will see that you did.",
+		"confirm": "Open and log it",
+		"close": "Close my access",
+		"closed": "Your access to {mailbox} is closed."
+	},
+	"inviteSent": "Invite sent to {email}.",
+	"inviteNotSent": "The invite email couldn't be sent from here ({error}). Copy the message below and send it to {email} yourself.",
+	"copy": "Copy invite",
+	"copied": "Copied",
+	"email": {
+		"subject": "{admin} has set up Mail App for you",
+		"greeting": "Hello {name},",
+		"intro": "{admin} has set up an email account for you with Mail App.",
+		"mailbox": "Your email address: {mailbox}",
+		"noMailbox": "{admin} will add your mailbox soon.",
+		"howTo": "To sign in, open {url} and enter this address: {email}. You'll get a one-time code by email to finish signing in. There's no password to remember.",
+		"tip": "Tip: once you're in, you can add Mail App to your phone's home screen or your Dock so it opens like an app.",
+		"signOff": "If you weren't expecting this, you can ignore this email."
+	},
+	"settings": {
+		"title": "Mailbox access",
+		"people": "Assigned users: {people}",
+		"you": "You ({email})",
+		"logTitle": "Administrator access",
+		"find": "Find in the log",
+		"logEmpty": "No administrator has accessed or inspected this mailbox.",
+		"logNote": "Audit records update automatically whenever an admin opens this inbox.",
+		"actions": {
+			"admin-opened": "{by} opened this mailbox",
+			"admin-closed": "{by} closed their access",
+			"given": "{by} gave it to {who}",
+			"taken-away": "{by} took it away from {who}"
+		}
+	},
+	"import": {
+		"find": "Find in this file",
+		"title": "Import users",
+		"intro": "Add lots of users at once from a spreadsheet. Save it as a CSV file with one user on each row: their name, the personal email they sign in with, their role (admin or member) and, if you like, their mailbox.",
+		"mailboxHelp": "A mailbox that doesn't exist yet is made for them, as long as it's at one of your domains. Leave it blank to give them one later.",
+		"template": "Download the template",
+		"choose": "Choose a CSV file",
+		"chooseAnother": "Choose another file",
+		"reading": "Reading the file…",
+		"tooBig": "That file is too big. Please split it into smaller files.",
+		"unreadable": "Mail App couldn't read that file. Please save it as a CSV (comma-separated) file and try again.",
+		"noEmailColumn": "The first row needs column names, including one called email. The template shows how.",
+		"empty": "There's nobody in that file.",
+		"tooMany": "That file has {count} rows. You can import up to {max} at a time.",
+		"columns": {
+			"line": "Row",
+			"user": "User",
+			"role": "Role",
+			"mailbox": "Mailbox",
+			"check": "Check"
+		},
+		"newMailbox": "New: {mailbox}",
+		"noMailbox": "None for now",
+		"ready": "Ready",
+		"summary": "{ready} ready to add, {problems} to fix.",
+		"summaryAll": "All {ready} ready to add.",
+		"fixHelp": "Rows with a problem are skipped. Fix them in your spreadsheet and import the file again, or add those users now and the rest later.",
+		"sendInvites": "Email each user their invite now",
+		"sendInvitesHelp": "If you untick this, you can send each invite later from the user's menu.",
+		"add": "Add {count} users",
+		"addOne": "Add 1 user",
+		"cancel": "Cancel",
+		"done": "Added {count} users.",
+		"doneOne": "Added 1 user.",
+		"doneSome": "{added} added, {failed} not added:",
+		"notSent": "Invites for {count} of them couldn't be emailed from here. Once sending is set up, use Send the invite again in each user's menu.",
+		"close": "Done"
+	}
+}

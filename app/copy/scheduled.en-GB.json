@@ -1,0 +1,31 @@
+{
+	"_note": "Words for scheduled send. {when} is filled in by the app.",
+	"schedule": "Schedule",
+	"scheduleLabel": "Schedule send",
+	"title": "Schedule send",
+	"intro": "It waits in Scheduled and goes at the time you choose. You can change the time, send it straight away or cancel it until then.",
+	"choices": {
+		"later": "Later today",
+		"tomorrow": "Tomorrow morning",
+		"weekend": "Saturday morning",
+		"next-week": "Monday morning"
+	},
+	"pick": "Pick a date and time",
+	"pickLabel": "Date and time",
+	"pickButton": "Schedule",
+	"changeTitle": "Change when it's sent",
+	"changeButton": "Change time",
+	"pickBad": "Choose a time from a minute from now to a year ahead.",
+	"cancel": "Cancel",
+	"scheduled": "Scheduled to send {when}",
+	"tag": "Sends {when}",
+	"note": "This email will be sent {when}.",
+	"sendNow": "Send now",
+	"sentNow": "Sending now",
+	"unschedule": "Cancel send",
+	"unscheduled": "Moved to Drafts. It won't be sent unless you send it again.",
+	"changed": "It will now be sent {when}",
+	"emptyTitle": "Nothing scheduled",
+	"emptyText": "Write an email and press Schedule next to Send to choose when it goes.",
+	"failed": "That didn't work. Please try again."
+}

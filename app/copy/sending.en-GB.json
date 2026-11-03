@@ -1,0 +1,21 @@
+{
+	"_note": "The admin card that says when Mail App can't send email to other people yet. Only admins see it, and only until sending works. Edit the wording here.",
+	"plan": {
+		"title": "FREE plan",
+		"subtitle": "Receiving email",
+		"text": "Ready to send emails? Register with Cloudflare for $5 a month.",
+		"button": "Turn on sending"
+	},
+	"domain": {
+		"title": "{domain} isn't set up for sending yet",
+		"text": "Cloudflare needs to switch on sending for your domain. The README shows how. Your mail and settings are kept.",
+		"button": "How to switch it on"
+	},
+	"compact": "Email can't be sent yet.",
+	"compactLink": "Fix this",
+	"checkAgain": "Check again",
+	"checking": "Checking…",
+	"stillNot": "Still not ready. Cloudflare can take a few minutes after you turn it on, so try again shortly.",
+	"working": "Sending works. We've sent you a short email to prove it.",
+	"detail": "What Cloudflare said: {detail}"
+}

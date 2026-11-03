@@ -1,0 +1,661 @@
+{
+	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
+	"releases": [
+		{
+			"version": "2.0",
+			"date": "2026-11-04",
+			"title": "Free and Open Source",
+			"changes": [
+				"Free and Open Source: Mail App is now free for everyone, with the code on GitHub under the Apache 2.0 licence. There's no licence key, trial or user limit beyond Cloudflare's own.",
+				"Install Your Way: Deploy from the code with Wrangler, or use the command-line installer from npm. Both install into your own Cloudflare account.",
+				"Updates from GitHub: Admins see a notice when a new release is out on GitHub, with a link to what's new.",
+				"Add Domains in the App: Add a domain on the Domains page once it's set up for Email Routing in Cloudflare."
+			]
+		},
+		{
+			"version": "1.71",
+			"date": "2026-10-29",
+			"title": "Stronger Spam Filter",
+			"changes": [
+				"Stronger Spam Filter: Dozens more checks for scams, phishing, drug spam, forms asking for your details, risky attachments such as invoice.pdf.exe, link shorteners and badly made emails, many of them taken from SpamAssassin, the open-source spam filter. They're free and run inside Mail App on your own Cloudflare account.",
+				"Learns as You Go: Each mailbox now learns from what you move to Spam and what you mark as Not spam, so it gets better the more it's used. Settings, under Spam, shows how much it has learnt.",
+				"Optional AI Check: Admins can switch on an AI check in Admin, under Spam filter, for mail from strangers that the free checks didn't catch. It runs on Cloudflare Workers AI in your own account, is off until you turn it on and has a daily limit. Cloudflare's free daily amount covers about 1,400 checks. Past that Cloudflare charges for what you use, and the page links to their prices.",
+				"Forward Spam Too: Trying Mail App alongside your old email? Under Email forwarding, turn on Forward spam too and your old address gets everything while you check what Mail App caught."
+			]
+		},
+		{
+			"version": "1.70",
+			"date": "2026-10-29",
+			"title": "Clearer Wording and Email Disclaimer",
+			"changes": [
+				"Clearer Wording: Every Admin page and every Settings tab has been rewritten to say plainly what each setting does.",
+				"Email Disclaimer: Company details is now Email disclaimer. Paste your disclaimer into one box and see how it looks on an example email. Details you saved before carry on unchanged."
+			]
+		},
+		{
+			"version": "1.69",
+			"date": "2026-10-29",
+			"title": "Your Own Branding and Reports",
+			"changes": [
+				"Your Own Branding: Put your company's logo, name and colour on Mail App in Admin, under Branding. Your team sees it in the menu, the browser tab, the app on their phone and the emails that invite and welcome them.",
+				"Your Own Support Address: Show your own help address in place of ours, so your team asks you. Once branded, only admins see the Mail App guides and version number.",
+				"Reports: See email received and sent, emails that couldn't be sent, spam caught and why, storage for each mailbox with what it costs on Cloudflare, and every time an admin opened someone else's mailbox. Choose the last 7, 30 or 90 days, and download any report as a CSV.",
+				"Find an Email: Search Reports by address, domain or subject to see what happened to any email across every mailbox: delivered, caught as spam and why, in the Bin, sent, or couldn't be sent and why. Press Problems only to see just the ones that went wrong, and Open to read one. Opening someone else's mailbox is logged where they can see it.",
+				"Private by Design: Reports only keep daily counts in your own Cloudflare account. Nothing is sent anywhere else."
+			]
+		},
+		{
+			"version": "1.68",
+			"date": "2026-10-29",
+			"title": "Send Always in View",
+			"changes": [
+				"Send Always in View: When you write an email in a narrower window, such as the installed app on a tablet, the buttons along the bottom now show just their icons so Send is always on screen. Point at any icon to see what it does. With more room, or in full screen, the words come back."
+			]
+		},
+		{
+			"version": "1.67",
+			"date": "2026-10-28",
+			"title": "Security Updates",
+			"changes": [
+				"Security Updates: The email editor, AI assistant and AI tool connection now use the latest, safest versions of the software they're built on. Nothing changes in how they work."
+			]
+		},
+		{
+			"version": "1.66",
+			"date": "2026-10-27",
+			"title": "AI Reply Assistant",
+			"changes": [
+				"AI Reply Assistant: Switch it on in Settings, under AI assistant, and Mail App drafts a reply to each new email for you to check. It never sends anything. It stays off until you turn it on, one mailbox at a time.",
+				"Private by Design: The assistant runs on Cloudflare Workers AI in your own Cloudflare account. Your email never comes to me or goes to an AI company, and Cloudflare doesn't keep it or use it to train AI.",
+				"See What It Keeps: Settings now shows exactly what the assistant does and keeps. Its side-panel chat keeps only its latest 100 messages, and switching the assistant off deletes it."
+			]
+		},
+		{
+			"version": "1.65",
+			"date": "2026-10-25",
+			"title": "Shared Calendars, Notes and Scheduled Send",
+			"changes": [
+				"Calendar Sharing: Share a calendar with people on your team, choosing busy times only, see all events or can edit. Share with everyone to make a team calendar.",
+				"See Your Calendar Anywhere: Turn on a private link for any calendar to see it in Apple Calendar, Google Calendar or Outlook.",
+				"Calendars From a Link: Add any calendar link, or UK bank holidays in one click. You can also import .ics files from Google, Outlook or Apple.",
+				"Built-in Notes: Keep notes and checklists beside your email, with pins, colours, search and reminders. Your notes are private unless you share one with everyone who uses the mailbox.",
+				"Scheduled Send: Choose when an email goes. Until then it waits in Scheduled, where you can send it now, change the time or cancel it."
+			]
+		},
+		{
+			"version": "1.63",
+			"date": "2026-10-21",
+			"title": "Snooze, Reminders and Company Details",
+			"changes": [
+				"Snooze: Hide an email until later today, tomorrow, the weekend, next week or a time you choose, and it comes back to the top of your inbox, or sooner if someone replies.",
+				"Remind Me If No Reply: Choose a reminder when you send an email, or later from the bell on a sent email, and it comes back to your inbox if nobody answers in time.",
+				"Company Details Footer: Admins enter the company name, number and registered office once in Admin › Company details, and they go at the end of every email anyone sends."
+			]
+		},
+		{
+			"version": "1.62",
+			"date": "2026-10-21",
+			"title": "Email Forwarding",
+			"changes": [
+				"Email forwarding: Pass every new email on to another address, such as your old Gmail or a colleague, from the new Forwarding tab in Settings. Spam is never forwarded.",
+				"Keep a copy or not: Choose whether forwarded emails stay in your inbox or go straight to Archive, marked as read.",
+				"Best delivery: Verify the address in Cloudflare and each email is passed on exactly as it arrived, so it passes SPF, DKIM and DMARC checks."
+			]
+		},
+		{
+			"version": "1.59",
+			"date": "2026-10-18",
+			"title": "Tidier Domains Page",
+			"changes": [
+				"Domains Page: The Domains page now looks like Users and Routing, with a table, coloured tags for each domain's mail records and type, and a ⋮ menu to remove a domain."
+			]
+		},
+		{
+			"version": "1.58",
+			"date": "2026-10-17",
+			"title": "Security and Sending Safeguards",
+			"changes": [
+				"Outbound rate limits: Each mailbox is now capped at 50 recipients per message, 50 recipients per hour, and 200 recipients per day. These limits cover all outbound traffic—including calendar invitations and automated out-of-office responses. Sent folder deletion no longer resets active counters.",
+				"Human-in-the-loop AI drafts: Third-party AI integrations (such as Claude MCP) are restricted to creating draft messages for human review. External AI tools cannot dispatch emails autonomously.",
+				"Web application hardening: Implemented strict clickjacking protection (`X-Frame-Options` / `frame-ancestors`) and Cross-Site Request Forgery (CSRF) defences to prevent unauthorised cross-origin iframe embedding and state-changing browser attacks."
+			]
+		},
+		{
+			"version": "1.57",
+			"date": "2026-10-16",
+			"title": "AI Assistant Preview",
+			"changes": [
+				"AI assistant: The optional AI reply assistant is coming soon. It's switched off for everyone for now, and you can preview its settings in Settings, under AI assistant.",
+				"Model choice: When it arrives, you'll be able to choose the AI model that writes your drafts, with a link to Cloudflare's Workers AI pricing.",
+				"Privacy: When the AI assistant is off, Mail App sends no email or drafts to its built-in AI, even for drafts written by AI tools you connect."
+			]
+		},
+		{
+			"version": "1.56",
+			"date": "2026-10-16",
+			"title": "Sign Out",
+			"changes": [
+				"Sign out: Sign out of Mail App from Settings, under Account, or from the link at the bottom of the sidebar."
+			]
+		},
+		{
+			"version": "1.55",
+			"date": "2026-10-16",
+			"title": "Masked Email",
+			"changes": [
+				"Instant masking on signup: Create a brand-new address on the spot whenever you fill out a form online. Decide whether to keep or block it the moment its first email lands in your inbox.",
+				"Auto-expiring addresses: Set masked addresses to self-destruct on a specific date, after a set number of days, or immediately after receiving their first message.",
+				"Data leak detection: Easily spot when a service has leaked, sold, or shared your details, as every incoming message clearly shows which custom address it was sent to."
+			]
+		},
+		{
+			"version": "1.54",
+			"date": "2026-10-16",
+			"title": "Passkey Sign-in",
+			"changes": [
+				"Biometric & device sign-in: Log in effortlessly using Face ID, Touch ID, Windows Hello, or your mobile phone.",
+				"Simple setup: Add passkeys in seconds via Settings → Account, then select Passkey as your sign-in method next time you log in."
+			]
+		},
+		{
+			"version": "1.53",
+			"date": "2026-10-16",
+			"title": "Tidier Long Lists, Part 2",
+			"changes": [
+				"Collapsible lists: Long lists now display the first few items by default, with a clean Show all button to expand the rest when you need them.",
+				"Instant list search: Any list containing 10 or more items now automatically includes a Find search box at the top, making it effortless to jump straight to what you're looking for."
+			]
+		},
+		{
+			"version": "1.52",
+			"date": "2026-10-16",
+			"title": "Files",
+			"changes": [
+				"Private cloud storage: Store and organise your files and photos in custom folders on your own Cloudflare account. Includes a Bin that safely retains deleted items for 30 days before permanent removal.",
+				"Large file uploads & media previews: Drag and drop files up to 5 GB each into storage. Open photos, PDFs, video, and audio directly within the webmail interface.",
+				"Seamless email integration: Attach stored files directly to outgoing messages, save incoming email attachments to Files in one click, or share files via encrypted download links.",
+				"Interface fix: Resolved an issue where dropdown menus (such as Templates) inside the floating composer window failed to open correctly."
+			]
+		},
+		{
+			"version": "1.51",
+			"date": "2026-10-16",
+			"title": "Easier Sign-in",
+			"changes": [
+				"Easier sign-in: Add a backup email address during setup so you never get locked out, with clearer guidance on the sign-in page so you always know where your code was sent."
+			]
+		},
+		{
+			"version": "1.50",
+			"date": "2026-10-16",
+			"title": "Import Users",
+			"changes": [
+				"Import users: Import your entire team at once from a CSV or spreadsheet, with full row-by-row validation before accounts are created."
+			]
+		},
+		{
+			"version": "1.49",
+			"date": "2026-10-16",
+			"title": "Better Invitations",
+			"changes": [
+				"Invitations: Apple Mail and iCloud now show Accept, Maybe and Decline on invitations you send, as Outlook and Gmail do."
+			]
+		},
+		{
+			"version": "1.47",
+			"date": "2026-10-15",
+			"title": "Calendar Invitations & Video Calls",
+			"changes": [
+				"Invitations: Add guests to any event and they're emailed an invitation that works in Outlook, Gmail and Apple Mail. Their Yes, Maybe or No shows next to their name.",
+				"Invitations you receive: An invitation from anyone shows as a card at the top of the email. Answer Yes, Maybe or No, and it goes straight into your calendar.",
+				"Video calls: Paste a Teams, Zoom or Google Meet link to get a Join button, or add a free video call with one click.",
+				"Repeating events: Change one date or all of them, and guests only hear about what changed."
+			]
+		},
+		{
+			"version": "1.46",
+			"date": "2026-10-15",
+			"title": "Tidier Admin Menu",
+			"changes": [
+				"Users: The People page is now called Users.",
+				"Routing: See every address that gets email and which mailbox it goes to, and set up extra addresses and catch-alls, all on one page.",
+				"Backups: See every mailbox's backups on one page, and back them all up with one click."
+			]
+		},
+		{
+			"version": "1.45",
+			"date": "2026-10-15",
+			"title": "Admin & API",
+			"changes": [
+				"Admin: A menu down the side, with mailboxes and people shown as clear tables and Domains on its own page.",
+				"API & webhooks: Let other apps read and send email for the mailboxes you choose, and tell them when new email arrives."
+			]
+		},
+		{
+			"version": "1.44",
+			"date": "2026-10-14",
+			"title": "Easier Calendar & Contacts",
+			"changes": [
+				"Calendar: Click an empty space or an event once to highlight it, then click again or double click to open it. On phones and in List view, one tap still opens it.",
+				"Contacts: Click one of a contact's recent emails to read it in a window over the page, with Reply, Forward and Open in Mail. Reply and Write email open over the page too, so you stay in Contacts."
+			]
+		},
+		{
+			"version": "1.43",
+			"date": "2026-10-14",
+			"title": "Calendar & Contacts Tidy-up",
+			"changes": [
+				"Calendar side panel: Fold the calendar's side panel away with the « button for more room, and bring it back with the panel button next to Today. It starts folded in a narrow window.",
+				"Month picker: The small month now only shades the days on show in Week, Day and List view.",
+				"Contacts: On a wider screen, click a contact to see their details, notes and your recent emails with them. Fold the list away with the « button to give them the whole page.",
+				"Export calendar: Download (.ics) is now called Export calendar, and says what it does."
+			]
+		},
+		{
+			"version": "1.42",
+			"date": "2026-10-14",
+			"title": "Calendar",
+			"changes": [
+				"Calendar: Plan your days in a new Calendar alongside your email, with month, week, day and list views.",
+				"Mail, Calendar & Contacts: Dedicated screens for each tool. Access them via the left sidebar on desktop or the bottom navigation bar on mobile.",
+				"Drag and Drop: Drag across the calendar to add an event, drag it to move it, or drag its edge to change how long it lasts.",
+				"Repeats: Set events to repeat daily, on weekdays, weekly, monthly or yearly, and change just one, the rest, or all of them.",
+				"Colours and Notes: Give each calendar and event its own colour, and add a place and notes to any event.",
+				"Reminders: Get reminded on your phone, Mac and in the app before an event starts.",
+				"Private Events: In a shared mailbox, mark an event Private so others only see that you're busy."
+			]
+		},
+		{
+			"version": "1.41",
+			"date": "2026-10-14",
+			"title": "UK English",
+			"changes": [
+				"UK English: The Trash folder is now called Bin, and settings and the privacy page use UK spelling throughout.",
+				"Reply dates: When you reply, the quoted date now uses the UK style, such as 15 Apr 2026, 3:42 pm."
+			]
+		},
+		{
+			"version": "1.40",
+			"date": "2026-10-14",
+			"title": "Tidier Long Lists",
+			"changes": [
+				"Long lists: Lists of domains, mailboxes, people, addresses, blocked senders, templates, inbox rules and backups now show the first few, with a Show all button. Longer lists also get a Find box, so you can jump straight to the one you want.",
+				"Domains: The Domains card on the Mailboxes page can be folded away with Hide, and remembers your choice. It still warns you if a domain needs attention.",
+				"Compose on phones: A round Compose button now sits at the bottom of the email list, so you can start a new email without opening the menu."
+			]
+		},
+		{
+			"version": "1.39",
+			"date": "2026-10-14",
+			"title": "Tidier Settings",
+			"changes": [
+				"Settings tabs: On a laptop, every Settings tab now fits on screen, wrapping onto a second line when needed, so none are hidden off to the right."
+			]
+		},
+		{
+			"version": "1.38",
+			"date": "2026-10-14",
+			"title": "Smarter Spam Filter",
+			"changes": [
+				"Built-in spam filter: New mail from people you haven't emailed is checked for signs of scams and junk, such as links that don't go where they say, a sender pretending to be a company like PayPal or Royal Mail, or a web address registered in the last month.",
+				"Why is this in Spam?: Open anything in Spam to see, in plain words, why it was moved there. If it's genuine, press Not spam and that sender is trusted from then on."
+			]
+		},
+		{
+			"version": "1.37",
+			"date": "2026-10-14",
+			"title": "Right-Click Menu & Reply Settings",
+			"changes": [
+				"Right-click menu: Right-click an email in your list, or press and hold it on a phone, to reply, forward, archive, move, label, mark as spam or delete it without opening it.",
+				"Reply from: Choose whether replies come from the address the email was sent to, your main address, or one address you pick, in Settings > Addresses.",
+				"Adding addresses: With more than one domain, type the name and pick the domain from a list."
+			]
+		},
+		{
+			"version": "1.36",
+			"date": "2026-10-14",
+			"title": "Inbox Rules",
+			"changes": [
+				"Inbox rules: Sort new mail as it arrives. Choose who it's from, who it was sent to, or words in the subject or message, then move it to a folder, add labels, mark it as read or star it.",
+				"Make a rule from an email: Open an email and click the funnel button to start a rule for mail from that sender.",
+				"Tidy what's already there: A new rule can also sort the mail that's already in your Inbox."
+			]
+		},
+		{
+			"version": "1.35",
+			"date": "2026-10-14",
+			"title": "Multiple Domains",
+			"changes": [
+				"Multiple addresses & catch-all: Add more domains from the Mailboxes page. Tick as many as you like and Mail App sets them all up in one go.",
+				"Catch-all for each domain: Each domain can now have its own catch-all mailbox."
+			]
+		},
+		{
+			"version": "1.34",
+			"date": "2026-10-13",
+			"title": "Clearer Sending",
+			"changes": [
+				"Why an email wasn't sent: If Cloudflare won't send an email, the reason now appears in plain English while it's still open, and it no longer sits in Sent as if it had gone.",
+				"Addresses with names: An address written as Sam Jones <sam@example.com> now sends, instead of failing with an error.",
+				"Always up to date: After an update, an app window or tab that was left open reloads by itself the next time you come back to it, unless you're writing an email."
+			]
+		},
+		{
+			"version": "1.33",
+			"date": "2026-10-13",
+			"title": "Send the Password Easily",
+			"changes": [
+				"Send the password easily: When you protect download links with a password, new buttons send it by WhatsApp, text message or your phone's share menu, already typed out for you."
+			]
+		},
+		{
+			"version": "1.32",
+			"date": "2026-10-12",
+			"title": "Two Ways to Start",
+			"changes": [
+				"Automated Outbound Checks: Immediately after domain selection, the installer verifies your Cloudflare account’s sending permissions. Setup completes automatically configured for full outbound sending or inbound-only processing accordingly.",
+				"One-Click Upgrades: Signing into the installer on an account with an existing Mail App deployment presents a streamlined, single-click Update button."
+			]
+		},
+		{
+			"version": "1.31",
+			"date": "2026-10-12",
+			"title": "Shared Inboxes, Outlook Style",
+			"changes": [
+				"One Mailbox List: Your own mailbox and every shared inbox now sit in one list in the sidebar, each with its own folders, so you can move between them with one click.",
+				"Always Know Where You Are: The page heading names the mailbox you're reading, and Compose shows which address your email will be sent from.",
+				"Tidier Sidebar: Shared inboxes fold away to show just their unread count, and All inboxes and the Back to button have gone."
+			]
+		},
+		{
+			"version": "1.30",
+			"date": "2026-10-12",
+			"title": "Sending Made Simple",
+			"changes": [
+				"Sending made simple: The installer now walks you through switching on email sending, including Cloudflare's $5 a month plan, or lets you skip it and just receive. Admins can still do it later from Mail App."
+			]
+		},
+		{
+			"version": "1.28",
+			"date": "2026-10-12",
+			"title": "Outbound Email Diagnostics",
+			"changes": [
+				"Outbound Email Diagnostics: If your Cloudflare account is not yet configured for external email sending, administrators will now see an inline status card explaining the issue, accompanied by a direct Switch on action button and a Check again verification control."
+			]
+		},
+		{
+			"version": "1.27",
+			"date": "2026-10-12",
+			"title": "Effortless Shared Mailboxes",
+			"changes": [
+				"Effortless Shared Mailboxes: Create shared mailboxes on the Mailboxes page and manage access permissions directly from there or via the People page."
+			]
+		},
+		{
+			"version": "1.26",
+			"date": "2026-10-12",
+			"title": "Shared Mailboxes in Your Sidebar",
+			"changes": [
+				"Mailboxes in your sidebar: Every mailbox you can open, such as sales@, is listed in your sidebar with its unread count, so you can switch in one tap.",
+				"Your name on shared emails: Emails you send from a shared mailbox are signed with your own name, like \"Sam at Acme Sales\", and you can add your own signature in Settings > Writing.",
+				"All inboxes: The newest emails from every mailbox you can open, together in one list. Tap one to open it in its own mailbox.",
+				"See who replied: Sent emails in a shared mailbox show who on the team sent them."
+			]
+		},
+		{
+			"version": "1.25",
+			"date": "2026-10-12",
+			"title": "Streamlined User Onboarding",
+			"changes": [
+				"Streamlined User Onboarding: People you invite can sign in straight away, without re-running the installer. Press Update now once to switch it on."
+			]
+		},
+		{
+			"version": "1.24",
+			"date": "2026-10-12",
+			"title": "Team Access & Shared Inboxes",
+			"changes": [
+				"Team Access & Shared Inboxes: Invite team members to your Mail App account. Each user authenticates securely with their own email address and accesses only their assigned mailbox, with the option to set up shared mailboxes for team collaboration."
+			]
+		},
+		{
+			"version": "1.23",
+			"date": "2026-10-12",
+			"title": "Small Fixes",
+			"changes": [
+				"Dock Badge Fix: The unread number on Mail App's Dock or home-screen icon now goes down as you read your mail, including emails opened from a notification.",
+				"Safer Extra Addresses: You can no longer create a mailbox with an address another mailbox already uses as an extra address, so its mail can't quietly move. Remove the extra address in Settings, Addresses first.",
+				"Tidier Conversations: A new email to one of your extra addresses no longer joins an unrelated conversation just because the subject matches."
+			]
+		},
+		{
+			"version": "1.22",
+			"date": "2026-10-11",
+			"title": "Install Mail App",
+			"changes": [
+				"Install Mail App: A small tip above your inbox shows you how to install Mail App on your computer or phone. In Chrome and Edge it's a single click. Hide it and it won't come back."
+			]
+		},
+		{
+			"version": "1.21",
+			"date": "2026-10-11",
+			"title": "Multiple Addresses",
+			"changes": [
+				"Multiple Addresses: Set up additional aliases like hello@ or support@ under Settings > Addresses. All messages land in your main inbox labelled with their target address, complete with individual display names and signatures.",
+				"Smart Sender Reply: Mail App defaults your reply to match the recipient address. For new messages, simply pick your preferred sender address from the dropdown.",
+				"Catch-All Routing: Turn on catch-all to receive emails sent to misspelt or non-existent addresses across your domain so no message slips through the cracks."
+			]
+		},
+		{
+			"version": "1.19",
+			"date": "2026-10-11",
+			"title": "Mail App on Your Dock",
+			"changes": [
+				"Add to Your Dock: Put Mail App on your Mac's Dock, or your phone's home screen, and it opens in its own window like any other app. Settings shows you how.",
+				"New-Mail Notifications: Switch on notifications in Settings and you'll see who each new email is from and its subject, even when Mail App is closed. Spam never notifies you.",
+				"Unread Count: The Mail App icon shows how many unread emails are in your inbox.",
+				"Email Links: Click an email address on a website and Mail App opens a new email to it, ready to write.",
+				"Stay Signed In: You now stay signed in for 30 days at a time, instead of entering a code every day."
+			]
+		},
+		{
+			"version": "1.18",
+			"date": "2026-10-11",
+			"title": "Backup & Export",
+			"changes": [
+				"Nightly backups: Mail App now makes a full copy of your mailbox every night, with every folder, label and attachment, and keeps it in your own Cloudflare account.",
+				"Back up now: Make a fresh copy whenever you like from Settings, and choose how many copies to keep.",
+				"Download your mail: Each backup is one standard .mbox file you can keep somewhere safe or open in Apple Mail or Thunderbird.",
+				"Restore a backup: Bring a backup back in and every email returns to its folder, with its labels, stars and read state.",
+				"Move in from Gmail: Bring across mail from Gmail (Google Takeout), Apple Mail or Thunderbird; Gmail labels come with it, and anything already here is skipped."
+			]
+		},
+		{
+			"version": "1.17",
+			"date": "2026-10-11",
+			"title": "Everyday Shortcuts",
+			"changes": [
+				"Quick Archive: An Archive button now sits above every email you open. One click moves the whole conversation out of your inbox and into Archive.",
+				"Select Several Emails: Tick the box beside each email to archive, move, mark as read or unread, or delete them all at once.",
+				"Mark All as Read: A new button at the top of a folder or label marks everything in it as read.",
+				"Undo Send: After you press Send, you have five seconds to change your mind. Press Undo and your email comes back, ready to edit.",
+				"Print: Print an email, or a whole conversation, with the new Print button.",
+				"Keyboard Shortcuts: Press ? to see them all. For example, c writes a new email, r replies, e archives, and j and k move between emails."
+			]
+		},
+		{
+			"version": "1.16",
+			"date": "2026-10-11",
+			"title": "Pop-Out Composer",
+			"changes": [
+				"Pop-Out Composer: New emails, replies and forwards now open in a box in the bottom corner of the screen, so you can keep reading your inbox while you write.",
+				"Minimise & Full Screen: Shrink the email you're writing to a small bar to get it out of the way, or expand it to full screen when you need more space.",
+				"Write From Anywhere: Your email stays open as you move between folders, and the Compose button now works from the Contacts and Settings pages too.",
+				"Fold Away the Sidebar: Hide the folders panel to give your emails the full width of the screen. A slim strip of icons stays at the side, and Mail App remembers your choice.",
+				"Phones: On phones, emails still open full screen, as before."
+			]
+		},
+		{
+			"version": "1.15",
+			"date": "2026-10-11",
+			"title": "Sender Names",
+			"changes": [
+				"Sender Names: Your inbox now shows who each email is from by name, such as \"Hannah Clarke\", instead of just the start of their email address. Emails you already have are updated too.",
+				"Clearer Emails: When you open an email, you'll see the sender's name with their email address beside it, and their initials in the circle.",
+				"Plain-Text Emails: Emails sent without formatting now keep their line breaks and paragraphs, so they're easier to read."
+			]
+		},
+		{
+			"version": "1.14",
+			"date": "2026-10-11",
+			"title": "Contact Import",
+			"changes": [
+				"Import Capabilities: Bring your contacts across from Gmail, iPhone, or Outlook. Select 'Import' on the Contacts page and choose your saved .vcf or .csv file.",
+				"Duplicate Protection: Review the imported list before anything is added. Existing contacts are automatically skipped, making repeated imports completely safe.",
+				"Step-by-Step Guides: Need help exporting your contacts? The Import window includes built-in step-by-step instructions for Gmail, iPhone, and Outlook."
+			]
+		},
+		{
+			"version": "1.13",
+			"date": "2026-10-11",
+			"title": "Enhanced Label Management",
+			"changes": [
+				"Drag-and-Drop Labelling: Drag any label directly from the sidebar onto an email to apply it instantly.",
+				"Custom Label Ordering: Reorder your labels freely by dragging them up and down the sidebar list.",
+				"Collapsible Sidebar Lists: Collapse or expand Folders and Labels sections by clicking their headings. Mail App remembers your preference across sessions.",
+				"Refined Colour Palette: Softer label accent colours across the sidebar and colour picker, designed to match message tags seamlessly.",
+				"Onboarding Example: New mailboxes start with an 'Important' label pre-applied to the welcome email to demonstrate the labelling system."
+			]
+		},
+		{
+			"version": "1.12",
+			"date": "2026-10-11",
+			"title": "Labels & Categorisation",
+			"changes": [
+				"Custom Labels: Organise your inbox using coloured labels (e.g. Family, Bills, Holidays). Open an email and select 'Label' to apply or remove them—conversations support multiple labels.",
+				"Label Management: Create, rename, recolour, or delete labels from the sidebar, choosing from twelve distinct colours.",
+				"Dedicated Label Views: Select any label in the sidebar to view all associated conversations, including archived emails.",
+				"Visual Tags & Search: Soft-coloured tags appear on message lists and email headers. Click the 'x' on any tag to remove it. Search labelled mail using `label:Bills`.",
+				"Conversation Continuity: Replies automatically stay in their existing conversation thread, preserving all applied labels."
+			]
+		},
+		{
+			"version": "1.11",
+			"date": "2026-10-11",
+			"title": "Expanded Composer Header Fields",
+			"changes": [
+				"Full-Width Input Boxes: The To, CC, BCC, and Subject fields now expand across the entire composer window for easier reading of long addresses and subject lines."
+			]
+		},
+		{
+			"version": "1.10",
+			"date": "2026-10-11",
+			"title": "Attachment & Inline Image Fixes",
+			"changes": [
+				"Inline Image Compatibility: Images embedded within messages now display correctly across Gmail and external mail clients, resolving previous broken image bugs.",
+				"File Integrity: Attached files are transmitted without alteration, preventing encoding issues on recipient devices."
+			]
+		},
+		{
+			"version": "1.9",
+			"date": "2026-10-11",
+			"title": "Streamlined Message Composer",
+			"changes": [
+				"Clean Toolbar Interface: The composer opens with a simplified toolbar. Select 'More' to reveal advanced formatting options (headings, fonts, tables); your preference persists until toggled.",
+				"Fixed Send Button: The Send button remains permanently visible regardless of email length or scroll position.",
+				"WYSIWYG Headings: Heading styles now render accurately in real-time as you write."
+			]
+		},
+		{
+			"version": "1.8",
+			"date": "2026-10-11",
+			"title": "Rich Text Composer & Performance",
+			"changes": [
+				"Advanced Rich Text Toolbar: Includes controls for headings, fonts, text sizing, text colour, highlighting, alignment, indentation, tables, emoji, and formatting reset. Styles render identically in Gmail and Outlook.",
+				"Inline Image Support: Paste or drop images directly into the message body. Large images are automatically optimised before sending. Non-image files are attached normally.",
+				"Faster Inbox Loading: The main inbox loads faster by deferring the rich text composer until drafting begins."
+			]
+		},
+		{
+			"version": "1.7",
+			"date": "2026-10-10",
+			"title": "Tracking Blocker & Deliverability",
+			"changes": [
+				"Privacy & Tracking Blocker: Removes hidden tracking pixels that report open times, locations, and device types. External images are fetched via a private proxy on your Cloudflare account to protect your IP address.",
+				"Improved Routing: Fixed an issue where emails addressed to CC/BCC or sent via mailing lists were occasionally dropped.",
+				"Sidebar Restructuring: Contacts and Calendar (coming soon) now occupy a dedicated section in the primary navigation sidebar."
+			]
+		},
+		{
+			"version": "1.6",
+			"date": "2026-10-10",
+			"title": "Contact Management",
+			"changes": [
+				"Dedicated Contacts Manager: A new Contacts page automatically indexes people you've emailed. Manually add contacts, assign names and notes, or delete entries.",
+				"Autocomplete Suggestions: Address suggestions populate dynamically as you type in To, CC, and BCC fields, with full keyboard navigation support.",
+				"Automatic Contact Capture Toggle: Disable 'Add people from my emails' in Settings to manually control who appears in your contact list.",
+				"Optional Gravatar Avatars: Enable Gravatar profile pictures in Settings (disabled by default to prevent third-party location/address leakage)."
+			]
+		},
+		{
+			"version": "1.5",
+			"date": "2026-10-10",
+			"title": "Signatures, Templates & Out of Office",
+			"changes": [
+				"Email Signatures: Configure custom rich signatures in Settings to automatically append to new messages, replies, and forwards.",
+				"Reusable Templates: Save frequent responses as templates and insert them directly into the composer.",
+				"Out of Office Auto-Responder: Set automated responses with start and end dates/times. Rate-limited to once every 4 days per sender; mailing lists and automated emails are automatically excluded. (Requires Workers Paid plan)."
+			]
+		},
+		{
+			"version": "1.4",
+			"date": "2026-10-10",
+			"title": "Secure Attachments & File Sharing Links",
+			"changes": [
+				"Standard File Attachments: Attach files via file picker, drag-and-drop, or screenshot pasting. Attachments persist across drafts and forwarded emails.",
+				"Encrypted Large File Sharing: Over-sized attachments automatically generate secure 30-day download links. Files are client-side encrypted prior to upload, with optional password protection.",
+				"Free Update Availability: Access large file sharing features immediately by selecting 'Update now' inside Mail App."
+			]
+		},
+		{
+			"version": "1.3",
+			"date": "2026-10-10",
+			"title": "Simplified Update Workflow",
+			"changes": [
+				"Remembered Setup Parameters: The installer retains your custom domain and web address settings, reducing the update process to a single Cloudflare sign-in click."
+			]
+		},
+		{
+			"version": "1.2",
+			"date": "2026-10-10",
+			"title": "Update Notification Testing",
+			"changes": [
+				"Notification Verification: Internal release to verify update notification prompts and 'Update now' execution pipelines."
+			]
+		},
+		{
+			"version": "1.1",
+			"date": "2026-10-10",
+			"title": "Spam Protection, Branding & Diagnostics",
+			"changes": [
+				"Spam Folder & Filtering: Dedicated Spam directory automatically routes blocked senders and messages failing Cloudflare authentication checks (SPF/DKIM/DMARC).",
+				"Sender Controls: Block senders directly from any email. Select 'Not spam' to return legitimate messages to the Inbox and trust the sender for future delivery.",
+				"Domain Blocklists: Manage individual blocked senders or entire domain blocklists in Settings.",
+				"Automated DNS & Security Diagnostics: The installer automatically checks and configures SPF, DKIM, and DMARC records to prevent deliverability issues, and alerts if a web address is already assigned.",
+				"Brand Identity & UI: Introduced official Mail App branding, logo, integrated documentation links, and automated update notifications."
+			]
+		},
+		{
+			"version": "1.0",
+			"date": "2026-10-10",
+			"title": "Initial Early-Access Release",
+			"changes": [
+				"Core Serverless Webmail: Send and receive email on your custom domain hosted directly on your Cloudflare account.",
+				"Passwordless Authentication: Secured exclusively via Cloudflare one-time passcode email sign-in.",
+				"Essential Management Tools: Folder navigation, message search, and draft management.",
+				"Multi-Mailbox Support: Provision multiple addresses on the same domain (e.g. hello@, accounts@).",
+				"Privacy First: Optional AI assistant remains completely turned off by default."
+			]
+		}
+	]
+}

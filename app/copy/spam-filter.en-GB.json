@@ -1,0 +1,48 @@
+{
+	"_note": "Words for Admin > Spam filter. Edit the wording here. {n}, {limit} and {free} are filled in by the app. Paragraph lists show as separate paragraphs.",
+	"intro": "How Mail App keeps spam out of your team's inboxes. The free checks are always on. The AI check is extra, and you choose whether to use it.",
+	"freeTitle": "Standard Protection (Always on)",
+	"freeItems": [
+		{
+			"label": "Edge rejection",
+			"text": "Cloudflare blocks spoofed sender domains and recognised spam relays before messages reach your inbox."
+		},
+		{
+			"label": "Trusted senders",
+			"text": "Known contacts and addresses marked as \"Not spam\" are delivered directly to your inbox. Flagged or blocked senders are routed straight to Spam."
+		},
+		{
+			"label": "Multi-layer heuristics",
+			"text": "Comprehensive analysis checks for phishing indicators, deceptive branding, suspicious attachments and malformed headers using rules derived from SpamAssassin."
+		},
+		{
+			"label": "Adaptive filtering",
+			"text": "Mailboxes learn from user actions, continuously improving accuracy as messages are moved between your Inbox and Spam folders."
+		}
+	],
+	"freeNote": "All filtering runs locally within Mail App on your own Cloudflare account. Message content is never routed to third-party servers for inspection.",
+	"aiTitle": "AI Inspection",
+	"aiSwitch": "Analyse messages from unknown senders with AI",
+	"aiAbout": [
+		"When enabled, incoming messages from new contacts that clear standard filters are analysed by an on-edge AI model to detect sophisticated spam and phishing attempts.",
+		"This feature executes via Cloudflare Workers AI inside your own Cloudflare account. Message data never leaves your Cloudflare account and is never sent to external AI vendors, and is not retained by Cloudflare."
+	],
+	"aiCost": "Cloudflare provides a complimentary daily allowance of approximately {free} Workers AI requests per account. Any usage beyond this threshold is billed directly to your Cloudflare account at their standard rates.",
+	"aiPricing": "View Cloudflare Workers AI pricing",
+	"limit": "Daily AI check limit",
+	"limitHint": "Setting this to {free} keeps processing within Cloudflare's free daily allocation (which is shared with the AI reply assistant). Once reached, incoming mail continues through standard filtering rules without AI inspection until the quota resets at midnight UTC.",
+	"today": "{n} of {limit} daily checks used today",
+	"save": "Save",
+	"saved": "Spam filter saved. The AI check is on.",
+	"savedOff": "Spam filter saved. The AI check is off.",
+	"failed": "Couldn't save. Try again.",
+	"learningTitle": "Learning from you",
+	"learning": "Learnt from {spam} spam and {ham} genuine emails so far.",
+	"learningSoon": "It starts helping once it has learnt from {min} of each.",
+	"learningHow": "Move unwanted mail to Spam and press Not spam on anything genuine. The spam filter learns what you do and don't want.",
+	"trialTitle": "Testing Mail App alongside your existing provider?",
+	"trial": [
+		"Go to Settings → Forwarding, enable forwarding to your existing address and select \"Forward spam too\". Your previous inbox will continue receiving all incoming messages while you evaluate Mail App's spam filtering.",
+		"The Reports view details how many unwanted messages were filtered out, alongside false-positive reports marked via \"Not spam\"."
+	]
+}

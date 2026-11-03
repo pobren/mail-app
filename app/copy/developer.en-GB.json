@@ -1,0 +1,118 @@
+{
+	"_note": "Admin > API & webhooks. Edit the wording here.",
+	"title": "API & webhooks",
+	"intro": "Integrate third-party applications to dispatch and inspect messages via Mail App, or stream real-time event notifications whenever email activity occurs.",
+	"guide": "Developer guide",
+	"guideUrl": "https://github.com/pobren/mail-app/blob/main/docs/api.md",
+	"off": "The API isn't switched on for this install yet. The README shows how to switch it on. Webhooks already work.",
+	"address": "API address",
+	"addressHelp": "Authorise external requests using an API secret key passed via standard bearer authentication.",
+	"copy": "Copy",
+	"copied": "Copied",
+	"keys": {
+		"title": "API keys",
+		"intro": "Restrict key permissions to designated mailboxes and specific scopes (such as read-only or outbound sending).",
+		"new": "Generate API key",
+		"find": "Find a key",
+		"emptyTitle": "No active API keys.",
+		"empty": "Generate an independent key for each connecting service, allowing you to revoke access for single integrations without affecting others.",
+		"columns": {
+			"name": "Key",
+			"can": "Can",
+			"mailboxes": "Mailboxes",
+			"used": "Last used"
+		},
+		"never": "Not used yet",
+		"made": "Made {date}",
+		"menu": "Options for {name}",
+		"delete": "Delete key",
+		"deleteTitle": "Delete {name}?",
+		"deleteBody": "Apps using this key stop working straight away. This can't be undone.",
+		"deleted": "Key deleted"
+	},
+	"scopes": {
+		"read": "Read",
+		"send": "Send",
+		"organise": "Organise"
+	},
+	"scopeHelp": {
+		"read": "List, read and search email, and download attachments",
+		"send": "Send new emails, replies and forwards",
+		"organise": "Mark as read, star, move to a folder and label"
+	},
+	"webhooks": {
+		"title": "Webhooks",
+		"intro": "Deliver immediate HTTP POST notifications to an external endpoint whenever an email is received or sent. Outgoing payloads include a cryptographic signature header, enabling your receiving server to verify payload authenticity.",
+		"new": "Add webhook endpoint",
+		"find": "Find a webhook",
+		"emptyTitle": "No webhooks configured.",
+		"empty": "Add an HTTPS endpoint to begin receiving automated, real-time message event notifications.",
+		"columns": {
+			"name": "Sends to",
+			"when": "When",
+			"mailboxes": "Mailboxes",
+			"status": "Status"
+		},
+		"all": "All mailboxes",
+		"active": "Active",
+		"paused": "Paused",
+		"menu": "Options for {name}",
+		"test": "Send a test",
+		"testOk": "Test sent: it answered {status}",
+		"testFailed": "The test didn't get through: {error}",
+		"log": "Delivery log",
+		"secret": "Signing secret",
+		"pause": "Pause",
+		"resume": "Resume",
+		"delete": "Delete webhook",
+		"deleteTitle": "Delete {name}?",
+		"deleteBody": "Mail App stops sending to {url}. This can't be undone.",
+		"deleted": "Webhook deleted"
+	},
+	"events": {
+		"email.received": "New email",
+		"email.sent": "Email sent",
+		"test": "Test"
+	},
+	"newKey": {
+		"title": "New API key",
+		"name": "Name",
+		"namePlaceholder": "For example: Zapier, or our website's contact form",
+		"can": "What it can do",
+		"mailboxes": "Which mailboxes",
+		"cancel": "Cancel",
+		"make": "Make key",
+		"shownTitle": "Your new API key",
+		"shownBody": "Copy it now and keep it somewhere safe, such as a password manager. For your security it won't be shown again. Anyone with this key can use the mailboxes you ticked.",
+		"done": "I've copied it"
+	},
+	"newWebhook": {
+		"title": "New webhook",
+		"name": "Name (optional)",
+		"namePlaceholder": "For example: Helpdesk",
+		"url": "Web address",
+		"urlPlaceholder": "https://",
+		"when": "When to send",
+		"mailboxes": "Which mailboxes",
+		"allMailboxes": "All mailboxes, including new ones",
+		"someMailboxes": "Only these",
+		"cancel": "Cancel",
+		"make": "Add webhook",
+		"shownTitle": "Webhook added",
+		"shownBody": "Give this signing secret to the app at the other end, so it can check each message came from Mail App. You can see it again from the webhook's menu.",
+		"done": "Done"
+	},
+	"log": {
+		"title": "Delivery log: {name}",
+		"intro": "The latest tries, newest first. A try that fails is tried again after 1 minute, 10 minutes and 1 hour.",
+		"empty": "Nothing sent yet. Use Send a test to try it.",
+		"find": "Find a delivery",
+		"try": "Try {attempt}",
+		"close": "Close"
+	},
+	"secret": {
+		"title": "Signing secret: {name}",
+		"body": "Every message carries a Mail-App-Signature header made with this secret. The developer guide shows how to check it.",
+		"close": "Close"
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"_note": "The welcome email placed in every new Mail App inbox. Edit the wording here; {name} is replaced with the mailbox's display name.",
+	"from": "welcome@mail-app.invalid",
+	"subject": "Welcome to Mail App",
+	"greeting": "Hello {name},",
+	"paragraphs": [
+		"Your new inbox is ready. It runs on your own Cloudflare account, so your email belongs to you and nobody else can read it.",
+		"This message was placed here when your mailbox was created. It wasn't sent over the internet, and you can delete it whenever you like."
+	],
+	"label": "Important",
+	"labelNote": "The red Important tag on this email is a label. Labels help you sort your mail: make your own with the + next to Labels in the sidebar, then drag one onto an email or press the tag button when an email is open.",
+	"linksTitle": "Helpful links",
+	"links": [
+		{
+			"text": "Help and answers to common questions",
+			"url": "https://github.com/pobren/mail-app#readme"
+		},
+		{
+			"text": "Check your email is set up properly",
+			"url": "/setup"
+		},
+		{
+			"text": "Enable Outbound Email with Cloudflare's $5 a month plan (receiving is free)",
+			"url": "https://github.com/pobren/mail-app#sending-email"
+		},
+		{
+			"text": "Report a bug or ask a question on GitHub",
+			"url": "https://github.com/pobren/mail-app/issues"
+		}
+	],
+	"comingTitle": "Coming soon",
+	"coming": [
+		"Shared team calendars",
+		"Private file storage on your own Cloudflare account"
+	],
+	"suggestions": "Have an idea or found something that isn't right? Open an issue on GitHub. (On Cloudflare's free plan, Mail App can't send to outside addresses yet, so replying to this email won't work until you upgrade.)",
+	"signOff": "Thanks for trying Mail App.",
+	"founder": {
+		"name": "Mail App",
+		"linkText": "github.com/pobren/mail-app",
+		"url": "https://github.com/pobren/mail-app"
+	},
+	"_brandedNote": "With a company's branding (Admin > Branding), the welcome email leaves out the app's own links and sign-off, says {brand} in place of Mail App, and uses these lines.",
+	"brandedHelp": "If you have a question, email {support}.",
+	"brandedSignOff": "Welcome to {brand}."
+}

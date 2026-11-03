@@ -1,0 +1,115 @@
+@source "../node_modules/@cloudflare/kumo/dist/**/*.{js,jsx,ts,tsx}";
+@import "@cloudflare/kumo/styles/tailwind";
+@import "tailwindcss";
+
+body {
+  margin: 0;
+}
+
+/* Mail App: Mail App's postbox red in place of Kumo's blue for buttons and highlights. A company's own colour
+   (Admin > Branding) replaces these from a <style> in the page head (shared/branding.ts, brandCss). */
+:root,
+[data-mode="dark"] {
+  --color-kumo-brand: #c8102e;
+  --color-kumo-brand-hover: #a50d26;
+  --brand: #c8102e;
+  --brand-ink: #a50d26;
+  --brand-rgb: 200, 16, 46;
+}
+
+/* Mail App: label tags. Pale with dark writing; deep with light writing if Kumo's dark mode is on
+   (the app is light-only for now, so this follows data-mode, not the system setting).
+   The colours come from shared/labels.ts as CSS variables. */
+.app-label {
+  background-color: var(--label-tint);
+  color: var(--label-ink);
+}
+[data-mode="dark"] .app-label {
+  background-color: var(--label-dark-tint);
+  color: var(--label-dark-ink);
+}
+
+/* Mail App: while a label is dragged, email frames let the drop through to the email around them. */
+.app-dragging-label iframe {
+  pointer-events: none;
+}
+
+/* Mail App: the calendar (FullCalendar), in Mail App's colours, with room to read each event. */
+.app-calendar .fc {
+  --fc-border-color: var(--color-kumo-line, #e5e7eb);
+  --fc-today-bg-color: rgba(var(--brand-rgb), 0.03);
+  --fc-now-indicator-color: var(--brand);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: var(--color-kumo-tint, #f9fafb);
+  --fc-list-event-hover-bg-color: var(--color-kumo-tint, #f3f4f6);
+  --fc-highlight-color: rgba(var(--brand-rgb), 0.1);
+  font-size: 15px;
+  /* FullCalendar's own layers stay inside it, so windows opened over the page sit on top. */
+  isolation: isolate;
+}
+.app-calendar .fc .fc-timegrid-slot { height: 1.9em; }
+/* Mail App: the event picked with one click; a second click opens it. */
+.app-calendar .fc .app-picked { box-shadow: 0 0 0 2px var(--color-kumo-brand); z-index: 5; }
+.app-calendar .fc .fc-highlight { background: rgba(var(--brand-rgb), 0.12); }
+/* Clicks go through the highlighted slot to the grid underneath, so a second click opens it. */
+.app-calendar .fc .fc-event-mirror { pointer-events: none; }
+.app-calendar .fc .fc-event-mirror { background: rgba(var(--brand-rgb), 0.14) !important; border-color: var(--brand) !important; }
+.app-calendar .fc .fc-event-mirror .fc-event-main { color: var(--brand-ink) !important; }
+.app-calendar .fc .fc-col-header-cell-cushion,
+.app-calendar .fc .fc-daygrid-day-number { color: inherit; text-decoration: none; font-weight: 600; }
+.app-calendar .fc .fc-day-today .fc-daygrid-day-number {
+  background: var(--brand); color: #fff; border-radius: 9999px; min-width: 1.8em; text-align: center; margin: 2px;
+}
+.app-calendar .fc .fc-timegrid-event, .app-calendar .fc .fc-daygrid-block-event { border-radius: 6px; border-width: 0 0 0 4px; }
+.app-calendar .fc .fc-daygrid-dot-event:hover, .app-calendar .fc .fc-daygrid-event { border-radius: 6px; }
+.app-calendar .fc .fc-list-day-cushion { background: var(--color-kumo-tint, #f3f4f6); }
+.app-calendar .fc .fc-event { cursor: pointer; }
+
+/* TipTap list styles */
+.ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror li {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+/* Mail App: headings in the composer look like the headings the email will have. */
+.ProseMirror h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+  margin: 0.6em 0 0.3em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.3em;
+  font-weight: 700;
+  margin: 0.6em 0 0.3em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.1em;
+  font-weight: 700;
+  margin: 0.5em 0 0.25em;
+}
+
+.ProseMirror hr {
+  margin: 0.75em 0;
+  border-color: var(--color-kumo-line, #ddd);
+}
+
+/* Mail App: menus and dialogs open above the floating composer (z-50), so its Attach and Templates menus, and
+   the "Attach from Files" dialog, can be used. */
+div:has(> [role="menu"]) { z-index: 60; }
+body > div:has(> [role="dialog"]) { position: relative; z-index: 60; }

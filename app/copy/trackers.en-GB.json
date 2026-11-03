@@ -1,0 +1,6 @@
+{
+	"_note": "Wording for the tracking blocker shown above emails. {count} and {who} are filled in.",
+	"blockedOne": "Blocked 1 tracker from {who}",
+	"blockedMany": "Blocked {count} trackers from {who}",
+	"explain": "Trackers are hidden pictures that tell the sender when, where and on what device you opened their email. Mail App removed them, and fetched the other pictures privately, so the sender can't see your location or device."
+}

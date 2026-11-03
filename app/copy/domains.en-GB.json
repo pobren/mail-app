@@ -1,0 +1,41 @@
+{
+	"title": "Domains",
+	"intro": "Mail App gets email for these domains. Mailboxes and extra addresses can be at any of them.",
+	"find": "Find a domain",
+	"count": "{count} domains",
+	"countOne": "1 domain",
+	"columns": {
+		"domain": "Domain",
+		"mailboxes": "Mailboxes",
+		"records": "Mail records",
+		"kind": "Type"
+	},
+	"kind": {
+		"main": "Main domain",
+		"added": "Added domain"
+	},
+	"kindHelp": {
+		"main": "The domain Mail App was installed on. It can't be removed.",
+		"added": "A domain added later from this page."
+	},
+	"mailboxes": "{count} mailboxes",
+	"oneMailbox": "1 mailbox",
+	"noMailboxes": "None yet",
+	"recordsOk": "All OK",
+	"recordsFix": "Needs attention: {records}",
+	"recordsUnknown": "Couldn't check",
+	"add": "Add domains",
+	"menu": "Options for {domain}",
+	"remove": "Remove",
+	"cancel": "Cancel",
+	"removeTitle": "Remove {domain}?",
+	"removeConfirm": "Take {domain} off Mail App? Its Cloudflare settings stay as they are, and you can add it again any time.",
+	"removed": "{domain} removed",
+	"added": "Added {domains}",
+	"failed": "That didn't work. Please try again.",
+	"setUpNote": "To add a domain, first add it to your Cloudflare account, switch on Email Routing for it and add a catch-all rule that sends to this Worker. The README on GitHub shows how.",
+	"addTitle": "Add domains",
+	"addHelp": "Type one or more domains, separated by spaces or commas. Each one must already be in your Cloudflare account, with Email Routing on and a catch-all rule that sends to this Worker.",
+	"addLabel": "Domains to add",
+	"notReady": "Not added yet: {domains}. Its mail doesn't reach Cloudflare yet. Switch on Email Routing for it in Cloudflare, then try again."
+}

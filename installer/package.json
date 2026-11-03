@@ -1,0 +1,31 @@
+{
+	"name": "@mrpwob/mail-app",
+	"version": "0.0.0",
+	"description": "Install and update Mail App, free open-source email, on your own Cloudflare account from the command line.",
+	"type": "module",
+	"bin": {
+		"mail-app": "cli.mjs"
+	},
+	"files": [
+		"cli.mjs",
+		"releases",
+		"README.md",
+		"LICENSE"
+	],
+	"engines": {
+		"node": ">=20"
+	},
+	"keywords": ["email", "cloudflare", "workers", "self-hosted", "mail"],
+	"homepage": "https://github.com/pobren/mail-app#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/pobren/mail-app.git"
+	},
+	"bugs": {
+		"url": "https://github.com/pobren/mail-app/issues"
+	},
+	"license": "Apache-2.0",
+	"publishConfig": {
+		"access": "public"
+	}
+}
