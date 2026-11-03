@@ -19,6 +19,7 @@ body:
     attributes:
       label: How did you install it?
       options:
+        - The Deploy to Cloudflare button
         - The installer (npx @mrpwob/mail-app)
         - From the code, with Wrangler
   - type: input

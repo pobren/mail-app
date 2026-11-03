@@ -3,3 +3,9 @@ contact_links:
   - name: Ask a question
     url: https://github.com/pobren/mail-app/discussions
     about: Questions about installing or using Mail App go in Discussions, so everyone can find the answer.
+  - name: Read the set-up guide
+    url: https://github.com/pobren/mail-app#readme
+    about: Step by step install and set-up instructions.
+  - name: Mail App home page
+    url: https://paulobrien.dev/mail/
+    about: What Mail App does, release notes and update emails.
