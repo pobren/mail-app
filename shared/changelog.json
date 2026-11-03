@@ -3,7 +3,7 @@
 	"releases": [
 		{
 			"version": "2.0",
-			"date": "2026-11-04",
+			"date": "2026-11-03",
 			"title": "Free and Open Source",
 			"changes": [
 				"Free and Open Source: Mail App is now free for everyone, with the code on GitHub under the Apache 2.0 licence. There's no licence key, trial or user limit beyond Cloudflare's own.",
