@@ -2,6 +2,14 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.0.1",
+			"date": "2026-11-03",
+			"title": "Add Domains from the Installer",
+			"changes": [
+				"Add Another Domain: Run npx @mrpwob/mail-app add-domain to get email for another domain. It switches on Email Routing, adds the email records, switches on sending and adds the domain to Mail App, ready for new mailboxes."
+			]
+		},
+		{
 			"version": "2.0",
 			"date": "2026-11-03",
 			"title": "Free and Open Source",
