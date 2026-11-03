@@ -6,6 +6,8 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  # Or run it from the Actions tab: it tags the newest version itself.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -28,11 +30,12 @@ jobs:
         id: v
         run: |
           version=$(jq -r '.releases[0].version' shared/changelog.json)
-          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = "push" ] && [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
             echo "The tag ${GITHUB_REF_NAME} doesn't match the newest version in shared/changelog.json (${version})." >&2
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
           jq -r '.releases[0] | "## \(.title)\n\n" + (.changes | map("- " + .) | join("\n"))' shared/changelog.json > "$RUNNER_TEMP/notes.md"
           echo "title=$(jq -r '.releases[0].title' shared/changelog.json)" >> "$GITHUB_OUTPUT"
       - run: npm run package
@@ -45,4 +48,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" --title "Mail App ${{ steps.v.outputs.version }}: ${{ steps.v.outputs.title }}" --notes-file "$RUNNER_TEMP/notes.md"
+          gh release create "${{ steps.v.outputs.tag }}" --target "$GITHUB_SHA" --title "Mail App ${{ steps.v.outputs.version }}: ${{ steps.v.outputs.title }}" --notes-file "$RUNNER_TEMP/notes.md"
