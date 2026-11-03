@@ -12,6 +12,9 @@ test("parseArgs reads commands and options", () => {
 	assert.equal(parseArgs(["setup", "--trial"]).domain, "");
 	assert.equal(parseArgs(["update", "--force"]).force, true);
 	assert.equal(parseArgs(["update", "--help"]).command, "help");
+	assert.equal(parseArgs(["add-domain"]).command, "add-domain");
+	assert.equal(parseArgs(["add-domain", "example.org"]).domain, "example.org");
+	assert.equal(parseArgs(["add-domain", "--domain", "example.net", "-y"]).domain, "example.net");
 });
 
 test("parseArgs refuses unknown commands, bad options and tokens on the command line", () => {

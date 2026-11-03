@@ -78,6 +78,7 @@ import {
 	type ActionId,
 	type InstallChoice,
 } from "./deploy";
+import { DOMAINS_KEY, addDomains, cleanDomainsFile, type DomainsFile } from "../shared/domains";
 import { ROUTING_DKIM_SELECTOR, checkDkim, checkDmarc, checkMx, checkSpf, joinTxt } from "../shared/dns-checks";
 import type { SetupCheck } from "../shared/setup";
 import { RELEASES_PATH, isReleaseManifest, isSafeVersion, type ReleaseManifest } from "./release";
@@ -703,6 +704,27 @@ async function signInPageHint(ctx: RunContext, owner: string): Promise<void> {
 	} catch (e) {
 		console.warn("Couldn't add the sign-in page hint:", e);
 	}
+}
+
+/** The extra domains Mail App gets mail for (shared/domains.ts), as kept in its storage. */
+export async function readDomainsList(ctx: RunContext): Promise<DomainsFile> {
+	try {
+		const res = await fetch(objectPath(ctx, DOMAINS_KEY), { headers: { authorization: `Bearer ${ctx.token}` } });
+		return cleanDomainsFile(res.ok ? await res.json() : null);
+	} catch {
+		return cleanDomainsFile(null);
+	}
+}
+
+/** Adds a domain to that list, so Mail App offers it for new mailboxes straight away. */
+export async function saveToDomainsList(ctx: RunContext, domain: string): Promise<void> {
+	const file = addDomains(await readDomainsList(ctx), [domain], new Date().toISOString());
+	const res = await fetch(objectPath(ctx, DOMAINS_KEY), {
+		method: "PUT",
+		headers: { authorization: `Bearer ${ctx.token}`, "content-type": "application/json" },
+		body: JSON.stringify(file),
+	});
+	if (!res.ok) throw new InstallError(`${domain} is set up for email, but we couldn't add it to Mail App's list. Add it on the Domains page in Mail App instead.`, `HTTP ${res.status}`);
 }
 
 /** The People list Mail App keeps in its storage, or null if there isn't one (or it can't be read). */

@@ -33,7 +33,7 @@
 	"removed": "{domain} removed",
 	"added": "Added {domains}",
 	"failed": "That didn't work. Please try again.",
-	"setUpNote": "To add a domain, first add it to your Cloudflare account, switch on Email Routing for it and add a catch-all rule that sends to this Worker. The README on GitHub shows how.",
+	"setUpNote": "To add a domain, first add it to your Cloudflare account. Then run npx @mrpwob/mail-app add-domain, which sets up its email and adds it here. To do it by hand instead, switch on Email Routing for it with a catch-all rule that sends to this Worker, then add it below.",
 	"addTitle": "Add domains",
 	"addHelp": "Type one or more domains, separated by spaces or commas. Each one must already be in your Cloudflare account, with Email Routing on and a catch-all rule that sends to this Worker.",
 	"addLabel": "Domains to add",

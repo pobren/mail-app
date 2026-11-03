@@ -2,7 +2,7 @@
 // terminal, and the permissions its Cloudflare API token needs. No network calls here, so it can be
 // tested with `node --experimental-strip-types --test site/test/`.
 
-export type Command = "setup" | "update" | "help" | "version";
+export type Command = "setup" | "update" | "add-domain" | "help" | "version";
 
 export interface Options {
 	command: Command;
@@ -33,9 +33,14 @@ export function parseArgs(argv: string[]): Options {
 		rest.shift();
 		if (first === "setup" || first === "install") opts.command = "setup";
 		else if (first === "update" || first === "upgrade") opts.command = "update";
+		else if (first === "add-domain" || first === "domain") {
+			opts.command = "add-domain";
+			// The domain can come straight after the command: npx @mrpwob/mail-app add-domain example.org
+			if (rest[0] && !rest[0].startsWith("-")) opts.domain = rest.shift()!.trim();
+		}
 		else if (first === "help") opts.command = "help";
 		else if (first === "version") opts.command = "version";
-		else throw new UsageError(`"${first}" isn't a mail-app command. Try: npx @mrpwob/mail-app setup, or npx @mrpwob/mail-app update.`);
+		else throw new UsageError(`"${first}" isn't a mail-app command. Try: npx @mrpwob/mail-app setup, update or add-domain.`);
 	}
 	while (rest.length) {
 		const arg = rest.shift()!;
@@ -135,10 +140,12 @@ export const HELP = `Mail App installer
 
   npx @mrpwob/mail-app setup    Install Mail App on your own Cloudflare account
   npx @mrpwob/mail-app update   Update an install to the latest version
+  npx @mrpwob/mail-app add-domain [domain]
+                                Get email for another domain on your Cloudflare account
 
 Options
   --account <id>    Cloudflare account to use, if your token reaches more than one
-  --domain <name>   Domain to install on (setup)
+  --domain <name>   Domain to install on (setup) or to add (add-domain)
   --trial           No domain: try it on your workers.dev address (setup)
   --subdomain <x>   Web address before the domain, "mail" by default (setup)
   --email <addr>    The address you'll sign in with (setup)

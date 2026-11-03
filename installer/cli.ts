@@ -8,8 +8,8 @@
 import { createInterface } from "node:readline/promises";
 import process from "node:process";
 import { readFile } from "node:fs/promises";
-import { planSteps, SCRIPT_NAME, WEB_SUBDOMAIN, type ActionId, type InstallChoice, parseChoice } from "./deploy";
-import { appInstalled, loadRelease, runAction, webAddressStatus, type ActionResult, type RunContext } from "./install-run";
+import { planSteps, SCRIPT_NAME, WEB_SUBDOMAIN, type ActionId, type InstallChoice, type PlanStep, parseChoice } from "./deploy";
+import { appInstalled, loadRelease, readDomainsList, runAction, saveToDomainsList, webAddressStatus, InstallError, type ActionResult, type RunContext } from "./install-run";
 import { PLAN_URL } from "../shared/sending";
 import { HELP, type Options, UsageError, forTerminal, isNewer, parseArgs, subdomainOf, tokenHelp } from "./core";
 
@@ -160,7 +160,7 @@ function fail(result: ActionResult): never {
 	throw new Stop("");
 }
 
-async function runSteps(token: string, choice: InstallChoice, opts: Options): Promise<{ hostname?: string; sending?: ActionResult["sending"] }> {
+async function runSteps(token: string, choice: InstallChoice, opts: Options, steps: PlanStep[] = planSteps(choice)): Promise<{ hostname?: string; sending?: ActionResult["sending"] }> {
 	let hostname: string | undefined;
 	let sending: ActionResult["sending"];
 	// The shared install code reports best-effort extras (a sign-in page hint and the like) with
@@ -169,7 +169,7 @@ async function runSteps(token: string, choice: InstallChoice, opts: Options): Pr
 	const warn = console.warn;
 	console.warn = (...args: unknown[]) => notes.push(args.map(String).join(" "));
 	try {
-		for (const step of planSteps(choice)) {
+		for (const step of steps) {
 			stdout.write(`${dim("…")} ${step.label}${tty ? "" : "\n"}`);
 			for (const action of step.actions) {
 				let result = await runAction(action as ActionId, ctxFor(token, choice));
@@ -303,6 +303,50 @@ async function update(opts: Options) {
 	finished(choice, hostname, sending, null);
 }
 
+/** Email for one more domain: Email Routing to Mail App, its email records, sending, then Mail App's own list. */
+async function addDomain(opts: Options) {
+	say(bold("Add a domain to Mail App\n"));
+	const token = await getToken();
+	const account = await pickAccount(token, opts, (id) => appInstalled(token, id));
+	const main = await existingChoice(token, account.id);
+	if (!main.domain) throw new Stop("Mail App is on its workers.dev address for now. Run npx @mrpwob/mail-app setup to give it a domain first.");
+	const have = new Set([main.domain, ...(await readDomainsList(ctxFor(token, main))).domains.map((d) => d.name)]);
+
+	let domain = opts.domain?.toLowerCase().replace(/\.$/, "");
+	if (!domain) {
+		const zones = await cf<{ name: string; status: string }[]>(token, `/zones?account.id=${account.id}&per_page=50`);
+		if (!zones.ok) throw new Stop(`We couldn't list your domains. Your token needs "Zone: Read". ${details(zones)}`);
+		const free = (zones.result ?? []).filter((z) => z.status === "active" && !have.has(z.name.toLowerCase()));
+		if (!free.length) throw new Stop("Every domain on this Cloudflare account already gets its email in Mail App. Add the new domain to Cloudflare first, then run this again.");
+		say(bold("Which domain should Mail App get email for?"));
+		domain = free[await choose("Domain:", free, (z) => z.name)].name.toLowerCase();
+	}
+	if (have.has(domain)) say(dim(`${domain} is already in Mail App. Checking its email settings again.`));
+
+	const choice: InstallChoice = { ...main, domain, moveMail: false };
+	say(`\nAdding ${bold(domain)} to Mail App on ${bold(account.name)}.\n`);
+	const { sending } = await runSteps(token, choice, opts, [
+		{ id: "email", label: `Switching on email for ${domain}`, actions: ["email", "records"] },
+		{ id: "sending", label: `Switching on sending for ${domain}`, actions: ["sending"] },
+	]);
+	try {
+		await saveToDomainsList(ctxFor(token, choice), domain);
+	} catch (e) {
+		if (e instanceof InstallError) fail({ ok: false, message: e.message, detail: e.detail });
+		throw e;
+	}
+	say(`${green("✓")} Added ${domain} to Mail App`);
+	say();
+	say(bold(`${domain} is ready.`));
+	say(`  Make mailboxes for it on the Mailboxes page in Mail App, at https://${main.subdomain ?? WEB_SUBDOMAIN}.${main.domain}`);
+	if (sending?.status === "plan") {
+		say(yellow("! Sending to other people needs Cloudflare's Workers Paid plan ($5 a month). Receiving works now."));
+	} else if (sending?.status === "failed") {
+		say(yellow(`! We couldn't switch on sending for ${domain} yet. Mail App shows what to do in Settings.`));
+		if (sending.detail) say(dim(`  Cloudflare said: ${sending.detail}`));
+	}
+}
+
 async function main() {
 	let opts: Options;
 	try {
@@ -319,6 +363,7 @@ async function main() {
 		if (opts.command === "version") say(CLI_VERSION);
 		else if (opts.command === "help") say(`${HELP}\n${tokenHelp()}`);
 		else if (opts.command === "setup") await setup(opts);
+		else if (opts.command === "add-domain") await addDomain(opts);
 		else await update(opts);
 	} catch (e) {
 		if (e instanceof Stop) {
