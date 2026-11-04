@@ -105,7 +105,7 @@
 		"@tiptap/extension-text": "3.32.0"
 	},
 	"devDependencies": {
-		"@cloudflare/vite-plugin": "^1.65.0",
+		"@cloudflare/vite-plugin": "^1.67.0",
 		"@cloudflare/workers-types": "^5.20261019.1",
 		"@jsquash/webp": "^1.5.0",
 		"@react-router/dev": "^7.18.4",
