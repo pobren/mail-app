@@ -1,8 +1,13 @@
 Mail App
 Copyright 2026 Paul O'Brien
 
+Mail App is licensed under the GNU Affero General Public License, version 3 only
+(AGPL-3.0-only), in the LICENSE file. Versions up to and including 2.0.2 were
+released under the Apache License 2.0 and stay under it.
+
 This product is based on Agentic Inbox (https://github.com/cloudflare/agentic-inbox),
-Copyright (c) 2026 Cloudflare, Inc., licensed under the Apache License 2.0.
-Files changed from Agentic Inbox say so near the top.
+Copyright (c) 2026 Cloudflare, Inc., licensed under the Apache License 2.0, in the
+LICENSE-APACHE file. Files that came from Agentic Inbox keep their Apache 2.0 notice,
+and files changed from Agentic Inbox say so near the top.
 
 Mail App is independent and is not made, endorsed or supported by Cloudflare.

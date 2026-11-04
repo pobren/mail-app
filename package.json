@@ -1,7 +1,7 @@
 {
 	"name": "mail-app",
 	"private": true,
-	"license": "Apache-2.0",
+	"license": "AGPL-3.0-only",
 	"type": "module",
 	"cloudflare": {
 		"label": "Mail App",

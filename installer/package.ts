@@ -71,7 +71,7 @@ await build({
 	platform: "node",
 	format: "esm",
 	target: "node20",
-	banner: { js: `#!/usr/bin/env node\n// Mail App installer ${npmVersion}. Apache License 2.0. https://github.com/pobren/mail-app` },
+	banner: { js: `#!/usr/bin/env node\n// Mail App installer ${npmVersion}. GNU AGPL 3.0. https://github.com/pobren/mail-app` },
 	define: { CLI_VERSION: JSON.stringify(npmVersion) },
 });
 
@@ -79,6 +79,6 @@ await build({
 const pkg = JSON.parse(readFileSync(join(root, "installer/package.json"), "utf8"));
 writeFileSync(join(npmDir, "package.json"), `${JSON.stringify({ ...pkg, version: npmVersion }, null, "\t")}\n`);
 cpSync(join(root, "installer/README.md"), join(npmDir, "README.md"));
-cpSync(join(root, "LICENSE"), join(npmDir, "LICENSE"));
+for (const file of ["LICENSE", "LICENSE-APACHE", "NOTICE"]) cpSync(join(root, file), join(npmDir, file));
 
 console.log(`@mrpwob/mail-app ${npmVersion}: ${modules.length} Worker modules, ${assets.length} assets, in npm/`);
