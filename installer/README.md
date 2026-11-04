@@ -38,4 +38,4 @@ Found a bug or stuck on an install? Please [open an issue](https://github.com/po
 
 ## Licence
 
-Apache License 2.0. Mail App is built on [Agentic Inbox](https://github.com/cloudflare/agentic-inbox) by Cloudflare. It is independent software and isn't made, endorsed or supported by Cloudflare.
+GNU AGPL 3.0. Free to use, change and run yourself. Hosting it for others or selling it without sharing your changes needs a commercial licence: get in touch at [paulobrien.dev/contact](https://paulobrien.dev/contact/). Mail App is built on [Agentic Inbox](https://github.com/cloudflare/agentic-inbox) by Cloudflare. It is independent software and isn't made, endorsed or supported by Cloudflare.

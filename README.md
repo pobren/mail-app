@@ -154,6 +154,16 @@ Help is only given on GitHub. Mail App is a free project, so answers come when t
 
 ## Licence and credits
 
-Mail App is licensed under the [Apache License 2.0](LICENSE). It's based on [Agentic Inbox](https://github.com/cloudflare/agentic-inbox) by Cloudflare, also under the Apache License 2.0; thank you to its authors. See [NOTICE](NOTICE).
+Mail App is open source under the [GNU Affero General Public License v3.0](LICENSE) (AGPL 3.0). Versions up to and including 2.0.2 were released under the Apache License 2.0 and stay under it.
+
+What that means in plain English:
+
+- **Free for you.** Use it, change it and run it for yourself, your family or your business, on your own Cloudflare account. No licence key, no trial.
+- **Share your changes.** If you change Mail App and let other people use your changed version over the internet, you must give them your changed source code under the same licence.
+- **Hosting or selling it?** If you want to host Mail App for others, sell it as a service or build it into a paid product without sharing your changes, you need a commercial licence. [Get in touch](https://paulobrien.dev/contact/) and choose *Let's work together*.
+
+This summary isn't legal advice. The [LICENSE](LICENSE) file is what counts.
+
+Mail App is based on [Agentic Inbox](https://github.com/cloudflare/agentic-inbox) by Cloudflare, under the [Apache License 2.0](LICENSE-APACHE); thank you to its authors. Files that came from Agentic Inbox keep their Apache 2.0 notice. See [NOTICE](NOTICE).
 
 Mail App is independent. It isn't made, endorsed or supported by Cloudflare.

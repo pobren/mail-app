@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Paul O'Brien. Licensed under the Apache 2.0 license.
+// Copyright (c) 2026 Paul O'Brien. Licensed under the GNU AGPL 3.0 (see LICENSE).
 // Added for Mail App: the DNS record rules, used by the app's setup wizard.
 
 import type { DnsFix, SetupCheck } from "./setup";

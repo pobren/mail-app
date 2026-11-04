@@ -10,7 +10,9 @@
 		"cli.mjs",
 		"releases",
 		"README.md",
-		"LICENSE"
+		"LICENSE",
+		"LICENSE-APACHE",
+		"NOTICE"
 	],
 	"engines": {
 		"node": ">=20"
@@ -24,7 +26,7 @@
 	"bugs": {
 		"url": "https://github.com/pobren/mail-app/issues"
 	},
-	"license": "Apache-2.0",
+	"license": "AGPL-3.0-only",
 	"publishConfig": {
 		"access": "public"
 	}
