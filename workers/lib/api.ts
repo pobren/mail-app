@@ -50,8 +50,11 @@ export function keyPerson(key: ApiKey): Person {
 	};
 }
 
+/** The API guide, linked from every error so whoever reads one knows where to look. */
+export const API_DOCS = "https://paulobrien.dev/mail/api/";
+
 function apiError(status: number, error: string): Response {
-	return new Response(JSON.stringify({ error }), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+	return new Response(JSON.stringify({ error, docs: API_DOCS }), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 }
 
 /**
@@ -69,7 +72,7 @@ export async function admitApiRequest(req: Request, env: Env, ctx: ExecutionCont
 	if (!record) return apiError(401, "That API key isn't valid. It may have been deleted.");
 
 	const route = routeFor(req.method, path);
-	if (!route) return apiError(404, "The API doesn't have that request. See docs/api.md in the Mail App repository for the list.");
+	if (!route) return apiError(404, `The API doesn't have that request. See ${API_DOCS} for the list.`);
 	if (!record.scopes.includes(route.scope)) return apiError(403, `This key can't ${route.scope === "read" ? "read mail" : route.scope === "send" ? "send mail" : "move or label mail"}. An admin can make a new key that can.`);
 	const mailbox = mailboxIn(path);
 	if (mailbox && !record.mailboxes.includes(mailbox)) return apiError(404, "Not found");

@@ -198,7 +198,7 @@ Use the body exactly as it arrived. Parsing the JSON and turning it back into te
 
 ## Errors and limits
 
-Anything that goes wrong comes back with a status and a sentence you can show to a person: `{"error": "That API key isn't valid. It may have been deleted."}`
+Anything that goes wrong comes back with a status and a sentence you can show to a person: `{"error": "That API key isn't valid. It may have been deleted.", "docs": "https://paulobrien.dev/mail/api/"}`. The `docs` link points to the full guide on paulobrien.dev.
 
 | Status | Means |
 | --- | --- |

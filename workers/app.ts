@@ -16,7 +16,7 @@ import { aiEnabledFor } from "./lib/ai-setting";
 import { publicLinks } from "./lib/links";
 import { publicFeeds } from "./lib/calendar-feeds";
 import { admit, devViewer, type PeopleVars } from "./lib/people";
-import { admitApiRequest } from "./lib/api";
+import { admitApiRequest, API_DOCS } from "./lib/api";
 import { keyFromHeaders } from "../shared/api";
 import { canOpen, isAdmin, type Person } from "../shared/people";
 import { sameSite } from "./lib/same-site";
@@ -101,6 +101,16 @@ app.use("*", async (c, next) => {
 		if (admitted instanceof Response) return admitted;
 		keyRequests.set(admitted.request, admitted.person);
 		const res = await app.fetch(admitted.request, c.env, c.executionCtx as ExecutionContext);
+		// An error from the app's own routes gets the same docs link as the API's own errors.
+		if (!res.ok && (res.headers.get("content-type") ?? "").includes("application/json")) {
+			const body = await res.clone().json().catch(() => null) as Record<string, unknown> | null;
+			if (body && typeof body.error === "string" && !("docs" in body)) {
+				const headers = new Headers(res.headers);
+				headers.delete("content-length");
+				headers.set("cache-control", "no-store");
+				return new Response(JSON.stringify({ ...body, docs: API_DOCS }), { status: res.status, headers });
+			}
+		}
 		const out = new Response(res.body, res);
 		out.headers.set("cache-control", "no-store");
 		return out;
