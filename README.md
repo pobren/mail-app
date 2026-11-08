@@ -99,7 +99,9 @@ Sending to other people needs Cloudflare's Workers Paid plan ($5 a month) and yo
 
 ## Adding domains
 
-Mail App can get email for more than one domain. Add the domain to your Cloudflare account, then run:
+Mail App can get email for more than one domain. Add the domain to your Cloudflare account, then open Mail App's **Domains** page and press **Add domains**. You sign in with Cloudflare in a small window (on paulobrien.dev), tick the domains and it sets each one up on your account: Email Routing with a catch-all to Mail App, its email records and sending. Nothing about you or your mail is kept there, and the permission is handed back to Cloudflare when you finish.
+
+Or from a terminal:
 
 ```sh
 npx @mrpwob/mail-app@latest add-domain example.org

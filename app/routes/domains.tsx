@@ -1,10 +1,12 @@
 // Mail App addition (not part of upstream Agentic Inbox).
 // The Domains page (admins only): every domain this install gets email for, in a table like Users and
-// Routing, with a check of each one's mail records. "Add domains" lists a domain that's already set up in
-// Cloudflare (Email Routing on, with a catch-all to this Worker). Wording in app/copy/domains.en-GB.json.
+// Routing, with a check of each one's mail records. "Add domains" opens paulobrien.dev/mail/add-domains/ in a
+// small window: the admin signs in with Cloudflare there, ticks domains, and it sets each one up on their own
+// account (Email Routing with a catch-all to this Worker, records, Email Sending), then tells this window, which
+// lists them. "Add by hand" lists a domain that's already set up. Wording in app/copy/domains.en-GB.json.
 import { Button, Dialog, Input, Loader, Text, useKumoToastManager } from "@cloudflare/kumo";
-import { CheckCircleIcon, GlobeIcon, PlusIcon, QuestionIcon, WarningCircleIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { CheckCircleIcon, GlobeIcon, PencilSimpleIcon, PlusIcon, QuestionIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 import { Details, Empty, Headings, Menu, Row } from "~/components/AdminTable";
 import AdminShell, { PageHeading, Pill } from "~/components/AdminShell";
 import { FindBox, ShowMoreButton, useShowMore } from "~/components/ShowMore";
@@ -16,6 +18,9 @@ import { useAddDomains, useDomains, useRefreshDomains, useRemoveDomain } from "~
 import { useMe } from "~/queries/people";
 import { pageTitle } from "~/lib/brand";
 
+/** The one-click "Add domains" page (Sign in with Cloudflare). Only its messages are listened to. */
+const ADD_ORIGIN = "https://paulobrien.dev";
+const ADD_PAGE = `${ADD_ORIGIN}/mail/add-domains/`;
 const RECORD_NAMES: Record<string, string> = { mx: "MX", spf: "SPF", dkim: "DKIM", dmarc: "DMARC" };
 const COLUMNS = "md:grid-cols-[minmax(0,1.6fr)_9rem_minmax(0,1.2fr)_9rem_3rem]";
 
@@ -37,7 +42,39 @@ export default function DomainsRoute() {
 
 	const [adding, setAdding] = useState(false);
 	const [names, setNames] = useState("");
-	const openAdd = () => { setNames(""); setAdding(true); };
+	const openManual = () => { setNames(""); setAdding(true); };
+	// One click needs Mail App on its own domain: the sign-in page finds it from the domain's mail settings.
+	// Read after the first paint, so the page drawn on the server and in the browser match.
+	const [host, setHost] = useState("");
+	useEffect(() => setHost(window.location.hostname), []);
+	const oneClick = !!host && !host.endsWith(".workers.dev") && host !== "localhost";
+	const openAdd = () => {
+		if (!oneClick) return openManual();
+		// Not "noopener": the page needs window.opener to say when it's done.
+		const w = window.open(`${ADD_PAGE}?host=${encodeURIComponent(host)}`, "mail-app-add-domains", "popup,width=600,height=820");
+		if (!w) toast.add({ title: fill(copy.popupBlocked, { url: ADD_PAGE }), variant: "error" });
+	};
+
+	// The sign-in page says which domains it set up; list them here (the server checks their mail reaches Cloudflare).
+	useEffect(() => {
+		const onMessage = (e: MessageEvent) => {
+			if (e.origin !== ADD_ORIGIN) return;
+			const msg = e.data as { type?: unknown; domains?: unknown } | null;
+			if (msg?.type !== "mail-app-domains-added" || !Array.isArray(msg.domains)) return;
+			const list = msg.domains.filter((d): d is string => typeof d === "string").slice(0, 50);
+			if (!list.length) return void refresh();
+			add.mutate(list, {
+				onSettled: () => refresh(),
+				onSuccess: (res) => {
+					if (res.added.length) toast.add({ title: fill(copy.added, { domains: res.added.join(", ") }) });
+					if (res.skipped.length) toast.add({ title: fill(copy.notReady, { domains: res.skipped.join(", ") }), variant: "error" });
+				},
+			});
+		};
+		window.addEventListener("message", onMessage);
+		return () => window.removeEventListener("message", onMessage);
+	}, [add, refresh, toast]);
+
 	const saveAdd = () => {
 		const list = names.split(/[\s,]+/).map((n) => n.trim()).filter(Boolean);
 		if (!list.length) return;
@@ -58,7 +95,12 @@ export default function DomainsRoute() {
 			<PageHeading
 				title={adminCopy.nav.domains}
 				intro={adminCopy.domains.intro}
-				action={isAdmin && data && <Button variant="primary" icon={<PlusIcon size={16} />} onClick={openAdd}>{copy.add}</Button>}
+				action={isAdmin && data && (
+					<div className="flex flex-wrap gap-2">
+						{oneClick && <Button variant="secondary" icon={<PencilSimpleIcon size={16} />} onClick={openManual}>{copy.addManual}</Button>}
+						<Button variant="primary" icon={<PlusIcon size={16} />} onClick={openAdd}>{copy.add}</Button>
+					</div>
+				)}
 			/>
 			{loading ? (
 				<div className="flex justify-center py-20"><Loader size="lg" /></div>
