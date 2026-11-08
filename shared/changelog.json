@@ -2,6 +2,15 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.1",
+			"date": "2026-11-08",
+			"title": "Add Domains in One Click",
+			"changes": [
+				"Add Domains in One Click: Press Add domains on the Domains page, sign in with Cloudflare and tick the domains you want. Each one gets Email Routing, its email records and sending switched on, and appears in Mail App ready for mailboxes. Domains that get their email somewhere else, such as Google or Microsoft, are never moved.",
+				"Add by Hand: You can still add a domain you've set up yourself, with Add by hand."
+			]
+		},
+		{
 			"version": "2.0.2",
 			"date": "2026-11-04",
 			"title": "Releases Straight from GitHub",
