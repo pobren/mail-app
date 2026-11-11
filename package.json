@@ -79,6 +79,7 @@
 		"zustand": "^5.0.12"
 	},
 	"overrides": {
+		"@hono/node-server": "^2.1.7",
 		"@tiptap/core": "3.32.0",
 		"@tiptap/pm": "3.32.0",
 		"@tiptap/extensions": "3.32.0",
@@ -105,7 +106,7 @@
 		"@tiptap/extension-text": "3.32.0"
 	},
 	"devDependencies": {
-		"@cloudflare/vite-plugin": "^1.65.0",
+		"@cloudflare/vite-plugin": "^1.68.0",
 		"@cloudflare/workers-types": "^5.20261019.1",
 		"@jsquash/webp": "^1.5.0",
 		"@react-router/dev": "^7.18.4",
@@ -114,12 +115,12 @@
 		"@types/node": "^20.19.37",
 		"@types/react": "^19.1.2",
 		"@types/react-dom": "^19.1.2",
+		"esbuild": "^0.25.0",
 		"tailwindcss": "^4.1.4",
 		"typescript": "^5.8.3",
 		"vite": "^6.3.3",
 		"vite-tsconfig-paths": "^5.1.4",
-		"wrangler": "^4.154.0",
-		"esbuild": "^0.25.0"
+		"wrangler": "^4.160.0"
 	},
 	"version": "2.0.0",
 	"description": "Free, open-source business email that runs on your own Cloudflare account: inbox, calendar, contacts, shared inboxes and a spam filter.",
