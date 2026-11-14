@@ -1,8 +1,8 @@
 Mail App: third-party licences
 ==============================
 
-Mail App is free, open-source software (https://github.com/pobren/mail-app), licensed under the
-GNU Affero General Public License, version 3 (https://www.gnu.org/licenses/agpl-3.0.html).
+Mail App is free, source available software (https://github.com/pobren/mail-app), licensed under
+the Business Source License 1.1 (https://mariadb.com/bsl11/).
 The source code for the version you are running is at https://github.com/pobren/mail-app.
 It is built on Agentic Inbox by Cloudflare, Inc. (https://github.com/cloudflare/agentic-inbox),
 which is licensed under the Apache License 2.0, below.
