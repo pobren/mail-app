@@ -71,7 +71,7 @@ await build({
 	platform: "node",
 	format: "esm",
 	target: "node20",
-	banner: { js: `#!/usr/bin/env node\n// Mail App installer ${npmVersion}. GNU AGPL 3.0. https://github.com/pobren/mail-app` },
+	banner: { js: `#!/usr/bin/env node\n// Mail App installer ${npmVersion}. Business Source License 1.1. https://github.com/pobren/mail-app` },
 	define: { CLI_VERSION: JSON.stringify(npmVersion) },
 });
 

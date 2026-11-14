@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Paul O'Brien. Licensed under the GNU AGPL 3.0 (see LICENSE).
+// Copyright (c) 2026 Paul O'Brien. Licensed under the Business Source License 1.1 (see LICENSE).
 // Added for Mail App: the setup wizard's checks. All wording lives in app/copy/setup.en-GB.json.
 
 import { Badge, Button, Loader } from "@cloudflare/kumo";

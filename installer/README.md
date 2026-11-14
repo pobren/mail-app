@@ -2,7 +2,7 @@
 
 Install and update [Mail App](https://github.com/pobren/mail-app) on your own Cloudflare account from the command line.
 
-Mail App is free, open-source email that runs on your own Cloudflare account: inbox, calendar, contacts, shared inboxes and a spam filter. This command sets everything up for you, using a Cloudflare API token you create.
+Mail App is free email that runs on your own Cloudflare account: inbox, calendar, contacts, shared inboxes and a spam filter. This command sets everything up for you, using a Cloudflare API token you create.
 
 ```sh
 npx @mrpwob/mail-app setup            # install Mail App
@@ -38,4 +38,4 @@ Found a bug or stuck on an install? Please [open an issue](https://github.com/po
 
 ## Licence
 
-GNU AGPL 3.0. Free to use, change and run yourself. Hosting it for others or selling it without sharing your changes needs a commercial licence: get in touch at [paulobrien.dev/contact](https://paulobrien.dev/contact/). Mail App is built on [Agentic Inbox](https://github.com/cloudflare/agentic-inbox) by Cloudflare. It is independent software and isn't made, endorsed or supported by Cloudflare.
+Business Source License 1.1. Source available, free for personal and small business use on up to 10 of your own domains. Going over 10 domains, running it for clients or offering it as a hosted service needs a commercial licence: get in touch at [paulobrien.dev/contact](https://paulobrien.dev/contact/). Mail App is built on [Agentic Inbox](https://github.com/cloudflare/agentic-inbox) by Cloudflare. It is independent software and isn't made, endorsed or supported by Cloudflare.

@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Paul O'Brien. Licensed under the GNU AGPL 3.0 (see LICENSE).
+// Copyright (c) 2026 Paul O'Brien. Licensed under the Business Source License 1.1 (see LICENSE).
 // Added for Mail App: the shape of GET /api/v1/setup/status, shared by the Worker and the wizard.
 
 export type CheckStatus = "ok" | "fix" | "unknown";
