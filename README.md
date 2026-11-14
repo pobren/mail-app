@@ -1,10 +1,12 @@
 <div align="center">
   <img src="public/favicon.svg" width="64" height="64" alt="">
   <h1>Mail App</h1>
-  <p><strong>Free, open-source business email that runs on your own Cloudflare account.</strong><br>
+  <p><strong>Free business email that runs on your own Cloudflare account.</strong><br>
   Inbox, calendar, contacts, shared inboxes and a spam filter, at your own domain.</p>
   <p><a href="https://paulobrien.dev/mail/">Website</a> · <a href="#install">Install</a> · <a href="https://github.com/pobren/mail-app/releases">Releases</a> · <a href="https://github.com/pobren/mail-app/issues">Report a bug</a> · <a href="https://github.com/pobren/mail-app/discussions">Ask a question</a></p>
 </div>
+
+**Free for personal and small business use, source available.** See [Licence and credits](#licence-and-credits) below.
 
 Mail App gives you private email at your own domain. It installs into your own Cloudflare account, so your mail, contacts and files stay there, and nothing depends on anyone else to keep running. Every feature is in the free app. There's nothing to unlock.
 
@@ -156,15 +158,15 @@ Help is only given on GitHub. Mail App is a free project, so answers come when t
 
 ## Licence and credits
 
-Mail App is open source under the [GNU Affero General Public License v3.0](LICENSE) (AGPL 3.0). Versions up to and including 2.0.2 were released under the Apache License 2.0 and stay under it.
+Mail App is source available under the [Business Source License 1.1](LICENSE), from the first release after 2.1. Version 2.1 stays under the GNU AGPL 3.0, and versions up to and including 2.0.2 stay under the Apache License 2.0.
 
 What that means in plain English:
 
-- **Free for you.** Use it, change it and run it for yourself, your family or your business, on your own Cloudflare account. No licence key, no trial.
-- **Share your changes.** If you change Mail App and let other people use your changed version over the internet, you must give them your changed source code under the same licence.
-- **Hosting or selling it?** If you want to host Mail App for others, sell it as a service or build it into a paid product without sharing your changes, you need a commercial licence. [Get in touch](https://paulobrien.dev/contact/) and choose *Let's work together*.
+- **Free** for personal and small business use: one person or organisation's own domains, up to 10, with any number of mailboxes. Read the code, change it and run your own copy. No licence key, no trial.
+- **Needs a commercial licence:** going over 10 domains, running it for clients or other people, or offering it as a hosted, managed or white-label service. [Get in touch](https://paulobrien.dev/contact/) and choose *Let's work together*.
+- Each version becomes Apache 2.0 four years after it's released.
 
-This summary isn't legal advice. The [LICENSE](LICENSE) file is what counts.
+There's nothing in the app that stops you. We trust you. This summary isn't legal advice. The [LICENSE](LICENSE) file is what counts.
 
 Mail App is based on [Agentic Inbox](https://github.com/cloudflare/agentic-inbox) by Cloudflare, under the [Apache License 2.0](LICENSE-APACHE); thank you to its authors. Files that came from Agentic Inbox keep their Apache 2.0 notice. See [NOTICE](NOTICE).
 
