@@ -95,3 +95,34 @@ export function AppTabBar() {
 		</nav>
 	);
 }
+
+/** Mail App 2.3: a row of icons at the foot of the mail sidebar on wider screens, in place of the strip.
+ *  The strip still shows on Calendar, Contacts, Files and Notes, and when the mail sidebar is folded away. */
+export function AppRow({ className = "" }: { className?: string }) {
+	const { mailboxId } = useParams<{ mailboxId: string }>();
+	const area = areaOf(useLocation().pathname);
+	const onSettings = /\/settings(\/|$)/.test(useLocation().pathname);
+	const unread = useInboxUnread();
+	const cell = (on: boolean) =>
+		`relative flex size-9 items-center justify-center rounded-lg no-underline transition-colors app-nav-link ${on ? "app-nav-active" : "hover:text-kumo-default"}`;
+	return (
+		<nav aria-label="Switch between Mail, Calendar, Contacts, Files and Notes" className={`hidden items-center justify-between md:flex ${className}`}>
+			{useItems().map((item) => {
+				const on = item.area === area && !onSettings;
+				return (
+					<Tooltip key={item.area} content={item.label} side="top" asChild>
+						<NavLink to={item.to} aria-label={item.label} aria-current={on ? "page" : undefined} className={cell(on)}>
+							{item.icon(on)}
+							{item.area === "mail" && unread > 0 && !on && <span className="absolute right-1 top-1 size-2 rounded-full bg-kumo-brand" />}
+						</NavLink>
+					</Tooltip>
+				);
+			})}
+			<Tooltip content="Settings" side="top" asChild>
+				<NavLink to={`/mailbox/${mailboxId}/settings`} aria-label="Settings" aria-current={onSettings ? "page" : undefined} className={cell(onSettings)}>
+					<GearSixIcon size={20} weight={onSettings ? "fill" : "regular"} />
+				</NavLink>
+			</Tooltip>
+		</nav>
+	);
+}

@@ -1,24 +1,26 @@
 @source "../node_modules/@cloudflare/kumo/dist/**/*.{js,jsx,ts,tsx}";
 @import "@cloudflare/kumo/styles/tailwind";
 @import "tailwindcss";
+/* Mail App: Inter, served from Mail App itself (no font services). SIL Open Font Licence. */
+@import "@fontsource-variable/inter";
 
 body {
   margin: 0;
 }
 
-/* Mail App: Mail App's postbox red in place of Kumo's blue for buttons and highlights. A company's own colour
+/* Mail App: Mail App's clean blue (#2f5bd3, matching the Mac and iPhone apps) for buttons and highlights. A company's own colour
    (Admin > Branding) replaces these from a <style> in the page head (shared/branding.ts, brandCss). */
 :root,
 [data-mode="dark"] {
-  --color-kumo-brand: #c8102e;
-  --color-kumo-brand-hover: #a50d26;
-  --brand: #c8102e;
-  --brand-ink: #a50d26;
-  --brand-rgb: 200, 16, 46;
+  --color-kumo-brand: #2f5bd3;
+  --color-kumo-brand-hover: #2649b0;
+  --brand: #2f5bd3;
+  --brand-ink: #2649b0;
+  --brand-rgb: 47, 91, 211;
 }
 
 /* Mail App: label tags. Pale with dark writing; deep with light writing if Kumo's dark mode is on
-   (the app is light-only for now, so this follows data-mode, not the system setting).
+   (data-mode is set from Settings or the computer's setting, app/lib/appearance.ts).
    The colours come from shared/labels.ts as CSS variables. */
 .app-label {
   background-color: var(--label-tint);
@@ -113,3 +115,78 @@ body {
    the "Attach from Files" dialog, can be used. */
 div:has(> [role="menu"]) { z-index: 60; }
 body > div:has(> [role="dialog"]) { position: relative; z-index: 60; }
+
+/* Mail App 2.3: the clean refresh. Calm neutrals, one blue and fewer lines, in the style of the Mac and
+   iPhone apps. Kumo's own colours are tuned here, so every screen picks it up; dark mode follows the
+   computer's setting unless someone picks Light or Dark in Settings (app/lib/appearance.ts). */
+:root:root {
+  --app-bg: #ffffff;
+  --app-side: #f7f7f8;
+  --app-line: #ececef;
+  --app-text: #17181c;
+  --app-muted: #61656f;
+  --app-field: #f3f4f6;
+  --app-tint: rgba(var(--brand-rgb), 0.08);
+  --app-tint-strong: rgba(var(--brand-rgb), 0.14);
+  --app-brand-ink: var(--brand);
+  --color-kumo-base: var(--app-bg);
+  --color-kumo-recessed: var(--app-side);
+  --color-kumo-elevated: #fbfbfc;
+  --color-kumo-line: var(--app-line);
+  --color-kumo-hairline: var(--app-line);
+  --color-kumo-tint: #f1f2f4;
+  --color-kumo-fill: #e9eaee;
+  --text-color-kumo-default: var(--app-text);
+  --text-color-kumo-strong: #3d4049;
+  --text-color-kumo-subtle: var(--app-muted);
+  --text-color-kumo-link: var(--brand);
+  --text-color-kumo-brand: var(--brand);
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+:root:root[data-mode="dark"] {
+  --app-bg: #15161a;
+  --app-side: #1b1c21;
+  --app-line: #2a2c33;
+  --app-text: #ecedef;
+  --app-muted: #a3a7b1;
+  --app-field: #22242a;
+  --app-tint: rgba(var(--brand-rgb), 0.22);
+  --app-tint-strong: rgba(var(--brand-rgb), 0.3);
+  --app-brand-ink: color-mix(in srgb, var(--brand) 55%, white);
+  --color-kumo-elevated: #1f2026;
+  --color-kumo-tint: #23252b;
+  --color-kumo-fill: #2b2d34;
+  --color-kumo-control: #1f2026;
+  --color-kumo-overlay: #1f2026;
+  --text-color-kumo-strong: #c9ccd3;
+  --text-color-kumo-link: var(--app-brand-ink);
+  --text-color-kumo-brand: var(--app-brand-ink);
+  color-scheme: dark;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+/* Folder links: the open folder in a soft blue, like the apps. */
+.app-nav-link { color: var(--text-color-kumo-strong); }
+.app-nav-link:hover { background: var(--color-kumo-tint); }
+.app-nav-link.app-nav-active,
+.app-nav-link.app-nav-active:hover { background: var(--app-tint); color: var(--app-brand-ink); font-weight: 600; }
+
+/* Email list rows. */
+.app-row { border-color: var(--app-line); }
+.app-row:hover { background: var(--color-kumo-tint); }
+.app-row.app-row-selected,
+.app-row.app-row-selected:hover { background: var(--app-tint); box-shadow: inset 3px 0 0 var(--brand); }
+.app-row .app-row-time-unread { color: var(--app-brand-ink); font-weight: 600; }
+.app-row .app-row-check { opacity: 0; transition: opacity 0.12s; }
+.app-row:hover .app-row-check,
+.app-row .app-row-check:focus-within,
+.app-list-selecting .app-row .app-row-check { opacity: 1; }
+@media (hover: none) { .app-row .app-row-check { opacity: 1; } }
+
+/* Initials in a soft circle, coloured by name (app/lib/avatar.ts). */
+.app-avatar { background: var(--av-bg); color: var(--av-ink); }
+[data-mode="dark"] .app-avatar { background: rgba(255, 255, 255, 0.08); color: #dadce2; }

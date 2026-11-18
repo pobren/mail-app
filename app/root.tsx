@@ -33,6 +33,7 @@ import { applyBrand } from "~/lib/brand";
 import { brandColours, brandCss, brandName, cleanBranding, isBranded, logoIsIcon, logoUrl, type Branding } from "shared/branding";
 import { loadBranding } from "../workers/lib/branding";
 import "./index.css";
+import { APPEARANCE_SCRIPT, watchSystemAppearance } from "~/lib/appearance";
 
 // Mail App: the company's branding (Admin > Branding), read once with the page. Saving it reloads the page.
 export async function loader({ context }: LoaderFunctionArgs) {
@@ -98,7 +99,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	const logo = logoUrl(branding);
 	const icon = logo && logoIsIcon(branding.logo) ? logo : null;
 	return (
-		<html lang="en-GB">
+		<html lang="en-GB" suppressHydrationWarning>
 			<head>
 				<meta charSet="UTF-8" />
 				{icon ? (
@@ -119,11 +120,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<meta name="theme-color" content={brandColours(branding.colour).brand} />
 				<meta name="apple-mobile-web-app-title" content={name} />
 				<title>{name}</title>
+				{/* Mail App 2.3: dark mode, set before the page draws so it never flashes white. */}
+				<script dangerouslySetInnerHTML={{ __html: APPEARANCE_SCRIPT }} />
 				{branding.colour && <style>{brandCss(branding)}</style>}
 				<Meta />
 				<Links />
 			</head>
-			<body className="bg-kumo-recessed text-kumo-default antialiased">
+			<body className="bg-kumo-base text-kumo-default antialiased">
 				{children}
 				<ScrollRestoration />
 				<Scripts />
@@ -146,6 +149,7 @@ export default function App() {
 	const [queryClient] = useState(getQueryClient);
 	useEffect(registerServiceWorker, []);
 	useEffect(watchForNewVersion, []);
+	useEffect(watchSystemAppearance, []);
 	return (
 		<QueryClientProvider client={queryClient}>
 			<LinkProvider component={KumoLink}>

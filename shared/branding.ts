@@ -4,7 +4,7 @@
 // (workers/lib/branding.ts). Nothing set means Mail App's own look. Wording in app/copy/branding.en-GB.json.
 
 export const DEFAULT_NAME = "Mail App";
-export const DEFAULT_COLOUR = "#c8102e";
+export const DEFAULT_COLOUR = "#2f5bd3";
 export const MAX_BRAND_NAME = 40;
 export const MAX_LOGO_BYTES = 200 * 1024;
 
@@ -22,7 +22,7 @@ export interface BrandLogo {
 export interface Branding {
 	/** Shown in place of "Mail App". Empty means Mail App. */
 	name: string;
-	/** "#rrggbb". Empty means Mail App's red. */
+	/** "#rrggbb". Empty means Mail App's blue. */
 	colour: string;
 	logo: BrandLogo | null;
 	/** Shown to everyone in the help links in place of Mail App's. Empty shows none to people who aren't admins. */
@@ -30,7 +30,7 @@ export interface Branding {
 }
 
 /** The ready-made colours on the Branding page. */
-export const COLOUR_PRESETS = ["#c8102e", "#0f766e", "#1d4ed8", "#7c3aed", "#be185d", "#c2410c", "#15803d", "#334155"];
+export const COLOUR_PRESETS = ["#2f5bd3", "#c8102e", "#0f766e", "#7c3aed", "#be185d", "#c2410c", "#15803d", "#334155"];
 
 const HEX = /^#[0-9a-f]{6}$/;
 const EMAIL = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;

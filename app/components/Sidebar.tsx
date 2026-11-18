@@ -41,6 +41,7 @@ import { useUIStore } from "~/hooks/useUIStore";
 import { useRemembered } from "~/hooks/useRemembered";
 import Logo, { HelpLinks, UpdateNotice } from "~/components/Logo";
 import SendingCard from "~/components/SendingCard";
+import { AppRow } from "~/components/AppSwitcher";
 import { LABEL_DRAG_TYPE, LabelDialog, LabelDot, isLabelDrag } from "~/components/Labels";
 import { useLabels, useReorderLabels } from "~/queries/labels";
 import { moveLabel } from "shared/labels";
@@ -107,17 +108,15 @@ function FolderLink({
 			onClick={onClick}
 			className={({ isActive: matched }) => {
 				const isActive = active ?? matched;
-				return `flex items-center gap-3 py-2 ${indent ? "pl-8 pr-3" : "px-3"} rounded-md text-sm transition-colors ${
-					isActive
-						? "bg-kumo-fill font-semibold text-kumo-default"
-						: "text-kumo-strong hover:bg-kumo-tint"
+				return `app-nav-link flex items-center gap-3 py-2 ${indent ? "pl-8 pr-3" : "px-3"} rounded-lg text-sm transition-colors ${
+					isActive ? "app-nav-active" : ""
 				}`;
 			}}
 		>
 			<span className="shrink-0">{icon}</span>
 			<span className="truncate flex-1">{label}</span>
 			{unreadCount != null && unreadCount > 0 && (
-				<Badge variant="secondary">{unreadCount}</Badge>
+				<span className="text-xs font-semibold tabular-nums">{unreadCount}</span>
 			)}
 		</NavLink>
 	);
@@ -433,7 +432,7 @@ export default function Sidebar({ onCollapse }: { onCollapse?: () => void }) {
 					variant="primary"
 					icon={<PencilSimpleIcon size={16} />}
 					onClick={() => startCompose()}
-					className="w-full"
+					className="w-full !h-10 !rounded-lg font-semibold shadow-sm"
 				>
 					Compose
 				</Button>
@@ -581,6 +580,7 @@ export default function Sidebar({ onCollapse }: { onCollapse?: () => void }) {
 			)}
 
 			<div className="px-4 py-3 border-t border-kumo-line">
+				<AppRow className="-mx-1 mb-3 border-b border-kumo-line pb-3" />
 				<UpdateNotice className="mb-3 text-xs" />
 				<SendingCard compact className="mb-3 text-xs" />
 				<a href="/" className="no-underline text-sm">

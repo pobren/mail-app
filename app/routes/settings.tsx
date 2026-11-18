@@ -22,6 +22,7 @@ import MaskedSettings from "~/components/MaskedSettings";
 import MailboxAccess from "~/components/MailboxAccess";
 import InboxRules from "~/components/InboxRules";
 import SpamLearningNote from "~/components/SpamLearningNote";
+import AppearanceSettings from "~/components/AppearanceSettings";
 import AutoEmptySettings from "~/components/AutoEmptySettings";
 import ForwardingSettings from "~/components/ForwardingSettings";
 import PersonalSignOff from "~/components/PersonalSignOff";
@@ -169,6 +170,8 @@ export default function SettingsRoute() {
 						<span className="text-xs text-kumo-subtle">{brand.signOutHint}</span>
 					</div>
 				</div>
+
+				<AppearanceSettings />
 
 				{/* Mail App: who can open this mailbox, and when an admin did */}
 				{mailboxId && <MailboxAccess mailboxId={mailboxId} />}
