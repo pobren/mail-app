@@ -19,7 +19,7 @@ The bridge only listens on your own computer (127.0.0.1), and talks to Mail App 
 
 1. **Make an API key.** In Mail App, open **Admin › API & webhooks › New API key**. Call it "Outlook bridge", tick **Read**, **Send**, **Organise** and **Delete**, and tick your mailbox. Copy the key; it's shown once.
    *Delete only lets the bridge empty mail that's already in the Bin or Spam, the same as emptying the Bin in Mail App.*
-2. **Install the bridge.** Download `Mail-App-Bridge-Setup.exe` from the [releases](https://github.com/pobren/mail-app/releases) and run it. It installs just for you, so it doesn't need an administrator. Its settings page opens in your browser.
+2. **Install the bridge.** Download `Mail-App-Bridge-Setup-<version>.exe` from the newest **Mail App Bridge** [release](https://github.com/pobren/mail-app/releases) and run it. It installs just for you, so it doesn't need an administrator. Its settings page opens in your browser.
 3. **Connect it.** On the settings page, enter your Mail App web address (such as `mail.yourdomain.co.uk`) and the API key, and choose **Save and connect**. Each mailbox the key can use appears under **Your mailboxes**; give it a minute to get your folders ready.
 4. **Add the account to Outlook.** In Outlook choose **File › Add account**, enter your mailbox's email address, open **Advanced options**, tick **Let me set up my account manually**, and choose **IMAP** (or **POP**). Use the settings shown on the bridge's settings page:
 
@@ -81,6 +81,6 @@ go test ./...
 go run ./cmd/mailapp-bridge --headless   # settings page at http://127.0.0.1:47825
 ```
 
-`test/imap_test.py` and `test/pop_smtp_test.py` check it end to end against a local Mail App (`npm run dev:local`). The Windows app and installer are built by `.github/workflows/bridge.yml`; a tag like `bridge-v0.1.0` puts them on a release.
+`test/imap_test.py` and `test/pop_smtp_test.py` check it end to end against a local Mail App (`npm run dev:local`). The Windows app and installer are built by `.github/workflows/bridge.yml`; a tag like `bridge-v0.1.0`, or running that workflow by hand on main, puts them on a release.
 
 The API calls the bridge uses (changes, index, raw, append) are in [docs/api.md](../docs/api.md#keeping-another-app-in-step).
