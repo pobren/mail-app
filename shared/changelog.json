@@ -2,6 +2,19 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.2",
+			"date": "2026-11-18",
+			"title": "Safer, Tidier Inbox",
+			"changes": [
+				"Sender Check: Each email now shows whether the sender was verified, and a note when it's the first email from that sender. Look-alike addresses, such as paypa1.com, get a clear warning.",
+				"Unsubscribe in One Click: Newsletters that support it now have Unsubscribe and Unsubscribe and block buttons at the top of the email.",
+				"Empty the Bin and Spam Automatically: Choose how many days emails stay in the Bin and Spam before they're deleted for good, in Settings, Spam and privacy. It's off until you pick a number.",
+				"Download All as ZIP: Emails with more than one attachment have a Download all link that saves them in one ZIP file.",
+				"Summarise: With the AI assistant switched on, press Summarise for a short summary of the whole conversation.",
+				"Quick Reply: Type a reply under the email and press Write reply. It opens in the full composer with your signature, ready to send."
+			]
+		},
+		{
 			"version": "2.1",
 			"date": "2026-11-08",
 			"title": "Add Domains in One Click",

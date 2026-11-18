@@ -22,6 +22,7 @@ import MaskedSettings from "~/components/MaskedSettings";
 import MailboxAccess from "~/components/MailboxAccess";
 import InboxRules from "~/components/InboxRules";
 import SpamLearningNote from "~/components/SpamLearningNote";
+import AutoEmptySettings from "~/components/AutoEmptySettings";
 import ForwardingSettings from "~/components/ForwardingSettings";
 import PersonalSignOff from "~/components/PersonalSignOff";
 import Passkeys from "~/components/Passkeys";
@@ -272,6 +273,7 @@ export default function SettingsRoute() {
 				{/* Mail App: blocked senders */}
 				{mailboxId && <BlockedSenders mailboxId={mailboxId} blocked={mailbox.settings?.blockedSenders ?? []} />}
 				{mailboxId && <SpamLearningNote mailboxId={mailboxId} />}
+				{mailboxId && <AutoEmptySettings mailboxId={mailboxId} />}
 				</>)}
 				{tab === "backup" && (<>
 				{/* Mail App: backup & export */}

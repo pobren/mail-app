@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Cloudflare, Inc.
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-// Modified for Mail App, 2026: "Block sender" and "Not spam"; sending a draft from here keeps its attachments and its pictures; labels; Archive and Print buttons; keyboard shortcuts; "Make a rule"; why a message is in Spam; Keep or Block a new masked address, and leak warnings; Snooze, "Remind me if no reply" and their notes; the scheduled send note.
+// Modified for Mail App, 2026: "Block sender" and "Not spam"; sending a draft from here keeps its attachments and its pictures; labels; Archive and Print buttons; keyboard shortcuts; "Make a rule"; why a message is in Spam; Keep or Block a new masked address, and leak warnings; Snooze, "Remind me if no reply" and their notes; the scheduled send note; Summarise and the quick reply box.
 
 import { useKumoToastManager } from "@cloudflare/kumo";
 import { useEffect, useMemo, useState } from "react";
@@ -21,6 +21,8 @@ import ThreadMessage from "~/components/email-panel/ThreadMessage";
 import { storedToOutgoing, withInlinePictures } from "~/lib/attachments";
 import { splitEmailList, toEmailListValue } from "~/lib/utils";
 import api from "~/services/api";
+import { AiSummary, QuickReply } from "~/components/email-panel/QuickTools";
+import { isAiEnabled } from "shared/ai";
 import { useDeleteEmail, useEmail, useMoveEmail, useReplyToEmail, useSendEmail, useThreadReplies, useUpdateConversations, useUpdateEmail } from "~/queries/emails";
 import { useFolders } from "~/queries/folders";
 import { useMailbox, useSpamAction } from "~/queries/mailboxes";
@@ -58,6 +60,7 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 		data?: Mailbox;
 	};
 	const { closePanel, startCompose } = useUIStore();
+	const aiOn = isAiEnabled(currentMailbox?.settings as { aiEnabled?: unknown } | undefined);
 	const toastManager = useKumoToastManager();
 	const navigate = useNavigate();
 	const { data: labels = [] } = useLabels(mailboxId);
@@ -278,6 +281,7 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 			{mailboxId && (folder ?? email.folder_id) === Folders.SCHEDULED && <ScheduledNote mailboxId={mailboxId} email={email} onDone={closePanel} />}
 			{isSpamFolder && <SpamReason messages={allMessages.length ? allMessages : [email]} />}
 			<MaskedNote mailboxId={mailboxId} messages={allMessages.length ? allMessages : [email]} />
+			{mailboxId && aiOn && !isDraftFolder && <AiSummary mailboxId={mailboxId} email={email} />}
 
 			<div className="flex-1 overflow-y-auto">
 				{hasThread ? (
@@ -314,6 +318,9 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 					/>
 				)}
 			</div>
+
+			{/* Mail App: the quick reply box. */}
+			{mailboxId && !isDraftFolder && lastReceivedMessage && lastReceivedMessage.sender !== currentMailbox?.email && <QuickReply email={lastReceivedMessage} />}
 
 			{snoozing && mailboxId && (
 				<SnoozeDialog mailboxId={mailboxId} ids={[email.id]} fromFolder={folder} onClose={() => setSnoozing(false)} onSnoozed={closePanel} />

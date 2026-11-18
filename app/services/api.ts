@@ -40,6 +40,7 @@ import type { CompanyDetails } from "shared/company";
 import type { Branding } from "shared/branding";
 import type { FindAnswer, ReportsAnswer } from "shared/reports";
 import type { SpamFilterSettings } from "shared/spam-ai";
+import type { AutoEmptySettings } from "shared/auto-empty";
 
 /** Mail App: Admin > Spam filter. */
 export interface SpamFilterAnswer { settings: SpamFilterSettings; checksToday: number }
@@ -586,6 +587,16 @@ const api = {
 	// Mail App: Admin > Spam filter, and what a mailbox has learnt from Spam and Not spam.
 	getSpamFilter: () => get<SpamFilterAnswer>("/api/v1/spam-filter"),
 	saveSpamFilter: (settings: SpamFilterSettings) => put<SpamFilterAnswer>("/api/v1/spam-filter", settings),
+	// Mail App: an AI summary of an email or conversation (only when AI is switched on).
+	summarise: (mailboxId: string, emailId: string) =>
+		post<{ summary: string }>(`/api/v1/mailboxes/${mailboxId}/emails/${emailId}/summary`, {}),
+	// Mail App: one-click unsubscribe (shared/unsubscribe.ts).
+	unsubscribe: (mailboxId: string, emailId: string, block: boolean) =>
+		post<{ status: "unsubscribed" | "manual"; url?: string | null; mailto?: { to: string; subject: string; body: string } | null; blocked: boolean }>(
+			`/api/v1/mailboxes/${mailboxId}/emails/${emailId}/unsubscribe`, { block }),
+	// Mail App: auto-empty the Bin and Spam (shared/auto-empty.ts).
+	getAutoEmpty: (mailboxId: string) => get<AutoEmptySettings>(`/api/v1/mailboxes/${mailboxId}/auto-empty`),
+	setAutoEmpty: (mailboxId: string, change: Partial<AutoEmptySettings>) => put<AutoEmptySettings>(`/api/v1/mailboxes/${mailboxId}/auto-empty`, change),
 	getSpamLearning: (mailboxId: string) => get<{ spam: number; ham: number }>(`/api/v1/mailboxes/${mailboxId}/spam/learning`),
 	markAllRead: (mailboxId: string, where: { folderId?: string; labelId?: string }) =>
 		post<void>(`/api/v1/mailboxes/${mailboxId}/mark-all-read`, where),

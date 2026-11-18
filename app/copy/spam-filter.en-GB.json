@@ -44,5 +44,15 @@
 	"trial": [
 		"Go to Settings → Forwarding, enable forwarding to your existing address and select \"Forward spam too\". Your previous inbox will continue receiving all incoming messages while you evaluate Mail App's spam filtering.",
 		"The Reports view details how many unwanted messages were filtered out, alongside false-positive reports marked via \"Not spam\"."
-	]
+	],
+	"autoEmpty": {
+		"title": "Empty the Bin and Spam automatically",
+		"intro": "Emails that have been in the Bin or Spam for longer than this are deleted for good, with their attachments, once a day. It keeps your storage down. The days count from when an email went there.",
+		"trash": "Bin",
+		"spam": "Spam",
+		"never": "Never",
+		"after": "After {n} days",
+		"saved": "Saved.",
+		"failed": "Couldn't save that. Please try again."
+	}
 }

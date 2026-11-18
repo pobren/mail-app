@@ -1,0 +1,11 @@
+{
+	"_note": "Mail App: Summarise and the quick reply box on an open email (app/components/email-panel/QuickTools.tsx).",
+	"summarise": "Summarise",
+	"summarising": "Summarising…",
+	"summaryTitle": "Summary",
+	"summaryNote": "Written by AI on your own Cloudflare account. Check the email for anything important.",
+	"summaryFailed": "Couldn't summarise this email. Please try again.",
+	"replyPlaceholder": "Reply to {name}…",
+	"replyOpen": "Write reply",
+	"replyLabel": "Quick reply"
+}
