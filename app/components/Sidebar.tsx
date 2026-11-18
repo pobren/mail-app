@@ -41,6 +41,7 @@ import { useUIStore } from "~/hooks/useUIStore";
 import { useRemembered } from "~/hooks/useRemembered";
 import Logo, { HelpLinks, UpdateNotice } from "~/components/Logo";
 import SendingCard from "~/components/SendingCard";
+import { AppRow } from "~/components/AppSwitcher";
 import { LABEL_DRAG_TYPE, LabelDialog, LabelDot, isLabelDrag } from "~/components/Labels";
 import { useLabels, useReorderLabels } from "~/queries/labels";
 import { moveLabel } from "shared/labels";
@@ -579,6 +580,7 @@ export default function Sidebar({ onCollapse }: { onCollapse?: () => void }) {
 			)}
 
 			<div className="px-4 py-3 border-t border-kumo-line">
+				<AppRow className="-mx-1 mb-3 border-b border-kumo-line pb-3" />
 				<UpdateNotice className="mb-3 text-xs" />
 				<SendingCard compact className="mb-3 text-xs" />
 				<a href="/" className="no-underline text-sm">
