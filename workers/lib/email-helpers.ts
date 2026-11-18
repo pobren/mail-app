@@ -14,6 +14,7 @@ import type { EmailFull } from "./schemas";
 import { Folders } from "../../shared/folders";
 import type { Env } from "../types";
 import { formatQuotedDate } from "../../shared/dates";
+import { removeHiddenBlocks, removeTags } from "../../shared/html-text";
 
 // ── DO Stub ────────────────────────────────────────────────────────
 
@@ -184,10 +185,7 @@ export function textToHtml(text: string): string {
  */
 export function stripHtmlToText(html: string): string {
 	if (!html) return "";
-	return html
-		.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-		.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-		.replace(/<[^>]+>/g, " ")
+	return removeTags(removeHiddenBlocks(html), " ")
 		.replace(/\s+/g, " ")
 		.trim();
 }

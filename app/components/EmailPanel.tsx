@@ -28,6 +28,7 @@ import { useUIStore } from "~/hooks/useUIStore";
 import { LabelChips, LabelMenu, useLabelDrop } from "~/components/Labels";
 import { useLabels, useSetEmailLabels } from "~/queries/labels";
 import type { Email, Folder, Mailbox } from "~/types";
+import { removeTags } from "shared/html-text";
 
 function EmailPanelSkeleton() {
 	return (
@@ -196,7 +197,7 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 				from,
 				subject: target.subject || "(no subject)",
 				html,
-				text: html ? html.replace(/<[^>]*>/g, "").trim() : "",
+				text: html ? removeTags(html).trim() : "",
 				...(outgoing.length ? { attachments: outgoing } : {}),
 			};
 			if (originalEmail) await replyMut.mutateAsync({ mailboxId, emailId: originalEmail.id, email: emailData }); else await sendEmailMut.mutateAsync({ mailboxId, email: emailData });

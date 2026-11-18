@@ -2,6 +2,8 @@
 // wraps it for an .mbox file, the format Gmail, Apple Mail and Thunderbird use to export and import mail.
 // Used by backups (workers/durableObject/backup.ts). No dependencies, so it runs in Workers and in tests.
 
+import { removeHiddenBlocks, removeTags } from "./html-text.ts";
+
 export interface StoredEmail {
 	id: string;
 	subject?: string | null;
@@ -143,12 +145,11 @@ export function emailDate(iso: string | null | undefined): string {
 
 /** A rough plain-text version of an HTML email, for mail apps that prefer text. */
 export function htmlToText(html: string): string {
-	return html
-		.replace(/<(style|script|head)[^>]*>[\s\S]*?<\/\1>/gi, "")
+	const lines = removeHiddenBlocks(html)
 		.replace(/<br\s*\/?>/gi, "\n")
 		.replace(/<\/(p|div|tr|h[1-6]|li|blockquote)>/gi, "\n")
-		.replace(/<li[^>]*>/gi, "• ")
-		.replace(/<[^>]+>/g, "")
+		.replace(/<li[^>]*>/gi, "• ");
+	return removeTags(lines)
 		.replace(/&nbsp;/g, " ")
 		.replace(/&lt;/g, "<")
 		.replace(/&gt;/g, ">")

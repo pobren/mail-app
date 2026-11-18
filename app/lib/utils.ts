@@ -11,6 +11,7 @@
  */
 import DOMPurify from "dompurify";
 import { formatQuotedDate } from "shared/dates";
+import { removeHiddenBlocks, removeTags, replaceUntilStable } from "shared/html-text";
 import type { Attachment } from "~/types";
 
 export {
@@ -62,8 +63,7 @@ export function htmlToPlainText(html: string): string {
 	// while preserving structural HTML for text extraction.
 	const sanitized = DOMPurify.sanitize(html);
 	const div = document.createElement("div");
-	div.innerHTML = sanitized
-		.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+	div.innerHTML = removeHiddenBlocks(sanitized)
 		.replace(/<br\s*\/?>/gi, "\n")
 		.replace(/<\/p>/gi, "\n\n")
 		.replace(/<p[^>]*>/gi, "")
@@ -76,7 +76,7 @@ export function htmlToPlainText(html: string): string {
  * Strip all HTML tags from a string.
  */
 export function stripHtml(html: string): string {
-	return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+	return removeTags(html).replace(/\s+/g, " ").trim();
 }
 
 function decodeHtmlEntities(text: string): string {
@@ -87,13 +87,14 @@ function decodeHtmlEntities(text: string): string {
 		.replace(/&#x([0-9a-f]+);/gi, (_match: string, hex: string) =>
 			String.fromCharCode(Number.parseInt(hex, 16)),
 		)
-		.replace(/&amp;/g, "&")
 		.replace(/&lt;/g, "<")
 		.replace(/&gt;/g, ">")
 		.replace(/&quot;/g, '"')
 		.replace(/&#39;/g, "'")
 		.replace(/&apos;/g, "'")
-		.replace(/&nbsp;/g, " ");
+		.replace(/&nbsp;/g, " ")
+		// Last, so "&amp;lt;" reads as the text "&lt;" and not as "<".
+		.replace(/&amp;/g, "&");
 }
 
 export function getSnippetText(
@@ -103,11 +104,15 @@ export function getSnippetText(
 	if (!snippet) return "";
 
 	const clean = decodeHtmlEntities(
-		snippet
-			.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-			.replace(/<style[^>]*>[\s\S]*/gi, "")
-			.replace(/<[^>]*>/g, " ")
-			.replace(/<[^>]*$/g, ""),
+		replaceUntilStable(
+			removeTags(
+				// A snippet can be cut off part way through a style block or a tag.
+				replaceUntilStable(removeHiddenBlocks(snippet), /<style[^>]*>[\s\S]*/gi, ""),
+				" ",
+			),
+			/<[^>]*$/g,
+			"",
+		),
 	)
 		.replace(/\s+/g, " ")
 		.trim();
