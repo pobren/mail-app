@@ -11,7 +11,7 @@
  */
 import DOMPurify from "dompurify";
 import { formatQuotedDate } from "shared/dates";
-import { removeHiddenBlocks, removeTags } from "shared/html-text";
+import { removeHiddenBlocks, removeTags, replaceUntilStable } from "shared/html-text";
 import type { Attachment } from "~/types";
 
 export {
@@ -104,12 +104,15 @@ export function getSnippetText(
 	if (!snippet) return "";
 
 	const clean = decodeHtmlEntities(
-		removeTags(
-			removeHiddenBlocks(snippet)
+		replaceUntilStable(
+			removeTags(
 				// A snippet can be cut off part way through a style block or a tag.
-				.replace(/<style[^>]*>[\s\S]*/gi, ""),
-			" ",
-		).replace(/<[^>]*$/g, ""),
+				replaceUntilStable(removeHiddenBlocks(snippet), /<style[^>]*>[\s\S]*/gi, ""),
+				" ",
+			),
+			/<[^>]*$/g,
+			"",
+		),
 	)
 		.replace(/\s+/g, " ")
 		.trim();
