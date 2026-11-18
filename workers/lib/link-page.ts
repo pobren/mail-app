@@ -108,13 +108,13 @@ main{max-width:30rem;margin:10vh auto;padding:0 16px}
 h1{font-size:1.35rem;margin:14px 0 6px}p{color:#4d6066;margin:8px 0}
 label{display:block;font-weight:600;margin:16px 0 6px}
 input{box-sizing:border-box;width:100%;font:inherit;padding:10px 12px;border:1px solid #b9c4c6;border-radius:8px}
-button{margin-top:16px;font:inherit;font-weight:600;color:#fff;background:#c8102e;border:0;border-radius:8px;padding:10px 18px;cursor:pointer}
+button{margin-top:16px;font:inherit;font-weight:600;color:#fff;background:#2f5bd3;border:0;border-radius:8px;padding:10px 18px;cursor:pointer}
 button:disabled{opacity:.6;cursor:default}
 #message{color:#a00d26;font-weight:500}#progress{min-height:1.5em;font-size:.9rem}
 small{display:block;margin-top:20px;color:#7f9095;font-size:.8rem}
 @media (prefers-color-scheme:dark){body{background:#0f1c1f;color:#e6eef0}.card{background:#16272b;border-color:#26393e}p{color:#a9bcc1}input{background:#0f1c1f;color:#e6eef0;border-color:#3a5156}#message{color:#ff8a9a}small{color:#7f9599}}`;
 
-const LOGO = `<svg width="34" height="34" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="5" width="28" height="20" rx="4" fill="#c8102e"/><path d="M5 10l10 7 10-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const LOGO = `<svg width="34" height="34" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="5" width="28" height="20" rx="4" fill="#2f5bd3"/><path d="M5 10l10 7 10-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 export function linkPage(available: string | null): string {
 	return `<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer">

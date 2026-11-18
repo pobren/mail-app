@@ -2,6 +2,17 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.3",
+			"date": "2026-11-18",
+			"title": "A Clean New Look",
+			"changes": [
+				"Clean New Look: Mail App has a calmer, cleaner design in a new blue, with the Inter typeface, fewer lines and more room to read.",
+				"Easier to Scan Inbox: Each email shows the sender's initials, the subject and a line of the email. Unread emails stand out in bold with a blue time.",
+				"Dark Mode: Mail App follows your computer or phone's light or dark setting. Choose Light or Dark yourself in Settings, Account, Appearance. Plain emails go dark too; newsletters keep their own colours.",
+				"Simpler Search: The search box is cleaner, with the magnifier inside. Press Enter to search."
+			]
+		},
+		{
 			"version": "2.2",
 			"date": "2026-11-18",
 			"title": "Safer, Tidier Inbox",

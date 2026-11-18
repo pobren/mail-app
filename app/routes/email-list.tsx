@@ -63,6 +63,7 @@ import { LabelChips, LabelDot, LabelDropZone, LabelMenu } from "~/components/Lab
 import type { Label } from "shared/labels";
 import { useLabels } from "~/queries/labels";
 import { useMailbox, useMailboxes, useSpamAction } from "~/queries/mailboxes";
+import ContactAvatar from "~/components/ContactAvatar";
 import { mailboxLabel } from "~/components/Sidebar";
 import labelCopy from "~/copy/labels.en-GB.json";
 import settingsCopy from "~/copy/settings.en-GB.json";
@@ -269,6 +270,7 @@ export default function EmailListRoute() {
 	// Mail App: with more than one mailbox to open, the heading says whose this is ("Inbox · Acme Sales").
 	const { data: allMailboxes = [] } = useMailboxes();
 	const { data: thisMailbox } = useMailbox(mailboxId);
+	const photos = !!thisMailbox?.settings?.showPhotos;
 	const whose = allMailboxes.filter((m) => m.canOpen !== false).length > 1 && thisMailbox ? mailboxLabel(thisMailbox) : null;
 
 	const folderName = useMemo(() => {
@@ -668,7 +670,7 @@ export default function EmailListRoute() {
 				{isRefreshing && emails.length === 0 ? (
 					<EmailListSkeleton />
 				) : emails.length > 0 ? (
-						<div>
+						<div className={pickedCount > 0 ? "app-list-selecting" : ""}>
 							{emails.map((email) => {
 								const isSelected = selectedEmailId === email.id;
 								const isPicked = picked.has(email.id);
@@ -691,53 +693,31 @@ export default function EmailListRoute() {
 												handleRowClick(email);
 											}
 										}}
-										className={`group flex items-center gap-3 w-full text-left cursor-pointer transition-colors [-webkit-touch-callout:none] pointer-coarse:select-none ${menu?.email.id === email.id ? "bg-kumo-tint" : ""} border-b border-kumo-line px-4 py-2.5 md:px-6 md:py-3 ${
-											isPanelOpen ? "md:px-4 md:py-2.5" : ""
-										} ${isSelected || isPicked ? "bg-kumo-tint" : "hover:bg-kumo-tint"} ${drop.over ? "bg-kumo-tint outline-2 -outline-offset-2 outline-dashed outline-kumo-brand" : ""}`}
+										className={`app-row group relative flex items-start gap-3 w-full text-left cursor-pointer transition-colors [-webkit-touch-callout:none] pointer-coarse:select-none border-b px-4 py-3 md:px-5 ${
+											isSelected || isPicked || menu?.email.id === email.id ? "app-row-selected" : ""
+										} ${drop.over ? "outline-2 -outline-offset-2 outline-dashed outline-kumo-brand" : ""}`}
 									>
-										{/* Mail App: tick box */}
-										<input
-											type="checkbox"
-											checked={isPicked}
-											onClick={(e) => e.stopPropagation()}
-											onKeyDown={(e) => e.stopPropagation()}
-											onChange={() => togglePick(email.id)}
-											aria-label={`Select: ${email.subject || "(no subject)"}`}
-											className="size-4 shrink-0 cursor-pointer accent-kumo-brand"
-										/>
-
-										{/* Unread dot */}
-										<div className="w-2.5 shrink-0 flex justify-center">
-											{hasUnread(email) && (
-												<div className="h-2 w-2 rounded-full bg-kumo-brand" />
-											)}
+										{/* Mail App 2.3: the sender's initials; a tick box takes their place on hover or while picking */}
+										<div className="relative size-9 shrink-0">
+											<ContactAvatar email={email.sender} name={email.sender_name || ""} photos={photos} size={36} />
+											<span className={`app-row-check absolute inset-0 flex items-center justify-center rounded-full bg-kumo-base ${isPicked ? "!opacity-100" : ""}`}>
+												<input
+													type="checkbox"
+													checked={isPicked}
+													onClick={(e) => e.stopPropagation()}
+													onKeyDown={(e) => e.stopPropagation()}
+													onChange={() => togglePick(email.id)}
+													aria-label={`Select: ${email.subject || "(no subject)"}`}
+													className="size-4 cursor-pointer accent-kumo-brand"
+												/>
+											</span>
 										</div>
-
-										{/* Star */}
-										<button
-											type="button"
-											className="shrink-0 p-0.5 bg-transparent border-0 cursor-pointer"
-											onClick={(e) => {
-												e.stopPropagation();
-												toggleStar(e, email);
-											}}
-										>
-											<StarIcon
-												size={16}
-												weight={email.starred ? "fill" : "regular"}
-												className={
-													email.starred
-														? "text-kumo-warning"
-														: "text-kumo-subtle hover:text-kumo-warning"
-												}
-											/>
-										</button>
 
 										{/* Content */}
 										<div className="min-w-0 flex-1">
 											<div className="flex items-center gap-2">
 												<span
-													className={`truncate text-sm ${hasUnread(email) ? "font-semibold text-kumo-default" : "text-kumo-strong"}`}
+													className={`truncate text-sm ${hasUnread(email) ? "font-bold text-kumo-default" : "font-medium text-kumo-default"}`}
 												>
 													{formatParticipants(email)}
 												</span>
@@ -781,30 +761,40 @@ export default function EmailListRoute() {
 														</span>
 													</Tooltip>
 												)}
-												<span className="text-sm text-kumo-subtle shrink-0 ml-auto">
+												<span className={`text-xs shrink-0 ml-auto tabular-nums ${hasUnread(email) ? "app-row-time-unread" : "text-kumo-subtle"}`}>
 													{formatListDate(email.shown_at || email.date)}
 												</span>
+												{/* Star: always shown when starred, otherwise on hover */}
+												<button
+													type="button"
+													aria-label={email.starred ? "Unstar" : "Star"}
+													className={`shrink-0 -my-1 p-0.5 bg-transparent border-0 cursor-pointer ${email.starred ? "" : "md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"}`}
+													onClick={(e) => {
+														e.stopPropagation();
+														toggleStar(e, email);
+													}}
+												>
+													<StarIcon
+														size={15}
+														weight={email.starred ? "fill" : "regular"}
+														className={email.starred ? "text-kumo-warning" : "text-kumo-subtle hover:text-kumo-warning"}
+													/>
+												</button>
 											</div>
 											<div className="flex items-center gap-1 min-w-0 text-sm mt-0.5">
 												{/* Mail App: label chips before the subject, leaving out the label whose page this is */}
 												<RowLabels email={email} labels={labels} hideId={labelId} />
-												<div className="truncate min-w-0">
-													<span
-														className={hasUnread(email) ? "font-medium text-kumo-default" : "text-kumo-subtle"}
-													>
-														{email.subject}
-													</span>
-												{snippet && (
-													<span className="text-kumo-subtle font-normal">
-														{" "}&mdash; {snippet}
-													</span>
-												)}
+												<div className={`truncate min-w-0 ${hasUnread(email) ? "font-semibold text-kumo-default" : "text-kumo-default"}`}>
+													{email.subject || "(no subject)"}
 												</div>
 										</div>
+										{snippet && (
+											<div className="truncate text-[13px] text-kumo-subtle mt-0.5">{snippet}</div>
+										)}
 									</div>
 
 										{/* Hover actions */}
-										<div className="hidden group-hover:flex has-[[aria-expanded=true]]:flex items-center shrink-0">
+										<div className="absolute right-3 bottom-2 hidden group-hover:flex has-[[aria-expanded=true]]:flex items-center rounded-lg border border-kumo-line bg-kumo-base shadow-sm">
 											{mailboxId && <LabelMenu mailboxId={mailboxId} email={email} compact align="right" />}
 											<Tooltip content={email.read ? "Mark unread" : "Mark read"} asChild>
 												<Button

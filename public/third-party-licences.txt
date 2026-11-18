@@ -11,6 +11,8 @@ Mail App is independent and is not made, endorsed or supported by Cloudflare.
 
 Mail App also uses open-source packages under the MIT, ISC, BSD and Apache 2.0 licences.
 Their notices are kept in the code Mail App is built from.
+The Inter typeface (https://github.com/rsms/inter), Copyright 2016 The Inter Project Authors, is used
+under the SIL Open Font License, version 1.1 (https://openfontlicense.org).
 
 
                                  Apache License

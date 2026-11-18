@@ -107,17 +107,15 @@ function FolderLink({
 			onClick={onClick}
 			className={({ isActive: matched }) => {
 				const isActive = active ?? matched;
-				return `flex items-center gap-3 py-2 ${indent ? "pl-8 pr-3" : "px-3"} rounded-md text-sm transition-colors ${
-					isActive
-						? "bg-kumo-fill font-semibold text-kumo-default"
-						: "text-kumo-strong hover:bg-kumo-tint"
+				return `app-nav-link flex items-center gap-3 py-2 ${indent ? "pl-8 pr-3" : "px-3"} rounded-lg text-sm transition-colors ${
+					isActive ? "app-nav-active" : ""
 				}`;
 			}}
 		>
 			<span className="shrink-0">{icon}</span>
 			<span className="truncate flex-1">{label}</span>
 			{unreadCount != null && unreadCount > 0 && (
-				<Badge variant="secondary">{unreadCount}</Badge>
+				<span className="text-xs font-semibold tabular-nums">{unreadCount}</span>
 			)}
 		</NavLink>
 	);
@@ -433,7 +431,7 @@ export default function Sidebar({ onCollapse }: { onCollapse?: () => void }) {
 					variant="primary"
 					icon={<PencilSimpleIcon size={16} />}
 					onClick={() => startCompose()}
-					className="w-full"
+					className="w-full !h-10 !rounded-lg font-semibold shadow-sm"
 				>
 					Compose
 				</Button>

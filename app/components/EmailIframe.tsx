@@ -8,6 +8,8 @@ import { ShieldCheckIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { classifyImage, isRemoteImage } from "shared/trackers";
 import copy from "~/copy/trackers.en-GB.json";
+import { useIsDark } from "~/lib/appearance";
+import { setsOwnColours } from "shared/email-colours";
 
 /**
  * Mail App: take web pictures out of the email before it's shown. Trackers are removed; every other
@@ -113,6 +115,7 @@ interface EmailIframeProps {
  *   iframe as a defense-in-depth layer.
  */
 export default function EmailIframe({ body, autoSize }: EmailIframeProps) {
+	const isDark = useIsDark();
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const [height, setHeight] = useState(autoSize ? 100 : 0);
 	const [trackers, setTrackers] = useState<string[]>([]);
@@ -151,6 +154,11 @@ export default function EmailIframe({ body, autoSize }: EmailIframeProps) {
 		setTrackers(stripped.trackers);
 
 		const padding = autoSize ? "0" : "24px";
+		// Mail App 2.3: in dark mode, plain emails go dark too; designed ones keep their own look.
+		const dark = isDark && !setsOwnColours(stripped.html);
+		const c = dark
+			? { bg: "#15161a", text: "#ecedef", link: "#9db4f2", quote: "#a3a7b1", rule: "#3a3c44", pre: "#22242a", scheme: "dark" }
+			: { bg: "#ffffff", text: "#1a1a1a", link: "#2f5bd3", quote: "#6b7280", rule: "#d1d5db", pre: "#f3f4f6", scheme: "light" };
 
 		// Height-reporting script: sends body.scrollHeight to the parent.
 		// Runs inside the opaque-origin sandbox so it has zero access to
@@ -184,15 +192,15 @@ export default function EmailIframe({ body, autoSize }: EmailIframeProps) {
 <style>
 * { box-sizing: border-box; }
 html {
-	background: #ffffff;
-	color-scheme: light;
+	background: ${c.bg};
+	color-scheme: ${c.scheme};
 }
 body {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	font-size: 14px;
 	line-height: 1.6;
-	color: #1a1a1a;
-	background: #ffffff;
+	color: ${c.text};
+	background: ${c.bg};
 	padding: ${padding};
 	margin: 0;
 	word-wrap: break-word;
@@ -202,16 +210,16 @@ body {
 [style*="position: fixed"], [style*="position:fixed"], [style*="position: absolute"], [style*="position:absolute"] {
 	position: relative !important;
 }
-a { color: #2563eb; }
+a { color: ${c.link}; }
 img { max-width: 100%; height: auto; }
 blockquote {
-	border-left: 3px solid #d1d5db;
+	border-left: 3px solid ${c.rule};
 	padding-left: 1em;
 	margin-left: 0;
-	color: #6b7280;
+	color: ${c.quote};
 }
 pre {
-	background: #f3f4f6;
+	background: ${c.pre};
 	padding: 12px;
 	border-radius: 6px;
 	overflow-x: auto;
@@ -226,7 +234,7 @@ ul, ol { padding-left: 20px; margin: 4px 0; }
 </head>
 <body>${stripped.html}${heightScript}</body>
 </html>`;
-	}, [body, autoSize]);
+	}, [body, autoSize, isDark]);
 
 	// Mail App: once the email is showing, fetch its pictures privately and hand them in.
 	const handleLoad = useCallback(() => {

@@ -8,7 +8,7 @@ test("branding is cleaned, and Mail App's own name and red count as not set", ()
 	assert.equal(b.colour, "#0f766e");
 	assert.equal(b.supportEmail, "it@smithjones.co.uk");
 	assert.equal(b.logo, null);
-	assert.deepEqual(cleanBranding({ name: "Mail App", colour: "#C8102E", supportEmail: "not an address" }), { name: "", colour: "", logo: null, supportEmail: "" });
+	assert.deepEqual(cleanBranding({ name: "Mail App", colour: "#2F5BD3", supportEmail: "not an address" }), { name: "", colour: "", logo: null, supportEmail: "" });
 	assert.equal(cleanColour("#abc"), "#aabbcc");
 	assert.equal(cleanColour("red"), "");
 });
@@ -27,7 +27,7 @@ test("light colours are darkened until white writing is easy to read", () => {
 	const teal = brandColours("#0f766e");
 	assert.equal(teal.brand, "#0f766e");
 	assert.equal(teal.darkened, false);
-	assert.equal(brandColours("").brand, "#c8102e");
+	assert.equal(brandColours("").brand, "#2f5bd3");
 });
 
 test("logos are recognised by their contents, not their name", () => {
