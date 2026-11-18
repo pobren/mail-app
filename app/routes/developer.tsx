@@ -28,7 +28,7 @@ export function meta({ matches }: { matches: readonly unknown[] }) {
 
 const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-const SCOPE_TONE: Record<Scope, Tone> = { read: "blue", send: "violet", organise: "amber" };
+const SCOPE_TONE: Record<Scope, Tone> = { read: "blue", send: "violet", organise: "amber", delete: "red" };
 const KEY_COLUMNS = "md:grid-cols-[minmax(0,1.6fr)_minmax(0,1.3fr)_minmax(0,1.4fr)_9rem_3rem]";
 const HOOK_COLUMNS = "md:grid-cols-[minmax(0,1.8fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_7rem_3rem]";
 

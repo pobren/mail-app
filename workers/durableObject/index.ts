@@ -12,6 +12,7 @@ import { Folders } from "../../shared/folders";
 import type { Env } from "../types";
 import { applyMigrations, mailboxMigrations } from "./migrations";
 import { AutoEmpty } from "./auto-empty";
+import { Sync } from "./sync";
 import { sendLimitError } from "../lib/send-limit";
 import { buildContacts, cleanSenderName, displayName, type SavedContactRow } from "../../shared/contacts";
 import { MAX_LABELS, type Label, type LabelColor } from "../../shared/labels";
@@ -179,6 +180,8 @@ export class MailboxDO extends DurableObject<Env> {
 	spamLearning: SpamLearning;
 	/** Mail App: auto-empty the Bin and Spam (see auto-empty.ts). */
 	autoEmpty: AutoEmpty;
+	/** Mail App: the change log for apps that keep in step, such as the Outlook bridge (see sync.ts). */
+	sync: Sync;
 
 	constructor(state: DurableObjectState, env: Env) {
 		super(state, env);
@@ -194,6 +197,27 @@ export class MailboxDO extends DurableObject<Env> {
 		this.scheduled = new ScheduledSends(this.ctx, env, this.stats);
 		this.spamLearning = new SpamLearning(this.ctx);
 		this.autoEmpty = new AutoEmpty(this.ctx, env);
+		this.sync = new Sync(this.ctx, env);
+	}
+
+	// ── Mail App: keeping other apps in step (the Outlook bridge) ───────
+
+	async syncCursor() { return this.sync.cursor(); }
+	async syncChanges(since: number, limit?: number) { return this.sync.changes(since, limit); }
+	async syncIndex(folder: string, offset?: number, limit?: number) { return this.sync.index(folder, offset, limit); }
+	async sweepRaw() { return this.sync.sweepRaw(); }
+	/** Adds one email to a folder as it is (the bridge's IMAP APPEND), threaded with any it replies to. */
+	async appendEmail(folderId: string, email: EmailData, attachments: AttachmentData[]): Promise<string | null> {
+		if (![...this.ctx.storage.sql.exec(`SELECT 1 FROM folders WHERE id = ?1`, folderId)].length) return null;
+		let refs: string[] = [];
+		try { refs = JSON.parse(email.email_references || "[]"); } catch { /* none */ }
+		const known = await this.findThreadByMessageIds([email.in_reply_to, ...refs].filter((x): x is string => !!x));
+		await this.createEmail(folderId, { ...email, thread_id: known ?? email.thread_id }, attachments);
+		return email.id;
+	}
+	async emailFolder(id: string): Promise<string | null> {
+		const row = [...this.ctx.storage.sql.exec(`SELECT folder_id FROM emails WHERE id = ?1`, id)][0];
+		return row ? String(row.folder_id) : null;
 	}
 
 	// ── Mail App: auto-empty the Bin and Spam ────────────────────────────

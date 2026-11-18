@@ -73,7 +73,7 @@ export async function admitApiRequest(req: Request, env: Env, ctx: ExecutionCont
 
 	const route = routeFor(req.method, path);
 	if (!route) return apiError(404, `The API doesn't have that request. See ${API_DOCS} for the list.`);
-	if (!record.scopes.includes(route.scope)) return apiError(403, `This key can't ${route.scope === "read" ? "read mail" : route.scope === "send" ? "send mail" : "move or label mail"}. An admin can make a new key that can.`);
+	if (!record.scopes.includes(route.scope)) return apiError(403, `This key can't ${route.scope === "read" ? "read mail" : route.scope === "send" ? "send mail" : route.scope === "delete" ? "delete mail" : "move or label mail"}. An admin can make a new key that can.`);
 	const mailbox = mailboxIn(path);
 	if (mailbox && !record.mailboxes.includes(mailbox)) return apiError(404, "Not found");
 
@@ -85,6 +85,8 @@ export async function admitApiRequest(req: Request, env: Env, ctx: ExecutionCont
 	}
 
 	const inner = new URL(`/api/v1${path}${url.search}`, url.origin);
+	// Deleting through the API only works on mail in the Bin or Spam (see the delete route in workers/index.ts).
+	if (route.scope === "delete") inner.searchParams.set("bin_only", "1");
 	const headers = new Headers(req.headers);
 	headers.delete("authorization");
 	headers.delete("x-api-key");

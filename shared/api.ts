@@ -7,6 +7,9 @@
 // without a valid key. A key only reaches the mailboxes it was made for, and only does what its
 // permissions allow. Keys are stored as a SHA-256 hash, so a key can only be seen once, when it's made.
 //
+// The Delete permission is off unless ticked: it lets a key delete email for good, but only email that's
+// already in the Bin or Spam, the same as emptying the Bin.
+//
 // Webhooks: when an email arrives in (or is sent from) a mailbox, Mail App POSTs a JSON event to each
 // matching webhook's address, signed with that webhook's secret:
 //   Mail-App-Signature: t=<unix seconds>,v1=<hex HMAC-SHA256 of "<t>.<body>">
@@ -16,8 +19,8 @@
 /** Where the API answers. */
 export const API_PREFIX = "/api/ext/v1";
 
-export type Scope = "read" | "send" | "organise";
-export const SCOPES: Scope[] = ["read", "send", "organise"];
+export type Scope = "read" | "send" | "organise" | "delete";
+export const SCOPES: Scope[] = ["read", "send", "organise", "delete"];
 
 export type WebhookEvent = "email.received" | "email.sent";
 export const WEBHOOK_EVENTS: WebhookEvent[] = ["email.received", "email.sent"];
@@ -172,6 +175,15 @@ const ROUTES: { method: string; pattern: RegExp; scope: Scope }[] = [
 	{ method: "PUT", pattern: /^\/mailboxes\/[^/]+\/emails\/[^/]+$/, scope: "organise" },
 	{ method: "POST", pattern: /^\/mailboxes\/[^/]+\/emails\/[^/]+\/move$/, scope: "organise" },
 	{ method: "PUT", pattern: /^\/mailboxes\/[^/]+\/emails\/[^/]+\/labels$/, scope: "organise" },
+	// Keeping another app in step, such as the Outlook bridge (workers/routes/sync.ts).
+	{ method: "GET", pattern: /^\/mailboxes\/[^/]+\/changes$/, scope: "read" },
+	{ method: "GET", pattern: /^\/mailboxes\/[^/]+\/index$/, scope: "read" },
+	{ method: "GET", pattern: /^\/mailboxes\/[^/]+\/emails\/[^/]+\/raw$/, scope: "read" },
+	{ method: "POST", pattern: /^\/mailboxes\/[^/]+\/append$/, scope: "organise" },
+	{ method: "POST", pattern: /^\/mailboxes\/[^/]+\/folders$/, scope: "organise" },
+	{ method: "PUT", pattern: /^\/mailboxes\/[^/]+\/folders\/[^/]+$/, scope: "organise" },
+	// Deleting for good: only from the Bin or Spam (the API adds bin_only=1, see workers/lib/api.ts).
+	{ method: "DELETE", pattern: /^\/mailboxes\/[^/]+\/emails\/[^/]+$/, scope: "delete" },
 ];
 
 /**

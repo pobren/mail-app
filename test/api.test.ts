@@ -35,8 +35,17 @@ test("the API answers only its own list of requests, each needing one permission
 	assert.deepEqual(routeFor("POST", "/mailboxes/a@b.com/emails/1/reply"), { scope: "send" });
 	assert.deepEqual(routeFor("POST", "/mailboxes/a@b.com/emails/1/move"), { scope: "organise" });
 	assert.deepEqual(routeFor("PUT", "/mailboxes/a@b.com/emails/1/labels"), { scope: "organise" });
-	// Not in the API: deleting, settings, people, admin routes.
-	assert.equal(routeFor("DELETE", "/mailboxes/a@b.com/emails/1"), null);
+	// Keeping an app in step (the Outlook bridge).
+	assert.deepEqual(routeFor("GET", "/mailboxes/a@b.com/changes"), { scope: "read" });
+	assert.deepEqual(routeFor("GET", "/mailboxes/a@b.com/index"), { scope: "read" });
+	assert.deepEqual(routeFor("GET", "/mailboxes/a@b.com/emails/1/raw"), { scope: "read" });
+	assert.deepEqual(routeFor("POST", "/mailboxes/a@b.com/append"), { scope: "organise" });
+	assert.deepEqual(routeFor("POST", "/mailboxes/a@b.com/folders"), { scope: "organise" });
+	assert.deepEqual(routeFor("PUT", "/mailboxes/a@b.com/folders/x"), { scope: "organise" });
+	// Deleting an email for good needs its own permission (and only works from the Bin or Spam).
+	assert.deepEqual(routeFor("DELETE", "/mailboxes/a@b.com/emails/1"), { scope: "delete" });
+	// Not in the API: deleting folders, settings, people, admin routes.
+	assert.equal(routeFor("DELETE", "/mailboxes/a@b.com/folders/x"), null);
 	assert.equal(routeFor("PUT", "/mailboxes/a@b.com"), null);
 	assert.equal(routeFor("GET", "/people"), null);
 	assert.equal(routeFor("GET", "/developer"), null);

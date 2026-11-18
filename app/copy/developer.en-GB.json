@@ -33,12 +33,14 @@
 	"scopes": {
 		"read": "Read",
 		"send": "Send",
-		"organise": "Organise"
+		"organise": "Organise",
+		"delete": "Delete"
 	},
 	"scopeHelp": {
 		"read": "List, read and search email, and download attachments",
 		"send": "Send new emails, replies and forwards",
-		"organise": "Mark as read, star, move to a folder and label"
+		"organise": "Mark as read, star, move to a folder, label, add folders and add email (for the Outlook bridge)",
+		"delete": "Delete email for good, only once it's in the Bin or Spam (for the Outlook bridge)"
 	},
 	"webhooks": {
 		"title": "Webhooks",
