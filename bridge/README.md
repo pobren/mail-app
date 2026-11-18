@@ -13,7 +13,7 @@ The bridge only listens on your own computer (127.0.0.1), and talks to Mail App 
 ## What you need
 
 - Windows 10 or 11, and classic Outlook.
-- A Mail App release that includes the bridge's API calls (the next release after 2.3), with the API switched on (see [The API and download links](../README.md#the-api-and-download-links)).
+- A Mail App release that includes the bridge's API calls (2.4 or newer), with the API switched on (see [The API and download links](../README.md#the-api-and-download-links)).
 
 ## Set it up
 
