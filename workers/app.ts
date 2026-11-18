@@ -179,8 +179,8 @@ function noAccess(path: string, email: string, reason: "not-invited" | "suspende
 	}
 	const safe = email.replace(/[<>&"]/g, "");
 	const html = `<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mail App: no access</title>
-<style>body{margin:0;font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;background:#eef1f1;color:#12262b}main{max-width:34rem;margin:12vh auto;padding:0 20px}h1{font-size:1.5rem;margin:16px 0 8px}p{color:#4d6066}a{color:#c8102e;font-weight:600}</style></head>
-<body><main><svg width="34" height="34" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="5" width="28" height="20" rx="4" fill="#c8102e"/><path d="M5 10l10 7 10-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<style>body{margin:0;font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;background:#eef1f1;color:#12262b}main{max-width:34rem;margin:12vh auto;padding:0 20px}h1{font-size:1.5rem;margin:16px 0 8px}p{color:#4d6066}a{color:#2f5bd3;font-weight:600}</style></head>
+<body><main><svg width="34" height="34" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="5" width="28" height="20" rx="4" fill="#2f5bd3"/><path d="M5 10l10 7 10-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <h1>${reason === "suspended" ? "Your access is paused" : "No access yet"}</h1>
 <p>${text}</p>
 <p>You're signed in as ${safe}. <a href="/cdn-cgi/access/logout">Sign out</a> to try a different address.</p></main></body></html>`;
@@ -197,8 +197,8 @@ function signInProblem(path: string, reason: string): Response {
 		return new Response(reason, { status: 403, headers: { "content-type": "text/plain; charset=utf-8" } });
 	}
 	const html = `<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mail App: please sign in</title>
-<style>body{margin:0;font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;background:#eef1f1;color:#12262b}main{max-width:34rem;margin:12vh auto;padding:0 20px}h1{font-size:1.5rem;margin:16px 0 8px}p{color:#4d6066}a{color:#c8102e;font-weight:600}code{font-size:.8rem;color:#7f9095}</style></head>
-<body><main><svg width="34" height="34" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="5" width="28" height="20" rx="4" fill="#c8102e"/><path d="M5 10l10 7 10-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<style>body{margin:0;font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;background:#eef1f1;color:#12262b}main{max-width:34rem;margin:12vh auto;padding:0 20px}h1{font-size:1.5rem;margin:16px 0 8px}p{color:#4d6066}a{color:#2f5bd3;font-weight:600}code{font-size:.8rem;color:#7f9095}</style></head>
+<body><main><svg width="34" height="34" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="5" width="28" height="20" rx="4" fill="#2f5bd3"/><path d="M5 10l10 7 10-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <h1>Sign-in isn't ready yet</h1>
 <p>Mail App only opens after Cloudflare has checked it's you. If you've just installed it or changed its web address, Cloudflare can take a minute or two to switch sign-in on.</p>
 <p>Please wait a moment, then <a href="/">try again</a>. If it keeps happening, check the Cloudflare Access steps in the <a href="https://github.com/pobren/mail-app#cloudflare-access">README</a>.</p>

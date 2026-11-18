@@ -102,7 +102,8 @@ export default function MailboxRoute() {
 
 	return (
 		<div className="flex h-screen overflow-hidden">
-			<AppStrip />
+			{/* Mail App 2.3: in Mail the switcher sits at the foot of the sidebar instead (AppRow) */}
+			{(!isMail || collapsed) && <AppStrip />}
 			{/* Mobile sidebar overlay backdrop */}
 			{isMail && isSidebarOpen && (
 				<div

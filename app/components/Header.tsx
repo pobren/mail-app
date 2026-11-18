@@ -80,10 +80,19 @@ export default function Header() {
 				}`}
 			>
 				<div className="flex-1 relative flex items-center">
+					{/* Mail App 2.3: a filled, rounded search field with the magnifier inside. Enter searches. */}
+					<button
+						type="button"
+						onClick={performSearch}
+						aria-label="Search"
+						className="absolute left-2.5 top-1/2 z-[1] -translate-y-1/2 border-0 bg-transparent p-0.5 text-kumo-subtle hover:text-kumo-default cursor-pointer"
+					>
+						<MagnifyingGlassIcon size={17} />
+					</button>
 					<Input
-						className="w-full"
+						className="w-full !h-10 !pl-9 !pr-8 !rounded-[10px] !bg-[var(--app-field)] !ring-transparent focus:!bg-kumo-base focus:!ring-kumo-brand"
 						aria-label="Search emails"
-						placeholder="Search emails... (try from:name, label:Bills, is:unread)"
+						placeholder="Search mail (try from:name, label:Bills, is:unread)"
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 						onKeyDown={handleKeyDown}
@@ -99,15 +108,6 @@ export default function Header() {
 						</button>
 					)}
 				</div>
-				<Tooltip content="Search" side="bottom" asChild>
-					<Button
-						variant="ghost"
-						shape="square"
-						icon={<MagnifyingGlassIcon size={20} />}
-						onClick={performSearch}
-						aria-label="Search"
-					/>
-				</Tooltip>
 			</div>
 
 			{/* Search toggle button - mobile only, hidden when search is expanded */}
