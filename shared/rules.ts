@@ -1,6 +1,6 @@
 // Mail App addition (not part of upstream Agentic Inbox).
 // Inbox rules: "when a message arrives that matches these, move it to a folder, label it, mark it
-// read or star it". Kept in the mailbox's settings file in R2 and run on each new message after the
+// read or star it", or "bounce it back to the sender". Kept in the mailbox's settings file in R2 and run on each new message after the
 // spam check. Matching is plain "contains", ignoring capitals, so people don't need to learn patterns.
 
 import { removeHiddenBlocks, removeTags } from "./html-text.ts";
@@ -21,7 +21,16 @@ export interface RuleActions {
 	labels?: string[];
 	markRead?: boolean;
 	star?: boolean;
+	/**
+	 * Turn the email away as it arrives, so it is never stored. Cloudflare refuses it during delivery,
+	 * so it's the sending server that tells the sender, and nothing goes out from this install (a
+	 * bounce sent afterwards could land on whoever a spammer forged). A bounce rule does nothing else.
+	 */
+	bounce?: boolean;
 }
+
+/** What the sender's server is told when a rule bounces their email. */
+export const RULE_BOUNCE = "This message was not accepted by the recipient.";
 
 export interface InboxRule {
 	id: string;
@@ -56,6 +65,8 @@ export interface RuleOutcome {
 	labels: string[];
 	markRead: boolean;
 	star: boolean;
+	/** A matching rule bounces it. Then nothing else happens to it. */
+	bounce: boolean;
 	/** Ids of the rules that matched, in order. */
 	matched: string[];
 }
@@ -103,13 +114,14 @@ export function ruleMatches(rule: InboxRule, m: RuleMessage, text?: string): boo
  * When more than one rule moves the message, the first one wins.
  */
 export function applyRules(rules: InboxRule[] | undefined, m: RuleMessage): RuleOutcome {
-	const out: RuleOutcome = { labels: [], markRead: false, star: false, matched: [] };
+	const out: RuleOutcome = { labels: [], markRead: false, star: false, bounce: false, matched: [] };
 	if (!rules?.length) return out;
 	const text = rules.some((r) => r.enabled && r.conditions.some((c) => c.field === "body")) ? bodyText(m.body) : undefined;
 	for (const rule of rules) {
 		if (!ruleMatches(rule, m, text)) continue;
 		out.matched.push(rule.id);
 		const a = rule.actions;
+		if (a.bounce) out.bounce = true;
 		if (a.folder && !out.folder) out.folder = a.folder;
 		for (const l of a.labels ?? []) if (!out.labels.includes(l)) out.labels.push(l);
 		if (a.markRead) out.markRead = true;
@@ -119,7 +131,7 @@ export function applyRules(rules: InboxRule[] | undefined, m: RuleMessage): Rule
 }
 
 export function hasAnyAction(a: RuleActions): boolean {
-	return !!a.folder || (a.labels?.length ?? 0) > 0 || !!a.markRead || !!a.star;
+	return !!a.bounce || !!a.folder || (a.labels?.length ?? 0) > 0 || !!a.markRead || !!a.star;
 }
 
 /**
@@ -144,12 +156,14 @@ export function cleanRules(input: unknown): InboxRule[] {
 			if (value) conditions.push({ field, value });
 		}
 		const a = (r.actions && typeof r.actions === "object" ? r.actions : {}) as Record<string, unknown>;
-		const actions: RuleActions = {};
+		let actions: RuleActions = {};
 		if (typeof a.folder === "string" && a.folder.trim() && a.folder.length <= 100) actions.folder = a.folder.trim();
 		const labels = Array.isArray(a.labels) ? [...new Set(a.labels.filter((l): l is string => typeof l === "string" && l.length > 0 && l.length <= 100))].slice(0, 20) : [];
 		if (labels.length) actions.labels = labels;
 		if (a.markRead === true) actions.markRead = true;
 		if (a.star === true) actions.star = true;
+		// Bouncing means the email never arrives, so it can't be filed or labelled as well.
+		if (a.bounce === true) actions = { bounce: true };
 		if (conditions.length === 0 || !hasAnyAction(actions)) continue;
 		const name = typeof r.name === "string" ? r.name.trim().slice(0, MAX_RULE_NAME) : "";
 		seen.add(id);
