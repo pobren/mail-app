@@ -1,5 +1,6 @@
 # The Outlook bridge (bridge/): checks it, builds the Windows app and its installer on every change, and
-# keeps the installer as a download on the run. A tag like bridge-v0.1.0 also puts it on a GitHub release.
+# keeps the installer as a download on the run. A tag like bridge-v0.1.0, or running it by hand on main, also
+# puts it on a GitHub release (by hand, the version comes from bridge/VERSION).
 name: Outlook bridge
 
 on:
@@ -77,12 +78,15 @@ jobs:
           retention-days: 30
 
   release:
-    if: startsWith(github.ref, 'refs/tags/bridge-v')
+    if: startsWith(github.ref, 'refs/tags/bridge-v') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     needs: windows
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: bridge/VERSION
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -91,7 +95,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          v="${GITHUB_REF_NAME#bridge-v}"
-          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "Mail App Bridge $v" \
+          if [[ "$GITHUB_REF" == refs/tags/bridge-v* ]]; then v="${GITHUB_REF_NAME#bridge-v}"; else v=$(cat bridge/VERSION); fi
+          gh release create "bridge-v$v" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Mail App Bridge $v" \
             --notes "Lets classic Outlook on Windows use Mail App over IMAP, POP3 and SMTP. Download Mail-App-Bridge-Setup-$v.exe and run it. Setup guide: https://github.com/pobren/mail-app/blob/main/bridge/README.md" \
             dist/Mail-App-Bridge-Setup-*.exe
