@@ -154,6 +154,7 @@ function RuleEditor({ rule, folders, labels, saving, onCancel, onSave }: {
 	const [picked, setPicked] = useState<string[]>(rule.actions.labels ?? []);
 	const [markRead, setMarkRead] = useState(!!rule.actions.markRead);
 	const [star, setStar] = useState(!!rule.actions.star);
+	const [bounce, setBounce] = useState(!!rule.actions.bounce);
 	const [applyNow, setApplyNow] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -164,12 +165,12 @@ function RuleEditor({ rule, folders, labels, saving, onCancel, onSave }: {
 		e.preventDefault();
 		const next = cleanRules([{
 			id: rule.id, name, enabled: rule.enabled, match, conditions,
-			actions: { folder: moveOn ? folder : undefined, labels: picked.filter((id) => labels.some((l) => l.id === id)), markRead, star },
+			actions: bounce ? { bounce: true } : { folder: moveOn ? folder : undefined, labels: picked.filter((id) => labels.some((l) => l.id === id)), markRead, star },
 		}])[0];
 		if (!conditions.some((c) => c.field === "attachment" || c.value?.trim())) { setError(copy.needCondition); return; }
 		if (!next) { setError(copy.needAction); return; }
 		setError(null);
-		onSave(next, applyNow);
+		onSave(next, applyNow && !bounce);
 	};
 
 	return (
@@ -225,6 +226,14 @@ function RuleEditor({ rule, folders, labels, saving, onCancel, onSave }: {
 			<div>
 				<div className="mb-2 text-sm font-medium text-kumo-default">{copy.then}</div>
 				<div className="space-y-2.5 text-sm text-kumo-default">
+					<div>
+						<label className="flex items-center gap-2">
+							<input type="checkbox" checked={bounce} onChange={(e) => setBounce(e.target.checked)} className="size-4 accent-kumo-brand" />
+							{copy.bounce}
+						</label>
+						{bounce && <p className="mt-1 ml-6 text-xs text-kumo-subtle">{copy.bounceNote}</p>}
+					</div>
+					{!bounce && (<>
 					<div className="flex flex-wrap items-center gap-2">
 						<label className="flex items-center gap-2">
 							<input type="checkbox" checked={moveOn} onChange={(e) => setMoveOn(e.target.checked)} className="size-4 accent-kumo-brand" />
@@ -267,13 +276,16 @@ function RuleEditor({ rule, folders, labels, saving, onCancel, onSave }: {
 						<input type="checkbox" checked={star} onChange={(e) => setStar(e.target.checked)} className="size-4 accent-kumo-brand" />
 						{copy.star}
 					</label>
+					</>)}
 				</div>
 			</div>
 
-			<label className="flex items-center gap-2 border-t border-kumo-line pt-3 text-sm text-kumo-default">
-				<input type="checkbox" checked={applyNow} onChange={(e) => setApplyNow(e.target.checked)} className="size-4 accent-kumo-brand" />
-				{copy.applyExisting}
-			</label>
+			{!bounce && (
+				<label className="flex items-center gap-2 border-t border-kumo-line pt-3 text-sm text-kumo-default">
+					<input type="checkbox" checked={applyNow} onChange={(e) => setApplyNow(e.target.checked)} className="size-4 accent-kumo-brand" />
+					{copy.applyExisting}
+				</label>
+			)}
 
 			{error && <Text variant="error" size="sm">{error}</Text>}
 			<div className="flex justify-end gap-2">
@@ -291,6 +303,7 @@ function summary(rule: InboxRule, folders: Folder[] | undefined, labels: Label[]
 		.map((c) => (c.field === "attachment" ? copy.fields.attachment : `${copy.fields[c.field]} ${copy.contains} "${c.value}"`))
 		.join(join);
 	const does: string[] = [];
+	if (rule.actions.bounce) does.push(copy.summaryBounce);
 	if (rule.actions.folder) {
 		const f = folders?.find((x) => x.id === rule.actions.folder);
 		does.push(copy.summaryMove.replace("{folder}", f?.name ?? copy.deletedFolder));

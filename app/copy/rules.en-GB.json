@@ -1,7 +1,7 @@
 {
 	"title": "Inbox rules",
 	"find": "Find a rule",
-	"intro": "Automatically organise incoming messages as they arrive. For example, route emails from your bank directly to a specific folder, or apply an \"Invoice\" label to matching subject lines. Rules run sequentially from top to bottom and never apply to messages filtered as spam.",
+	"intro": "Automatically organise incoming messages as they arrive. For example, route emails from your bank directly to a specific folder, or apply an \"Invoice\" label to matching subject lines. Rules run sequentially from top to bottom and never apply to messages filtered as spam, except a rule that bounces, which turns matching mail away before it arrives.",
 	"noneTitle": "No rules configured",
 	"none": "Create your first rule to automatically filter, label or sort incoming mail.",
 	"new": "Create rule",
@@ -34,6 +34,8 @@
 	"addCondition": "Add another condition",
 	"removeCondition": "Remove this condition",
 	"then": "Then",
+	"bounce": "Bounce it back to the sender",
+	"bounceNote": "The email is turned away as it arrives, so it never reaches this mailbox. The sender's own mail server tells them it wasn't delivered, and nothing is sent from your address. Mail that's already here isn't affected.",
 	"moveTo": "Move it to",
 	"chooseFolder": "Choose a folder",
 	"addLabels": "Add labels",
@@ -57,6 +59,7 @@
 	"summaryLabel": "label {labels}",
 	"summaryRead": "mark as read",
 	"summaryStar": "star",
+	"summaryBounce": "bounce back to the sender",
 	"quietNote": "Emails automatically moved out of the inbox or marked as read by a rule will not trigger new-mail notifications.",
 	"makeRule": "Make a rule for mail like this"
 }
