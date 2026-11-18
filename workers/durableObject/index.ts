@@ -1047,6 +1047,8 @@ export class MailboxDO extends DurableObject<Env> {
 	 * Looks at the newest 5,000 messages. Returns how many conversations it changed.
 	 */
 	async applyRuleToInbox(rule: InboxRule): Promise<number> {
+		// A bounce rule only works as mail arrives: what's already here has been delivered.
+		if (rule.actions.bounce) return 0;
 		const sql = this.ctx.storage.sql;
 		const folderId = rule.actions.folder;
 		if (folderId && ![...sql.exec(`SELECT id FROM folders WHERE id = ?1`, folderId)].length) return 0;

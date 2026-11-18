@@ -57,7 +57,7 @@ import { learntFinding, tokensFor } from "shared/spam-learning";
 import { cleanSpamFilterSettings, spamAiPoints } from "shared/spam-ai";
 import { aiChecksToday, aiSpamCheck, loadSpamFilter, saveSpamFilter } from "./lib/spam-ai";
 import { domainAgeDays } from "./lib/domain-age";
-import { applyRules, cleanRules, type InboxRule } from "shared/rules";
+import { RULE_BOUNCE, applyRules, cleanRules, type InboxRule } from "shared/rules";
 import { cleanForwarding, forwardingProblem, shouldForward, FORWARDED_HEADER } from "shared/forwarding";
 import { forwardEmail, loadForwardingStatus } from "./lib/forwarding";
 import { importMessages } from "./lib/import";
@@ -1393,7 +1393,22 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 	if ("reject" in route) { event.setReject?.(route.reject); return; }
 	const delivery = route;
 	const mailboxId = delivery.mailbox;
-	const settingsForMasked = delivery.masked ? await spamSettingsFor(env.BUCKET, mailboxId) : null;
+	const spamSettings = await spamSettingsFor(env.BUCKET, mailboxId);
+	const sender = (parsedEmail.from?.address || "").toLowerCase();
+	// Mail App: an inbox rule that bounces. Checked before anything is stored, and refused during delivery,
+	// so the sending server tells the sender and nothing is sent from here (no backscatter to forged senders).
+	const bounceRules = cleanRules((spamSettings as { rules?: InboxRule[] } | null)?.rules).filter((r) => r.actions.bounce);
+	if (bounceRules.length && event.setReject && applyRules(bounceRules, {
+		sender, senderName: parsedEmail.from?.name || null,
+		recipients: [...allRecipients, ...ccRecipients, delivery.deliveredTo],
+		subject: parsedEmail.subject || "", body: parsedEmail.html || parsedEmail.text || "",
+		hasAttachment: (parsedEmail.attachments || []).some((a) => (a.disposition || "attachment") !== "inline"),
+	}).bounce) {
+		console.log(`Bounced an email to ${delivery.deliveredTo}: it matched an inbox rule.`);
+		event.setReject(RULE_BOUNCE);
+		return;
+	}
+	const settingsForMasked = delivery.masked ? spamSettings : null;
 	const maskedLeak = delivery.masked ? await noteMaskedMail(env.BUCKET, masked, { ...delivery.masked, mailbox: mailboxId },
 		parsedEmail.from?.address || "", !!(settingsForMasked as { maskedKeepNew?: boolean } | null)?.maskedKeepNew) : null;
 	// Remember which address it came in on, so a reply can come from the same one. Any copy of the
@@ -1448,8 +1463,6 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 
 	// Mail App: blocked senders, and mail whose DMARC check failed at Cloudflare, go to Spam. The reason is kept
 	// in our own header so the message can say why it's there.
-	const sender = (parsedEmail.from?.address || "").toLowerCase();
-	const spamSettings = await spamSettingsFor(env.BUCKET, mailboxId);
 	const listed = spamReason(sender, parsedEmail.headers, spamSettings);
 	let isSpam = listed !== null;
 	let reasons: { check: StoredReason; detail?: string }[] = listed ? [{ check: listed }] : [];
@@ -1493,7 +1506,7 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 	if (reasons.length) headers.push({ key: SPAM_REASON_HEADER, value: reasonHeaderValue(reasons) });
 
 	// Mail App: inbox rules, top first, on mail that isn't spam. A rule can move it, label it, mark it read or star it.
-	const rules = isSpam ? { labels: [], markRead: false, star: false, matched: [] } : applyRules(
+	const rules = isSpam ? { labels: [], markRead: false, star: false, bounce: false, matched: [] } : applyRules(
 		cleanRules((spamSettings as { rules?: InboxRule[] } | null)?.rules),
 		{
 			sender, senderName: parsedEmail.from?.name || null,
