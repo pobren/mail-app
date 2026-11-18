@@ -47,7 +47,7 @@ test("labels add up and the first folder wins", () => {
 	assert.equal(out.star, true);
 	assert.equal(out.markRead, false);
 	assert.deepEqual(out.matched, ["a", "b"]);
-	assert.deepEqual(applyRules(undefined, mail), { labels: [], markRead: false, star: false, matched: [] });
+	assert.deepEqual(applyRules(undefined, mail), { labels: [], markRead: false, star: false, bounce: false, matched: [] });
 });
 
 test("cleanRules tidies what's stored and drops rules that can't do anything", () => {
@@ -66,4 +66,16 @@ test("cleanRules tidies what's stored and drops rules that can't do anything", (
 
 test("bodyText", () => {
 	assert.equal(bodyText("<div>a&amp;b</div>\n\n<p>c</p>").trim(), "a&b c");
+});
+
+test("a bounce rule bounces and does nothing else", () => {
+	const [clean] = cleanRules([{ id: "b1", conditions: [{ field: "from", value: "mybank" }], actions: { bounce: true, folder: "f1", labels: ["l1"], markRead: true, star: true } }]);
+	assert.deepEqual(clean.actions, { bounce: true });
+	const out = applyRules([clean], mail);
+	assert.equal(out.bounce, true);
+	assert.deepEqual(out.matched, ["b1"]);
+	assert.equal(applyRules([clean], { ...mail, sender: "someone@else.com", senderName: null }).bounce, false);
+	assert.equal(applyRules([{ ...clean, enabled: false }], mail).bounce, false, "a rule that's off doesn't bounce");
+	assert.equal(applyRules([rule({ conditions: [{ field: "from", value: "mybank" }] })], mail).bounce, false);
+	assert.equal(cleanRules([{ conditions: [{ field: "from", value: "x" }], actions: { bounce: "yes" } }]).length, 0, "only true counts");
 });
