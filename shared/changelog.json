@@ -2,6 +2,16 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.4",
+			"date": "2026-11-18",
+			"title": "Use Mail App in Outlook",
+			"changes": [
+				"Outlook Bridge: Use your mailbox in classic Outlook on Windows, alongside Mail App in your browser. Install Mail App Bridge, choose IMAP or POP3, and read status, flags, folders, moves and deletes stay in step both ways. The setup guide is on GitHub.",
+				"Original Emails Kept: Mail App now keeps each new email exactly as it arrived, so the API and the bridge can give apps the whole original.",
+				"Delete Permission for API Keys: A new Delete tick lets an app empty mail that's already in the Bin or Spam. It's off unless you tick it."
+			]
+		},
+		{
 			"version": "2.3",
 			"date": "2026-11-18",
 			"title": "A Clean New Look",

@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Cloudflare, Inc.
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-// Modified for Mail App, 2026: added the /api/v1/setup/status route; new mail only goes to the AI agent when AI is switched on; new mailboxes get a welcome email; /api/v1/update says when a newer Mail App release is out; spam filtering and a block list; attachments; download links for big files; out-of-office replies; contacts; incoming mail goes by its real delivery address; private picture fetching; labels; replies join the conversation they answer; contact import; extra addresses (aliases), a catch-all and sending from either; team access (people only see their own mailboxes; admins manage people, mailboxes and addresses); /api/v1/sending tells admins whether the install can send to anyone; inbox rules; automatic spam checks; the calendar; masked email (an address for each website, sent back once it's off or has ended). The API and webhooks: events when mail arrives or is sent, and Admin > API & webhooks. Admin > Backups. Calendar invites: answers to ours are noted, changes to ones we accepted are taken in. Files (private storage); Notes; a deleted mailbox's files go with it. Passkeys in Settings. Snooze, "Remind me if no reply" and the company details footer. Calendar sharing. Scheduled send. Admin > Branding and Reports (and the daily tally Reports reads, and Find an email). A stronger spam filter: SpamAssassin's rules, learning from Spam and Not spam, and an optional AI check (Admin > Spam filter).
+// Modified for Mail App, 2026: added the /api/v1/setup/status route; new mail only goes to the AI agent when AI is switched on; new mailboxes get a welcome email; /api/v1/update says when a newer Mail App release is out; spam filtering and a block list; attachments; download links for big files; out-of-office replies; contacts; incoming mail goes by its real delivery address; private picture fetching; labels; replies join the conversation they answer; contact import; extra addresses (aliases), a catch-all and sending from either; team access (people only see their own mailboxes; admins manage people, mailboxes and addresses); /api/v1/sending tells admins whether the install can send to anyone; inbox rules; automatic spam checks; the calendar; masked email (an address for each website, sent back once it's off or has ended). The API and webhooks: events when mail arrives or is sent, and Admin > API & webhooks. Admin > Backups. Calendar invites: answers to ours are noted, changes to ones we accepted are taken in. Files (private storage); Notes; a deleted mailbox's files go with it. Passkeys in Settings. Snooze, "Remind me if no reply" and the company details footer. Calendar sharing. Scheduled send. Admin > Branding and Reports (and the daily tally Reports reads, and Find an email). A stronger spam filter: SpamAssassin's rules, learning from Spam and Not spam, and an optional AI check (Admin > Spam filter). The original of each incoming email is kept (raw/ in R2) and the sync routes for the Outlook bridge (routes/sync.ts).
 
 import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
@@ -28,6 +28,8 @@ import { calendar as calendarRoutes } from "./routes/calendar";
 import { calendarShares, forgetCalendarShares } from "./routes/calendar-shares";
 import { deleteMailboxFiles, files as fileRoutes } from "./routes/files";
 import { notes as noteRoutes } from "./routes/notes";
+import { sync as syncRoutes } from "./routes/sync";
+import { rawKey } from "./durableObject/sync";
 import { createMailbox } from "./lib/new-mailbox";
 import { MAX_PEOPLE, canOpen, findPerson, isAdmin, isShared, openable, setMailboxPeople, usersOf, withPerson } from "shared/people";
 import { setupStatus } from "./lib/setup-checks";
@@ -618,6 +620,8 @@ app.route("/", calendarShares);
 app.route("/", fileRoutes);
 // Mail App: Notes.
 app.route("/", noteRoutes);
+// Mail App: keeping other apps in step, for the Outlook bridge (see routes/sync.ts).
+app.route("/", syncRoutes);
 // Mail App: scheduled send.
 app.route("/", scheduledRoutes);
 // Mail App: Admin > API & webhooks.
@@ -769,6 +773,12 @@ app.put("/api/v1/mailboxes/:mailboxId/emails/:id", async (c: AppContext) => {
 
 app.delete("/api/v1/mailboxes/:mailboxId/emails/:id", async (c: AppContext) => {
 	const id = c.req.param("id")!;
+	// Mail App: through the API (the Outlook bridge), only mail already in the Bin or Spam can be deleted for good.
+	if (c.req.query("bin_only") === "1") {
+		const folder = await (c.var.mailboxStub as any).emailFolder(id);
+		if (folder === null) return c.json({ error: "Not found" }, 404);
+		if (folder !== Folders.TRASH && folder !== Folders.SPAM) return c.json({ error: "Only email in the Bin or Spam can be deleted. Move it to the Bin first." }, 409);
+	}
 	const attachments = await c.var.mailboxStub.deleteEmail(id);
 	if (attachments === null) return c.json({ error: "Not found" }, 404);
 	if (attachments.length > 0) await c.env.BUCKET.delete(attachments.map((att: any) => `attachments/${id}/${att.id}/${att.filename}`));
@@ -1532,6 +1542,11 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 
 	// Mail a rule files away, or marks as read, doesn't buzz your phone.
 	const quiet = isSpam || folder !== Folders.INBOX || markRead;
+
+	// Mail App: keep the original as it arrived, for the API's raw download and the Outlook bridge. Removed
+	// again when the email is deleted (see durableObject/sync.ts).
+	await env.BUCKET.put(rawKey(messageId), rawEmail, { httpMetadata: { contentType: "message/rfc822" } });
+	ctx.waitUntil((stub as any).sweepRaw().catch(() => 0));
 
 	await stub.createEmail(folder, {
 		id: messageId, subject: parsedEmail.subject || "",

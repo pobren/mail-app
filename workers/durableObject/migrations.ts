@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Cloudflare, Inc.
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-// Modified for Mail App, 2026: contacts and labels tables; backups; the calendar; snooze and reminders; calendars from other websites; the daily tally for Admin > Reports; learning from Spam and Not spam; when mail arrived in the Bin or Spam.
+// Modified for Mail App, 2026: contacts and labels tables; backups; the calendar; snooze and reminders; calendars from other websites; the daily tally for Admin > Reports; learning from Spam and Not spam; when mail arrived in the Bin or Spam; the change log for apps that keep in step (the Outlook bridge).
 
 export interface Migration {
 	name: string;
@@ -528,6 +528,44 @@ export const mailboxMigrations: Migration[] = [
             CREATE TRIGGER IF NOT EXISTS bin_since_delete AFTER DELETE ON emails
             BEGIN
                 DELETE FROM bin_since WHERE email_id = OLD.id;
+            END;
+        `,
+	},
+	{
+		// Mail App: keeping other apps in step (see sync.ts), for the Outlook bridge. Every email that's added,
+		// moved, marked read or unread, starred or deleted gets a new change number; each email keeps only its
+		// newest. Deleted emails are also noted in raw_gone, so their original copy in R2 can be removed.
+		name: "28_add_email_changes",
+		sql: `
+            CREATE TABLE IF NOT EXISTS email_changes (
+                seq INTEGER PRIMARY KEY AUTOINCREMENT,
+                email_id TEXT NOT NULL,
+                at INTEGER NOT NULL
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_email_changes_email ON email_changes(email_id);
+            CREATE TABLE IF NOT EXISTS sync_meta (
+                key TEXT PRIMARY KEY,
+                value INTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS raw_gone (
+                email_id TEXT PRIMARY KEY
+            );
+            CREATE TRIGGER IF NOT EXISTS email_changes_insert AFTER INSERT ON emails
+            BEGIN
+                DELETE FROM email_changes WHERE email_id = NEW.id;
+                INSERT INTO email_changes (email_id, at) VALUES (NEW.id, CAST(strftime('%s','now') AS INTEGER) * 1000);
+            END;
+            CREATE TRIGGER IF NOT EXISTS email_changes_update AFTER UPDATE OF folder_id, read, starred ON emails
+                WHEN NEW.folder_id IS NOT OLD.folder_id OR NEW.read IS NOT OLD.read OR NEW.starred IS NOT OLD.starred
+            BEGIN
+                DELETE FROM email_changes WHERE email_id = NEW.id;
+                INSERT INTO email_changes (email_id, at) VALUES (NEW.id, CAST(strftime('%s','now') AS INTEGER) * 1000);
+            END;
+            CREATE TRIGGER IF NOT EXISTS email_changes_delete AFTER DELETE ON emails
+            BEGIN
+                DELETE FROM email_changes WHERE email_id = OLD.id;
+                INSERT INTO email_changes (email_id, at) VALUES (OLD.id, CAST(strftime('%s','now') AS INTEGER) * 1000);
+                INSERT OR IGNORE INTO raw_gone (email_id) VALUES (OLD.id);
             END;
         `,
 	},

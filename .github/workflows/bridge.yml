@@ -1,0 +1,97 @@
+# The Outlook bridge (bridge/): checks it, builds the Windows app and its installer on every change, and
+# keeps the installer as a download on the run. A tag like bridge-v0.1.0 also puts it on a GitHub release.
+name: Outlook bridge
+
+on:
+  push:
+    branches: [main]
+    paths: ["bridge/**", ".github/workflows/bridge.yml"]
+    tags: ["bridge-v*"]
+  pull_request:
+    paths: ["bridge/**", ".github/workflows/bridge.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: bridge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: bridge/go.mod
+          cache-dependency-path: bridge/go.sum
+      - run: go vet ./...
+      - run: GOOS=windows go vet ./...
+      - run: go test ./...
+
+  windows:
+    needs: check
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: bridge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: bridge/go.mod
+          cache-dependency-path: bridge/go.sum
+      - name: Version
+        id: v
+        run: |
+          v=$(cat VERSION)
+          if [[ "$GITHUB_REF" == refs/tags/bridge-v* ]]; then v="${GITHUB_REF_NAME#bridge-v}"; fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - name: Icon and version details for the app
+        working-directory: bridge/cmd/mailapp-bridge
+        run: |
+          go install github.com/tc-hib/go-winres@v0.3.3
+          go-winres simply --icon assets/icon.png --manifest gui --product-name "Mail App Bridge" \
+            --file-description "Mail App Bridge" --product-version "${{ steps.v.outputs.version }}" \
+            --file-version "${{ steps.v.outputs.version }}" --copyright "Paul O'Brien" --original-filename "Mail App Bridge.exe"
+      - name: Build
+        run: |
+          mkdir -p dist
+          go build -trimpath -ldflags "-s -w -H windowsgui -X github.com/pobren/mail-app/bridge/internal/bridge.Version=${{ steps.v.outputs.version }}" -o "dist/Mail App Bridge.exe" ./cmd/mailapp-bridge
+      - name: Installer
+        shell: pwsh
+        working-directory: bridge/installer
+        run: |
+          if (-not (Get-Command iscc -ErrorAction SilentlyContinue)) { choco install innosetup -y --no-progress | Out-Null; $env:Path += ";C:\Program Files (x86)\Inno Setup 6" }
+          iscc /DAppVersion=${{ steps.v.outputs.version }} "/DSourceExe=..\dist\Mail App Bridge.exe" mailapp-bridge.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mail-App-Bridge-${{ steps.v.outputs.version }}
+          path: |
+            bridge/dist/Mail-App-Bridge-Setup-*.exe
+            bridge/dist/Mail App Bridge.exe
+          retention-days: 30
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/bridge-v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${GITHUB_REF_NAME#bridge-v}"
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "Mail App Bridge $v" \
+            --notes "Lets classic Outlook on Windows use Mail App over IMAP, POP3 and SMTP. Download Mail-App-Bridge-Setup-$v.exe and run it. Setup guide: https://github.com/pobren/mail-app/blob/main/bridge/README.md" \
+            dist/Mail-App-Bridge-Setup-*.exe

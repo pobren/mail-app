@@ -34,9 +34,10 @@ Make a separate key for each app, so you can delete one without stopping the oth
 | --- | --- |
 | **Read** | List mailboxes, list, read and search email, read whole conversations, see folders and labels, and download attachments. |
 | **Send** | Send new emails, replies and forwards from the key's mailboxes (and their extra addresses). |
-| **Organise** | Mark email as read or unread, star it, move it to a folder, and add or remove labels. |
+| **Organise** | Mark email as read or unread, star it, move it to a folder, add or remove labels, add or rename folders, and add an email file to a folder. |
+| **Delete** | Delete email for good, but only email that's already in the Bin or Spam (the same as emptying the Bin). Off unless you tick it. |
 
-The API never deletes email, changes settings, or manages people, mailboxes or domains. Those stay in the app, behind sign-in.
+The API only deletes email that's already in the Bin or Spam, and only with a key that has the Delete permission. It never changes settings, or manages people, mailboxes or domains. Those stay in the app, behind sign-in.
 
 ## Every request
 
@@ -58,6 +59,13 @@ Write mailbox addresses in the path with `@` as `%40`, for example `/mailboxes/s
 | `PUT /mailboxes/{mailbox}/emails/{id}` | Organise | Marks as read or starred: `{"read": true, "starred": false}`. |
 | `POST /mailboxes/{mailbox}/emails/{id}/move` | Organise | Moves to a folder: `{"folderId": "archive"}`. |
 | `PUT /mailboxes/{mailbox}/emails/{id}/labels` | Organise | Adds and removes labels on the whole conversation: `{"add": ["label-id"], "remove": []}`. |
+| `GET /mailboxes/{mailbox}/emails/{id}/raw` | Read | The email as a standard email file (`message/rfc822`). See below. |
+| `GET /mailboxes/{mailbox}/changes?since=N` | Read | What changed since change number `N`. See below. |
+| `GET /mailboxes/{mailbox}/index?folder=inbox` | Read | Every email in a folder, oldest first, with `read`, `starred`, `date` and `message_id`, plus the `cursor` to carry on from. Up to 5,000 a page: add `&offset=5000` for the next. |
+| `POST /mailboxes/{mailbox}/append?folder=draft` | Organise | Adds an email file (the request body, `message/rfc822`, up to 25 MB) to a folder as it is. Add `&read=0` to leave it unread or `&starred=1` to star it. Answers `{"id": "…"}`. |
+| `POST /mailboxes/{mailbox}/folders` | Organise | Adds a folder: `{"name": "Clients"}`. |
+| `PUT /mailboxes/{mailbox}/folders/{id}` | Organise | Renames a folder: `{"name": "Customers"}`. |
+| `DELETE /mailboxes/{mailbox}/emails/{id}` | Delete | Deletes an email for good. Only for email in the Bin or Spam; anything else answers `409`. |
 
 ## Examples
 
@@ -115,6 +123,28 @@ const res = await fetch(`${MAIL_API_URL}/mailboxes/${encodeURIComponent("sales@y
 if (!res.ok) throw new Error((await res.json()).error);
 const { emails } = await res.json();
 ```
+
+## Keeping another app in step
+
+These are what the [Outlook bridge](../bridge/README.md) uses, and they suit any app that keeps its own copy of a mailbox, such as an IMAP bridge or a backup tool.
+
+**The original email.** `GET .../emails/{id}/raw` answers the email exactly as it arrived, as a standard email file (RFC 5322 with its MIME parts). Mail App keeps the original of every email that arrives from the release that added this. Older mail, and mail sent from Mail App, is rebuilt from what's stored; the `Mail-App-Original` header says `yes` or `no`.
+
+**What changed.** Every email that's added, moved, marked read or unread, starred or unstarred, or deleted gets a new change number. Start with `GET .../changes` (no `since`), which answers the current `cursor` and the folders. Read what you need (for example with `index`), then ask `GET .../changes?since=<cursor>` from time to time:
+
+```json
+{
+  "changes": [
+    { "id": "f332437e-…", "folder": "archive", "read": true, "starred": false, "deleted": false },
+    { "id": "9b1c02aa-…", "folder": null, "read": false, "starred": false, "deleted": true }
+  ],
+  "cursor": 1042,
+  "more": false,
+  "folders": [{ "id": "inbox", "name": "Inbox", "unreadCount": 3 }]
+}
+```
+
+Each email appears once, as it is now. Keep the new `cursor`, and ask again straight away while `more` is `true`. Deletions are remembered for 30 days: if `since` is older than that, the answer is `410`, and you start again from `index`.
 
 ## Webhooks
 

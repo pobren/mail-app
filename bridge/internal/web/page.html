@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mail App Bridge</title>
+<style>
+:root{--blue:#2f5bd3;--blue-soft:#eef2fc;--ink:#18202f;--muted:#5b6475;--line:#e3e7ef;--bg:#f6f7fa;--card:#fff;--ok:#1f7a4d;--ok-soft:#e8f5ee;--bad:#b42318;--bad-soft:#fdecea;--warn:#8a5a00;--warn-soft:#fff6e0}
+@media (prefers-color-scheme:dark){:root{--blue:#6f8ff0;--blue-soft:#1d2540;--ink:#e8ebf2;--muted:#a3abbc;--line:#2c3243;--bg:#12151d;--card:#1a1e29;--ok:#5fd39a;--ok-soft:#14301f;--bad:#ff8a80;--bad-soft:#3a1715;--warn:#ffcf66;--warn-soft:#33280f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line)}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+header .wrap{display:flex;align-items:center;gap:12px;height:64px}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--blue);display:grid;place-items:center;color:#fff}
+h1{font-size:18px;margin:0;font-weight:600}
+.ver{margin-left:auto;color:var(--muted);font-size:13px}
+main{padding:24px 0 48px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+h2{font-size:16px;margin:0 0 4px;font-weight:600}
+p.lead{margin:0 0 16px;color:var(--muted)}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 6px}
+input[type=text],input[type=password]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;background:var(--bg);color:var(--ink)}
+input:focus{outline:2px solid var(--blue);outline-offset:1px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 13px;font:inherit;font-size:14px;cursor:pointer}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+button.small{padding:5px 9px;font-size:13px}
+button svg{width:16px;height:16px;flex:none}
+.note{border-radius:8px;padding:10px 13px;margin-top:14px;font-size:14px}
+.note.bad{background:var(--bad-soft);color:var(--bad)}
+.note.ok{background:var(--ok-soft);color:var(--ok)}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.box{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}
+.dot.ok{background:var(--ok)}.dot.bad{background:var(--bad)}.dot.wait{background:#d49b00}
+.box .who{font-weight:600}
+.box .meta{color:var(--muted);font-size:13px;width:100%;padding-left:22px}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-weight:600;width:42%}
+td code{font:13px/1.4 Consolas,ui-monospace,monospace;background:var(--blue-soft);padding:3px 7px;border-radius:6px}
+td .row{gap:8px}
+.tabs{display:flex;gap:6px;margin:6px 0 4px}
+.tabs button[aria-pressed=true]{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.check{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-weight:400}
+.check input{margin-top:4px;width:17px;height:17px;accent-color:var(--blue)}
+.check b{display:block;font-weight:600}
+.check span{color:var(--muted);font-size:14px}
+.hide{display:none}
+footer{color:var(--muted);font-size:13px;text-align:center;padding:10px}
+a{color:var(--blue)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
+  <h1>Mail App Bridge</h1>
+  <span class="ver">Version {{VERSION}}</span>
+</div></header>
+<main><div class="wrap">
+
+<section class="card">
+  <h2>Connect to Mail App</h2>
+  <p class="lead">We use your Mail App's API to keep Outlook in step with it. Make a key in Mail App under Admin, API &amp; webhooks, and tick Read, Send, Organise and Delete.</p>
+  <label for="server">Mail App web address</label>
+  <input id="server" type="text" placeholder="mail.yourdomain.co.uk" autocomplete="off" spellcheck="false">
+  <label for="key">API key</label>
+  <input id="key" type="password" placeholder="mailapp_…" autocomplete="off" spellcheck="false">
+  <div class="row" style="margin-top:14px">
+    <button class="primary" id="connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><path d="M8 12h8"/></svg>Save and connect</button>
+    <span id="keyhint" class="lead" style="margin:0"></span>
+  </div>
+  <div id="problem" class="note bad hide"></div>
+  <div id="ports" class="note warn hide"></div>
+</section>
+
+<section class="card">
+  <h2>Your mailboxes</h2>
+  <p class="lead">Each mailbox is its own account in Outlook. We check Mail App for changes every 20 seconds.</p>
+  <div id="accounts"><p class="lead">Nothing connected yet.</p></div>
+</section>
+
+<section class="card">
+  <h2>Settings for Outlook</h2>
+  <p class="lead">In classic Outlook choose File, Add account, then Advanced options, Let me set up my account manually, and pick IMAP or POP. Use these settings.</p>
+  <div class="tabs" role="group">
+    <button class="small" id="tab-imap" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>IMAP (recommended)</button>
+    <button class="small" id="tab-pop" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>POP3</button>
+  </div>
+  <p class="lead" id="mode-note" style="margin-top:8px">IMAP keeps Outlook and Mail App the same both ways: read, flags, folders, moves and deletes.</p>
+  <table>
+    <tr><th>User name</th><td>Your mailbox's email address</td></tr>
+    <tr><th>Password</th><td><div class="row"><code id="pw">••••</code>
+      <button class="small" data-copy="pw-real"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+      <button class="small" id="show"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Show</span></button>
+    </div></td></tr>
+    <tr><th>Incoming server</th><td><div class="row"><code>127.0.0.1</code><button class="small" data-copy-text="127.0.0.1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button></div></td></tr>
+    <tr><th>Incoming port</th><td><code id="inport">1143</code></td></tr>
+    <tr><th>Outgoing (SMTP) server</th><td><div class="row"><code>127.0.0.1</code><button class="small" data-copy-text="127.0.0.1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button></div></td></tr>
+    <tr><th>Outgoing port</th><td><code id="outport">1025</code></td></tr>
+    <tr><th>Encryption, both ways</th><td>None. Outlook only talks to the bridge on this computer, so nothing travels over the network unprotected. The bridge reaches Mail App over HTTPS.</td></tr>
+    <tr><th>Outgoing server needs a password</th><td>Yes, use the same user name and password</td></tr>
+  </table>
+  <div class="row" style="margin-top:14px">
+    <button id="newpw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>Make a new password</button>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Options</h2>
+  <label class="check"><input type="checkbox" id="keepMail"><div><b>Keep mail in Mail App when Outlook deletes it over POP3</b><span>On: deleting in Outlook only removes it from this computer. Off: it goes to the Bin in Mail App. Outlook's own "Leave a copy of messages on the server" works too.</span></div></label>
+  <label class="check"><input type="checkbox" id="markRead"><div><b>Mark mail as read in Mail App once Outlook downloads it over POP3</b><span>So you don't see it as new twice.</span></div></label>
+  <label class="check" id="autostart-row"><input type="checkbox" id="startWithWindows"><div><b>Start the bridge when I sign in to Windows</b><span>Outlook can only get mail while the bridge is running. It sits in the system tray.</span></div></label>
+  <div id="optnote" class="note bad hide"></div>
+</section>
+
+<footer>The bridge only listens on this computer. Help and questions: <a href="https://github.com/pobren/mail-app/discussions" target="_blank" rel="noopener">GitHub Discussions</a></footer>
+</div></main>
+<script>
+const TOKEN = "{{TOKEN}}";
+let state = null, showPw = false, mode = "imap";
+const $ = (id) => document.getElementById(id);
+async function call(path, body) {
+  const res = await fetch(path, { method: body ? "POST" : "GET", headers: { "X-Bridge-Token": TOKEN, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  return res.json();
+}
+function ago(iso) {
+  if (!iso) return "not yet";
+  const s = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return "just now";
+  const m = Math.round(s / 60);
+  return m === 1 ? "a minute ago" : m + " minutes ago";
+}
+function esc(t) { const d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+function render(s) {
+  if (!s || s.error) { if (s && s.error) { $("optnote").textContent = s.error; $("optnote").classList.remove("hide"); } return; }
+  state = s;
+  if (document.activeElement !== $("server") && !$("server").value) $("server").value = s.server || "";
+  $("keyhint").textContent = s.keyHint ? "Saved key: " + s.keyHint : "";
+  $("problem").textContent = s.problem || "";
+  $("problem").classList.toggle("hide", !s.problem);
+  const ports = Object.entries(s.portProblems || {}).map(([k, v]) => k + ": " + v).join(". ");
+  $("ports").textContent = ports ? ports + ". Close the other program, then restart the bridge." : "";
+  $("ports").classList.toggle("hide", !ports);
+  $("pw").textContent = showPw ? s.password : "•".repeat(12);
+  $("inport").textContent = mode === "imap" ? s.imapPort : s.pop3Port;
+  $("outport").textContent = s.smtpPort;
+  $("keepMail").checked = s.keepMail; $("markRead").checked = s.markRead; $("startWithWindows").checked = s.startWithWindows;
+  $("autostart-row").classList.toggle("hide", !s.windows);
+  const list = (s.accounts || []).sort((a, b) => a.address.localeCompare(b.address));
+  $("accounts").innerHTML = list.length ? list.map((a) => {
+    const cls = a.problem ? "bad" : a.ready ? "ok" : "wait";
+    const words = a.problem ? "Problem: " + esc(a.problem) : a.ready ? "In step, checked " + ago(a.lastSync) : "Getting your folders ready…";
+    const inbox = a.counts && a.counts.INBOX != null ? " · " + a.counts.INBOX + " in the Inbox" : "";
+    return '<div class="box"><span class="dot ' + cls + '"></span><span class="who">' + esc(a.address) + '</span><span class="meta">' + words + inbox + "</span></div>";
+  }).join("") : '<p class="lead">Nothing connected yet.</p>';
+}
+async function refresh() { try { render(await call("/api/status")); } catch {} }
+$("connect").onclick = async () => {
+  $("connect").disabled = true;
+  try { render(await call("/api/connect", { server: $("server").value, key: $("key").value })); $("key").value = ""; }
+  finally { $("connect").disabled = false; }
+};
+$("show").onclick = () => { showPw = !showPw; $("show").querySelector("span").textContent = showPw ? "Hide" : "Show"; render(state); };
+$("newpw").onclick = async () => { render(await call("/api/password", {})); showPw = true; $("show").querySelector("span").textContent = "Hide"; render(state); };
+document.querySelectorAll("[data-copy],[data-copy-text]").forEach((b) => b.onclick = async () => {
+  const text = b.dataset.copyText || (state && state.password) || "";
+  try { await navigator.clipboard.writeText(text); const old = b.lastChild.textContent; b.lastChild.textContent = "Copied"; setTimeout(() => (b.lastChild.textContent = old), 1500); } catch {}
+});
+function setMode(m) {
+  mode = m;
+  $("tab-imap").setAttribute("aria-pressed", m === "imap"); $("tab-pop").setAttribute("aria-pressed", m === "pop");
+  $("mode-note").textContent = m === "imap" ? "IMAP keeps Outlook and Mail App the same both ways: read, flags, folders, moves and deletes." : "POP3 downloads your Inbox to Outlook. Folders and changes you make in Outlook stay on this computer.";
+  render(state);
+}
+$("tab-imap").onclick = () => setMode("imap"); $("tab-pop").onclick = () => setMode("pop");
+["keepMail", "markRead", "startWithWindows"].forEach((id) => $(id).onchange = async () => {
+  $("optnote").classList.add("hide");
+  render(await call("/api/options", { [id]: $(id).checked }));
+});
+refresh(); setInterval(refresh, 5000);
+</script>
+</body>
+</html>
