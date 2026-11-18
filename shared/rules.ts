@@ -3,6 +3,8 @@
 // read or star it". Kept in the mailbox's settings file in R2 and run on each new message after the
 // spam check. Matching is plain "contains", ignoring capitals, so people don't need to learn patterns.
 
+import { removeHiddenBlocks, removeTags } from "./html-text.ts";
+
 export const RULE_FIELDS = ["from", "to", "subject", "body", "attachment"] as const;
 export type RuleField = (typeof RULE_FIELDS)[number];
 
@@ -62,15 +64,14 @@ const lower = (s: string | null | undefined) => (s ?? "").toLowerCase();
 
 /** Plain text of an email body, with tags and the most common entities removed, for "message contains". */
 export function bodyText(body: string): string {
-	return body
-		.replace(/<(style|script|head)[\s\S]*?<\/\1>/gi, " ")
-		.replace(/<[^>]+>/g, " ")
+	return removeTags(removeHiddenBlocks(body, " "), " ")
 		.replace(/&nbsp;/gi, " ")
-		.replace(/&amp;/gi, "&")
 		.replace(/&lt;/gi, "<")
 		.replace(/&gt;/gi, ">")
 		.replace(/&#39;|&apos;/gi, "'")
 		.replace(/&quot;/gi, '"')
+		// Last, so "&amp;lt;" reads as the text "&lt;" and not as "<".
+		.replace(/&amp;/gi, "&")
 		.replace(/\s+/g, " ");
 }
 

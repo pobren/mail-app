@@ -67,8 +67,15 @@ export function findMeetingLink(...texts: (string | null | undefined)[]): string
 /** A new free Jitsi Meet room with a name nobody will guess. */
 export function newJitsiLink(): string {
 	const letters = "abcdefghijkmnpqrstuvwxyz23456789";
-	const bytes = crypto.getRandomValues(new Uint8Array(14));
-	return `https://meet.jit.si/Mail-${[...bytes].map((b) => letters[b % letters.length]).join("")}`;
+	// Only use bytes below the largest multiple of the alphabet size, so every letter is equally likely.
+	const limit = 256 - (256 % letters.length);
+	let name = "";
+	while (name.length < 14) {
+		for (const b of crypto.getRandomValues(new Uint8Array(14))) {
+			if (b < limit && name.length < 14) name += letters[b % letters.length];
+		}
+	}
+	return `https://meet.jit.si/Mail-${name}`;
 }
 
 // ── Time zones in invites ──────────────────────────────────────────
