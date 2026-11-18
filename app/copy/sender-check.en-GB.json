@@ -1,0 +1,17 @@
+{
+	"_note": "Mail App: the sender check and Unsubscribe on each message (app/components/email-panel/SenderCheck.tsx).",
+	"verified": "Verified sender",
+	"verifiedTip": "The email really came from {domain}: it passed the sender checks (SPF {spf}, DKIM {dkim}, DMARC {dmarc}).",
+	"failed": "Couldn't verify sender",
+	"failedTip": "This email says it's from {domain}, but it failed that domain's own checks (SPF {spf}, DKIM {dkim}, DMARC {dmarc}). Be careful with links and attachments.",
+	"unknownTip": "{domain} doesn't publish the checks that prove who sent its email (SPF {spf}, DKIM {dkim}, DMARC {dmarc}).",
+	"firstContact": "First email from this sender",
+	"lookalikeTitle": "This sender looks like {known}, but isn't",
+	"lookalike": "The email is from {domain}, which is easy to mistake for {known}. Don't click links or open attachments unless you're sure it's genuine.",
+	"unsubscribe": "Unsubscribe",
+	"unsubscribeBlock": "Unsubscribe and block",
+	"unsubscribed": "Unsubscribed. It can take the sender a few days to stop.",
+	"unsubscribedBlocked": "Unsubscribed and blocked. Anything else from {sender} goes to Spam.",
+	"opened": "Their unsubscribe page is open in a new tab.",
+	"failedUnsubscribe": "Couldn't unsubscribe. Please try again."
+}

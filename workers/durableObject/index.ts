@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Cloudflare, Inc.
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-// Modified for Mail App, 2026: contacts; labels; contact import; acting on whole conversations; backups; the list says which extra address an email came to; inbox rules run on mail already in the Inbox; knowsSender for the spam checks; the calendar and its invites; Files; Notes; snooze and "Remind me if no reply"; scheduled send; the daily tally for Admin > Reports; learning from Spam and Not spam.
+// Modified for Mail App, 2026: contacts; labels; contact import; acting on whole conversations; backups; the list says which extra address an email came to; inbox rules run on mail already in the Inbox; knowsSender for the spam checks; the calendar and its invites; Files; Notes; snooze and "Remind me if no reply"; scheduled send; the daily tally for Admin > Reports; learning from Spam and Not spam; auto-empty the Bin and Spam.
 
 import { DurableObject } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/durable-sqlite";
@@ -11,6 +11,7 @@ import * as schema from "../db/schema";
 import { Folders } from "../../shared/folders";
 import type { Env } from "../types";
 import { applyMigrations, mailboxMigrations } from "./migrations";
+import { AutoEmpty } from "./auto-empty";
 import { sendLimitError } from "../lib/send-limit";
 import { buildContacts, cleanSenderName, displayName, type SavedContactRow } from "../../shared/contacts";
 import { MAX_LABELS, type Label, type LabelColor } from "../../shared/labels";
@@ -176,6 +177,8 @@ export class MailboxDO extends DurableObject<Env> {
 	stats: MailStats;
 	/** Mail App: learning from Spam and Not spam (see spam-learning.ts). */
 	spamLearning: SpamLearning;
+	/** Mail App: auto-empty the Bin and Spam (see auto-empty.ts). */
+	autoEmpty: AutoEmpty;
 
 	constructor(state: DurableObjectState, env: Env) {
 		super(state, env);
@@ -190,7 +193,13 @@ export class MailboxDO extends DurableObject<Env> {
 		this.stats = new MailStats(this.ctx);
 		this.scheduled = new ScheduledSends(this.ctx, env, this.stats);
 		this.spamLearning = new SpamLearning(this.ctx);
+		this.autoEmpty = new AutoEmpty(this.ctx, env);
 	}
+
+	// ── Mail App: auto-empty the Bin and Spam ────────────────────────────
+
+	async autoEmptySettings() { return this.autoEmpty.settings(); }
+	async updateAutoEmpty(change: { trashDays?: number; spamDays?: number }) { return this.autoEmpty.update(change); }
 
 	// ── Mail App: Admin > Reports ───────────────────────────────────────
 
@@ -244,7 +253,7 @@ export class MailboxDO extends DurableObject<Env> {
 
 	// ── Mail App: backups ───────────────────────────────────────────────
 
-	// The one alarm serves backups, calendar reminders, webhook retries, snoozes, note reminders and scheduled emails: each runs if it's due, then the alarm
+	// The one alarm serves backups, calendar reminders, webhook retries, snoozes, note reminders, scheduled emails and auto-empty: each runs if it's due, then the alarm
 	// is booked for whichever comes next.
 	async alarm() {
 		try {
@@ -256,7 +265,8 @@ export class MailboxDO extends DurableObject<Env> {
 			try { this.reminders.onAlarm(); } catch (e) { console.error("Snoozes and reminders:", (e as Error).message); }
 			await this.notes.onAlarm(row?.mailbox_id ? String(row.mailbox_id) : null).catch((e) => console.error("Note reminders:", (e as Error).message));
 			await this.scheduled.onAlarm(this).catch((e) => console.error("Scheduled send:", (e as Error).message));
-			const due = [await this.ctx.storage.getAlarm(), this.backups.nextDue(), this.calendar.nextDue(), this.webhookRetries.nextDue(), this.reminders.nextDue(), this.notes.nextDue(), this.scheduled.nextDue()].filter((t): t is number => t !== null);
+			await this.autoEmpty.onAlarm().catch((e) => console.error("Auto-empty:", (e as Error).message));
+			const due = [await this.ctx.storage.getAlarm(), await this.autoEmpty.nextDue(), this.backups.nextDue(), this.calendar.nextDue(), this.webhookRetries.nextDue(), this.reminders.nextDue(), this.notes.nextDue(), this.scheduled.nextDue()].filter((t): t is number => t !== null);
 			if (due.length) await this.ctx.storage.setAlarm(Math.max(Date.now() + 100, Math.min(...due)));
 		}
 	}

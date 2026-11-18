@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Cloudflare, Inc.
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-// Modified for Mail App, 2026: in a shared mailbox, sent emails show which team member sent them; calendar invites show a card to answer them; a scheduled reply says when it goes.
+// Modified for Mail App, 2026: the sender check and Unsubscribe; in a shared mailbox, sent emails show which team member sent them; calendar invites show a card to answer them; a scheduled reply says when it goes.
 
 import { Badge, Button, Tooltip } from "@cloudflare/kumo";
 import {
@@ -13,6 +13,7 @@ import {
 	TrashIcon,
 } from "@phosphor-icons/react";
 import EmailAttachmentList from "~/components/EmailAttachmentList";
+import { LookalikeWarning, SenderBadges, UnsubscribeButtons } from "~/components/email-panel/SenderCheck";
 import EmailIframe from "~/components/EmailIframe";
 import InviteCard from "~/components/InviteCard";
 import { Folders } from "shared/folders";
@@ -135,6 +136,7 @@ export default function ThreadMessage({
 									<span className="text-xs text-kumo-subtle truncate">{email.sender}</span>
 								)}
 								{isDraft && <Badge variant="outline">Draft</Badge>}
+								{!isDraft && !isSelf && <SenderBadges email={email} />}
 							</div>
 							<div className="text-xs text-kumo-subtle">To: {email.recipient}</div>
 						</div>
@@ -170,6 +172,8 @@ export default function ThreadMessage({
 					</div>
 				</div>
 
+				{!isDraft && !isSelf && <LookalikeWarning email={email} />}
+				{!isDraft && !isSelf && <div className="mb-3 md:ml-[42px] empty:hidden"><UnsubscribeButtons email={email} mailboxId={mailboxId} /></div>}
 				<InviteCard mailboxId={mailboxId} emailId={email.id} attachments={email.attachments} className="mb-3 md:ml-[42px]" />
 				<div className="md:ml-[42px]">
 					<EmailIframe

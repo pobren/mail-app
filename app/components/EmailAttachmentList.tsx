@@ -1,10 +1,10 @@
 // Copyright (c) 2026 Cloudflare, Inc.
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-// Modified for Mail App, 2026: each attachment can be saved to Files.
+// Modified for Mail App, 2026: each attachment can be saved to Files; Download all as one ZIP.
 
 import { useKumoToastManager } from "@cloudflare/kumo";
-import { CheckIcon, CircleNotchIcon, FolderSimplePlusIcon, PaperclipIcon, FileIcon, ImageIcon } from "@phosphor-icons/react";
+import { CheckIcon, CircleNotchIcon, DownloadSimpleIcon, FolderSimplePlusIcon, PaperclipIcon, FileIcon, ImageIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { formatBytes, getAttachmentUrl, getNonInlineAttachments } from "~/lib/utils";
@@ -108,6 +108,17 @@ export default function EmailAttachmentList({
 						</div>
 					);
 				})}
+				{/* Mail App: every attachment in one ZIP (see shared/zip.ts). */}
+				{files.length > 1 && (
+					<a
+						href={`/api/v1/mailboxes/${mailboxId}/emails/${emailId}/attachments.zip`}
+						download
+						className="flex items-center gap-2 rounded-md border border-kumo-line px-3 py-2 text-sm font-medium text-kumo-default no-underline transition-colors hover:bg-kumo-tint"
+					>
+						<DownloadSimpleIcon size={16} className="text-kumo-subtle shrink-0" />
+						{fill(filesCopy.downloadAll, { n: files.length })}
+					</a>
+				)}
 			</div>
 		</div>
 	);

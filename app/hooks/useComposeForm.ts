@@ -166,12 +166,15 @@ function buildInitialComposeFields(
 		};
 	}
 
+	// Mail App: words typed in the quick reply box under a message start the reply.
+	const replyStart = composeOptions.text ? `${textToHtml(composeOptions.text)}<p><br></p>` : "<p><br></p>";
+
 	if (mode === "reply") {
 		return {
 			...EMPTY_FIELDS,
 			to: original.sender,
 			subject: getPrefixedSubject(original.subject, "Re"),
-			body: `<p><br></p>${sigBlock ? `${sigBlock}<br>` : ""}${buildQuotedReplyBlock(original.date, original.sender, original.body || "")}`,
+			body: `${replyStart}${sigBlock ? `${sigBlock}<br>` : ""}${buildQuotedReplyBlock(original.date, original.sender, original.body || "")}`,
 		};
 	}
 
@@ -181,7 +184,7 @@ function buildInitialComposeFields(
 			...EMPTY_FIELDS,
 			...recipients,
 			subject: getPrefixedSubject(original.subject, "Re"),
-			body: `<p><br></p>${sigBlock ? `${sigBlock}<br>` : ""}${buildQuotedReplyBlock(original.date, original.sender, original.body || "")}`,
+			body: `${replyStart}${sigBlock ? `${sigBlock}<br>` : ""}${buildQuotedReplyBlock(original.date, original.sender, original.body || "")}`,
 		};
 	}
 

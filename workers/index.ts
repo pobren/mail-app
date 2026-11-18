@@ -36,6 +36,7 @@ import { BAD_SEND_AT, scheduleEmail, sendAtOf } from "./lib/scheduled-send";
 import { scheduled as scheduledRoutes } from "./routes/scheduled";
 import { PLAN_URL, checkDue } from "shared/sending";
 import { aiEnabledFor, forgetAiChat } from "./lib/ai-setting";
+import { summariseEmail } from "./lib/ai";
 import { isAiEnabled } from "../shared/ai";
 import { sendAutoReply } from "./lib/auto-reply";
 import { cleanSenderName, isValidContactEmail } from "shared/contacts";
@@ -46,6 +47,9 @@ import { installDomains, loadAddressBook, loadDomainsFile, saveAddressBook, save
 import { loadMasked, saveMasked, sendableFor } from "./lib/masked";
 import { MASKED_LEAK_HEADER, maskedDomainsOf, maskedOf, maskedProblem, maskedWithoutMailboxes, newMaskedAddress, recordMaskedMail, routeIncoming, siteFromLabel, type MaskedAddress } from "shared/masked";
 import { addEntry, isValidSenderEntry, removeEntry, senderMatches, spamReason, type SpamSettings } from "shared/spam";
+import { FIRST_CONTACT_HEADER } from "shared/sender-check";
+import { ONE_CLICK_BODY, unsubscribeFrom } from "shared/unsubscribe";
+import { makeZip, uniqueNames } from "shared/zip";
 import { SPAM_REASON_HEADER, SPAM_THRESHOLD, plainText, reasonHeaderValue, siteOf, spamChecks, spamScore, type StoredReason } from "shared/spam-checks";
 import { learntFinding, tokensFor } from "shared/spam-learning";
 import { cleanSpamFilterSettings, spamAiPoints } from "shared/spam-ai";
@@ -914,6 +918,55 @@ app.post("/api/v1/mailboxes/:mailboxId/spam/block", async (c: AppContext) => {
 	return c.json({ settings });
 });
 
+// Mail App: "Summarise" on an email or conversation. Only when the person has switched AI on in Settings; it
+// runs on Workers AI in the owner's own Cloudflare account.
+app.post("/api/v1/mailboxes/:mailboxId/emails/:id/summary", async (c: AppContext) => {
+	const mailboxId = c.req.param("mailboxId")!;
+	if (!(await aiEnabledFor(c.env.BUCKET, mailboxId))) return c.json({ error: "Switch on AI in Settings to get summaries." }, 409);
+	const email = await c.var.mailboxStub.getEmail(c.req.param("id")!) as { subject?: string | null; sender: string; sender_name?: string | null; body?: string | null; thread_id?: string | null } | null;
+	if (!email) return c.json({ error: "Email not found" }, 404);
+	const thread = email.thread_id ? await (c.var.mailboxStub as any).getThreadEmails(email.thread_id) as typeof email[] : [];
+	const messages = (thread.length ? thread : [email]).map((m) => ({ from: m.sender_name || m.sender, body: m.body || "" }));
+	const summary = await summariseEmail(c.env.AI, { subject: email.subject || "", messages });
+	if (!summary) return c.json({ error: "Couldn't summarise this email. Please try again." }, 502);
+	return c.json({ summary });
+});
+
+// Mail App: one-click unsubscribe (shared/unsubscribe.ts). When the newsletter supports RFC 8058, the Worker
+// sends the one-click request itself; otherwise the app opens their page or writes the email. "And block"
+// also blocks the sender, so anything that still arrives goes to Spam.
+const UnsubscribeBody = z.object({ block: z.boolean().optional() });
+
+app.post("/api/v1/mailboxes/:mailboxId/emails/:id/unsubscribe", async (c: AppContext) => {
+	const { block } = UnsubscribeBody.parse(await c.req.json().catch(() => ({})));
+	const email = await c.var.mailboxStub.getEmail(c.req.param("id")!) as { sender?: string; raw_headers?: string | null } | null;
+	if (!email) return c.json({ error: "Email not found" }, 404);
+	const how = unsubscribeFrom(email.raw_headers);
+	if (!how) return c.json({ error: "This email doesn't say how to unsubscribe." }, 400);
+	let done = false;
+	if (how.oneClick) {
+		try {
+			const res = await fetch(how.oneClick, {
+				method: "POST", redirect: "manual",
+				headers: { "Content-Type": "application/x-www-form-urlencoded" },
+				body: ONE_CLICK_BODY, signal: AbortSignal.timeout(10_000),
+			});
+			done = res.status < 400;
+		} catch (e) {
+			console.error("One-click unsubscribe failed:", (e as Error).message);
+		}
+	}
+	if (block && email.sender && isValidSenderEntry(email.sender)) {
+		await updateSpamLists(c.env.BUCKET, c.req.param("mailboxId")!, (s) => ({
+			blockedSenders: addEntry(s.blockedSenders, email.sender!),
+			safeSenders: removeEntry(s.safeSenders, email.sender!),
+		}));
+	}
+	if (done) return c.json({ status: "unsubscribed", blocked: !!block });
+	// Not done for you: the app opens their page, or writes the email.
+	return c.json({ status: "manual", url: how.url, mailto: how.mailto, blocked: !!block });
+});
+
 app.post("/api/v1/mailboxes/:mailboxId/spam/not-spam", async (c: AppContext) => {
 	const { sender, emailId } = SpamBody.parse(await c.req.json());
 	const domain = sender.split("@")[1] ?? "";
@@ -926,6 +979,17 @@ app.post("/api/v1/mailboxes/:mailboxId/spam/not-spam", async (c: AppContext) => 
 	// Mail App: Admin > Reports counts "Not spam" presses.
 	await (c.var.mailboxStub as any).countMail(["not-spam"]).catch(() => {});
 	return c.json({ settings });
+});
+
+// Mail App: auto-empty the Bin and Spam after a set number of days (Settings > Spam). 0: never.
+app.get("/api/v1/mailboxes/:mailboxId/auto-empty", async (c: AppContext) => {
+	return c.json(await c.var.mailboxStub.autoEmptySettings());
+});
+
+const AutoEmptyBody = z.object({ trashDays: z.number().int().optional(), spamDays: z.number().int().optional() });
+
+app.put("/api/v1/mailboxes/:mailboxId/auto-empty", async (c: AppContext) => {
+	return c.json(await c.var.mailboxStub.updateAutoEmpty(AutoEmptyBody.parse(await c.req.json())));
 });
 
 // Mail App: how much this mailbox has learnt from Spam and Not spam (Settings > Spam).
@@ -1207,6 +1271,30 @@ app.get("/api/v1/mailboxes/:mailboxId/search", async (c: AppContext) => {
 
 // -- Attachments ----------------------------------------------------
 
+// Mail App: "Download all" makes one ZIP of an email's attachments (shared/zip.ts). Pictures shown inside the
+// email itself are left out. Capped so a huge email can't use up the Worker's memory.
+const ZIP_MAX_BYTES = 60 * 1024 * 1024;
+
+app.get("/api/v1/mailboxes/:mailboxId/emails/:emailId/attachments.zip", async (c: AppContext) => {
+	const emailId = c.req.param("emailId")!;
+	const email = await c.var.mailboxStub.getEmail(emailId) as { subject?: string | null; attachments: { id: string; filename: string; size: number; disposition?: string | null }[] } | null;
+	if (!email) return c.json({ error: "Email not found" }, 404);
+	const files = email.attachments.filter((a) => a.disposition !== "inline");
+	if (files.length === 0) return c.json({ error: "This email has no attachments." }, 404);
+	if (files.reduce((n, a) => n + (a.size || 0), 0) > ZIP_MAX_BYTES) return c.json({ error: "These attachments are too big to download together. Download them one at a time." }, 413);
+	const names = uniqueNames(files.map((a) => a.filename));
+	const parts = await Promise.all(files.map(async (a, i) => {
+		const obj = await c.env.BUCKET.get(`attachments/${emailId}/${a.id}/${a.filename}`);
+		return obj ? { name: names[i], data: new Uint8Array(await obj.arrayBuffer()) } : null;
+	}));
+	const zip = makeZip(parts.flatMap((p) => (p ? [p] : [])));
+	const base = (email.subject || "attachments").replace(/[\/:*?"<>|\x00-\x1f]/g, "_").trim().slice(0, 80) || "attachments";
+	return new Response(zip.buffer as ArrayBuffer, { headers: {
+		"Content-Type": "application/zip",
+		"Content-Disposition": `attachment; filename="attachments.zip"; filename*=UTF-8''${encodeURIComponent(base + ".zip")}`,
+	} });
+});
+
 app.get("/api/v1/mailboxes/:mailboxId/emails/:emailId/attachments/:attachmentId", async (c: AppContext) => {
 	const emailId = c.req.param("emailId")!;
 	const attachmentId = c.req.param("attachmentId")!;
@@ -1301,7 +1389,7 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 	// Remember which address it came in on, so a reply can come from the same one. Any copy of the
 	// header in the email itself is dropped first, so a sender can't choose it.
 	const headers = [
-		...(parsedEmail.headers || []).filter((h) => ![DELIVERED_TO_HEADER, SPAM_REASON_HEADER, MASKED_LEAK_HEADER].includes(h.key.toLowerCase())),
+		...(parsedEmail.headers || []).filter((h) => ![DELIVERED_TO_HEADER, SPAM_REASON_HEADER, MASKED_LEAK_HEADER, FIRST_CONTACT_HEADER].includes(h.key.toLowerCase())),
 		{ key: DELIVERED_TO_HEADER, value: delivery.deliveredTo },
 		// Mail App: from a different website than the masked address was for.
 		...(maskedLeak ? [{ key: MASKED_LEAK_HEADER, value: maskedLeak }] : []),
@@ -1360,7 +1448,10 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 	// your contacts, people you've emailed, and replies in a conversation you already have. Then what
 	// this mailbox has learnt from Spam and Not spam (shared/spam-learning.ts) and, when an admin has
 	// switched it on and the free checks haven't decided, the AI check (shared/spam-ai.ts).
-	const trusted = !!knownThread || senderMatches(sender, spamSettings?.safeSenders) || (await stub.knowsSender(sender));
+	const knowsSender = await stub.knowsSender(sender);
+	const trusted = !!knownThread || senderMatches(sender, spamSettings?.safeSenders) || knowsSender;
+	// Mail App: the sender check on the message says when nothing has come from this address before.
+	if (!knownThread && !knowsSender && sender) headers.push({ key: FIRST_CONTACT_HEADER, value: "1" });
 	const learnTokens = tokensFor({ sender, subject: parsedEmail.subject || "", body: parsedEmail.html || parsedEmail.text || "" });
 	let autoScore = 0;
 	if (!isSpam && !trusted) {

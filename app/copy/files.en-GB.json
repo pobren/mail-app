@@ -97,5 +97,6 @@
 	"pickAttachCount": "Attach {count}",
 	"pickNone": "No files here.",
 	"moveNone": "No folders here.",
-	"addedBy": "Added by {name}"
+	"addedBy": "Added by {name}",
+	"downloadAll": "Download all ({n}) as ZIP"
 }

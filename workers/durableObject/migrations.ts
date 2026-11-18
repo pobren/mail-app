@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Cloudflare, Inc.
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-// Modified for Mail App, 2026: contacts and labels tables; backups; the calendar; snooze and reminders; calendars from other websites; the daily tally for Admin > Reports; learning from Spam and Not spam.
+// Modified for Mail App, 2026: contacts and labels tables; backups; the calendar; snooze and reminders; calendars from other websites; the daily tally for Admin > Reports; learning from Spam and Not spam; when mail arrived in the Bin or Spam.
 
 export interface Migration {
 	name: string;
@@ -500,6 +500,35 @@ export const mailboxMigrations: Migration[] = [
                 key TEXT PRIMARY KEY,
                 value TEXT
             );
+        `,
+	},
+	{
+		// Mail App: auto-empty Bin and Spam (see auto-empty.ts). When each email arrived in the Bin or Spam, kept up to
+		// date by triggers so every way of moving mail counts. Mail already there counts from today.
+		name: "27_add_bin_since",
+		sql: `
+            CREATE TABLE IF NOT EXISTS bin_since (
+                email_id TEXT PRIMARY KEY,
+                folder_id TEXT NOT NULL,
+                since INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_bin_since ON bin_since(folder_id, since);
+            INSERT OR IGNORE INTO bin_since (email_id, folder_id, since)
+                SELECT id, folder_id, CAST(strftime('%s','now') AS INTEGER) * 1000 FROM emails WHERE folder_id IN ('trash', 'spam');
+            CREATE TRIGGER IF NOT EXISTS bin_since_insert AFTER INSERT ON emails WHEN NEW.folder_id IN ('trash', 'spam')
+            BEGIN
+                INSERT OR REPLACE INTO bin_since (email_id, folder_id, since) VALUES (NEW.id, NEW.folder_id, CAST(strftime('%s','now') AS INTEGER) * 1000);
+            END;
+            CREATE TRIGGER IF NOT EXISTS bin_since_move AFTER UPDATE OF folder_id ON emails WHEN NEW.folder_id IS NOT OLD.folder_id
+            BEGIN
+                DELETE FROM bin_since WHERE email_id = NEW.id;
+                INSERT INTO bin_since (email_id, folder_id, since)
+                    SELECT NEW.id, NEW.folder_id, CAST(strftime('%s','now') AS INTEGER) * 1000 WHERE NEW.folder_id IN ('trash', 'spam');
+            END;
+            CREATE TRIGGER IF NOT EXISTS bin_since_delete AFTER DELETE ON emails
+            BEGIN
+                DELETE FROM bin_since WHERE email_id = OLD.id;
+            END;
         `,
 	},
 ];
