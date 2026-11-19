@@ -45,12 +45,16 @@ export interface ApiKey {
 	hash: string;
 	/** The first few characters, so people can tell keys apart ("mailapp_ab12cd34_Xy…"). */
 	hint: string;
-	/** Mailbox addresses, lower case. */
+	/** Mailbox addresses, lower case. Ignored when allMailboxes is set. */
 	mailboxes: string[];
+	/** Every mailbox, including ones added after the key was made. */
+	allMailboxes?: boolean;
 	scopes: Scope[];
 	createdAt: string;
 	createdBy: string;
 	lastUsedAt?: string;
+	updatedAt?: string;
+	updatedBy?: string;
 }
 
 export interface Webhook {
@@ -105,7 +109,7 @@ export async function sha256Hex(text: string): Promise<string> {
 }
 
 /** A new key: the full text (shown once) and what gets stored. */
-export async function newKey(input: { name: string; mailboxes: string[]; scopes: Scope[]; by: string; now: string }): Promise<{ key: string; record: ApiKey }> {
+export async function newKey(input: { name: string; mailboxes: string[]; allMailboxes?: boolean; scopes: Scope[]; by: string; now: string }): Promise<{ key: string; record: ApiKey }> {
 	const id = randomHex(4);
 	const key = `mailapp_${id}_${randomText(32)}`;
 	return {
@@ -115,8 +119,7 @@ export async function newKey(input: { name: string; mailboxes: string[]; scopes:
 			name: input.name,
 			hash: await sha256Hex(key),
 			hint: `${key.slice(0, 15)}…`,
-			mailboxes: [...new Set(input.mailboxes.map((m) => m.trim().toLowerCase()))].sort(),
-			scopes: SCOPES.filter((s) => input.scopes.includes(s)),
+			...keyAccess(input),
 			createdAt: input.now,
 			createdBy: input.by,
 		},
@@ -204,10 +207,26 @@ export function mailboxIn(path: string): string | null {
 
 // -- Checking what an admin asks for ------------------------------------------
 
-export function keyProblem(input: { name: string; mailboxes: string[]; scopes: string[] }, mailboxes: string[], count: number): string | null {
+/** What a key may do and which mailboxes it covers, tidied, for a new key or an edit. */
+export function keyAccess(input: { mailboxes: string[]; allMailboxes?: boolean; scopes: string[] }): Pick<ApiKey, "mailboxes" | "allMailboxes" | "scopes"> {
+	return {
+		mailboxes: input.allMailboxes ? [] : [...new Set(input.mailboxes.map((m) => m.trim().toLowerCase()))].sort(),
+		...(input.allMailboxes ? { allMailboxes: true } : {}),
+		scopes: SCOPES.filter((s) => input.scopes.includes(s)),
+	};
+}
+
+/** The mailboxes a key can use right now: every mailbox, or the ones ticked on it. */
+export function keyMailboxes(key: Pick<ApiKey, "mailboxes" | "allMailboxes">, all: string[]): string[] {
+	return key.allMailboxes ? [...new Set(all.map((m) => m.toLowerCase()))].sort() : key.mailboxes;
+}
+
+/** count is how many keys there are already; pass 0 when editing a key. */
+export function keyProblem(input: { name: string; mailboxes: string[]; allMailboxes?: boolean; scopes: string[] }, mailboxes: string[], count: number): string | null {
 	if (!input.name.trim()) return "Please give the key a name, so you know which app uses it.";
 	if (input.name.length > 60) return "Please use a shorter name (60 characters at most).";
 	if (!input.scopes.length || input.scopes.some((s) => !SCOPES.includes(s as Scope))) return "Please tick what the key can do.";
+	if (input.allMailboxes) return count >= MAX_KEYS ? `You can have up to ${MAX_KEYS} keys. Delete one you no longer use first.` : null;
 	if (!input.mailboxes.length) return "Please tick at least one mailbox.";
 	const known = new Set(mailboxes.map((m) => m.toLowerCase()));
 	if (input.mailboxes.some((m) => !known.has(m.toLowerCase()))) return "One of those mailboxes doesn't exist any more. Please refresh the page.";

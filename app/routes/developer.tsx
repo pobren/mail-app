@@ -1,6 +1,6 @@
 // Mail App addition (not part of upstream Agentic Inbox).
-// Admin > API & webhooks (admins only): the API's address, API keys (each limited to chosen mailboxes and
-// permissions, shown once when made), and webhooks (with a signing secret, a test button and a delivery
+// Admin > API & webhooks (admins only): the API's address, API keys (each limited to chosen mailboxes, or all of
+// them, and permissions; shown once when made, and changeable afterwards without a new key), and webhooks (with a signing secret, a test button and a delivery
 // log). The API itself is described in docs/api.md. Wording lives in app/copy/developer.en-GB.json.
 
 import { Button, Dialog, DropdownMenu, Input, Loader, Text, useKumoToastManager } from "@cloudflare/kumo";
@@ -9,7 +9,7 @@ import {
 } from "@phosphor-icons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, type ReactNode, useState } from "react";
-import { SCOPES, WEBHOOK_EVENTS, type Scope, type Webhook, type WebhookEvent } from "shared/api";
+import { SCOPES, WEBHOOK_EVENTS, type ApiKey, type Scope, type Webhook, type WebhookEvent } from "shared/api";
 import { Details, Empty, Headings, Menu, Row, Section } from "~/components/AdminTable";
 import AdminShell, { PageHeading, Pill, type Tone } from "~/components/AdminShell";
 import { FindBox, ShowMoreButton, shortList, useShowMore } from "~/components/ShowMore";
@@ -39,6 +39,7 @@ export default function DeveloperRoute() {
 	const qc = useQueryClient();
 	const toast = useKumoToastManager();
 	const [newKey, setNewKey] = useState(false);
+	const [editKey, setEditKey] = useState<Omit<ApiKey, "hash"> | null>(null);
 	const [newHook, setNewHook] = useState(false);
 	const [shownKey, setShownKey] = useState<string | null>(null);
 	const [shownSecret, setShownSecret] = useState<Webhook | null>(null);
@@ -46,7 +47,7 @@ export default function DeveloperRoute() {
 	const [confirm, setConfirm] = useState<{ title: string; body: string; run: () => Promise<unknown>; done: string } | null>(null);
 	const [busy, setBusy] = useState(false);
 
-	const keyList = useShowMore(data?.keys ?? [], { text: (k) => `${k.name} ${k.hint} ${k.mailboxes.join(" ")}` });
+	const keyList = useShowMore(data?.keys ?? [], { text: (k) => `${k.name} ${k.hint} ${k.allMailboxes ? copy.keys.all : k.mailboxes.join(" ")}` });
 	const hookList = useShowMore(data?.webhooks ?? [], { text: (w) => `${w.name} ${w.url} ${w.mailboxes.join(" ")}` });
 
 	const refresh = () => qc.invalidateQueries({ queryKey: queryKeys.developer });
@@ -114,6 +115,9 @@ export default function DeveloperRoute() {
 								</div>
 								<div className="justify-self-end md:order-last">
 									<Menu label={fill(copy.keys.menu, { name: k.name })} items={[{
+										label: copy.keys.edit,
+										onClick: () => setEditKey(k),
+									}, {
 										label: copy.keys.delete, danger: true,
 										onClick: () => setConfirm({
 											title: fill(copy.keys.deleteTitle, { name: k.name }), body: copy.keys.deleteBody, done: copy.keys.deleted,
@@ -125,7 +129,7 @@ export default function DeveloperRoute() {
 									<div className="flex flex-wrap gap-1.5">
 										{k.scopes.map((s) => <Pill key={s} tone={SCOPE_TONE[s]} title={copy.scopeHelp[s]}>{copy.scopes[s]}</Pill>)}
 									</div>
-									<div className="min-w-0 basis-full text-sm text-kumo-default md:basis-auto md:truncate" title={k.mailboxes.join(", ")}>{shortList(k.mailboxes, 1)}</div>
+									<div className="min-w-0 basis-full text-sm text-kumo-default md:basis-auto md:truncate" title={k.allMailboxes ? copy.keys.allHelp : k.mailboxes.join(", ")}>{k.allMailboxes ? copy.keys.all : shortList(k.mailboxes, 1)}</div>
 									<div className="text-sm text-kumo-subtle">
 										{k.lastUsedAt ? day(k.lastUsedAt) : copy.keys.never}
 									</div>
@@ -188,10 +192,18 @@ export default function DeveloperRoute() {
 			</>)}
 
 			{newKey && data && (
-				<NewKeyDialog
+				<KeyDialog
 					mailboxes={data.mailboxes}
 					onClose={() => setNewKey(false)}
 					onMade={async (key) => { setNewKey(false); setShownKey(key); await refresh(); }}
+				/>
+			)}
+			{editKey && data && (
+				<KeyDialog
+					mailboxes={data.mailboxes}
+					editing={editKey}
+					onClose={() => setEditKey(null)}
+					onMade={async () => { setEditKey(null); toast.add({ title: copy.keys.saved }); await refresh(); }}
 				/>
 			)}
 			{newHook && data && (
@@ -294,11 +306,13 @@ function Ticks<T extends string>({ label, options, picked, onPicked, describe }:
 	);
 }
 
-function NewKeyDialog({ mailboxes, onClose, onMade }: { mailboxes: string[]; onClose: () => void; onMade: (key: string) => void }) {
+/** Makes a new key, or (with editing) changes an existing key's name, permissions and mailboxes, keeping the key itself. */
+function KeyDialog({ mailboxes, editing, onClose, onMade }: { mailboxes: string[]; editing?: Omit<ApiKey, "hash">; onClose: () => void; onMade: (key: string) => void }) {
 	const f = copy.newKey;
-	const [name, setName] = useState("");
-	const [scopes, setScopes] = useState<Set<Scope>>(new Set(["read"]));
-	const [picked, setPicked] = useState<Set<string>>(new Set(mailboxes.length === 1 ? mailboxes : []));
+	const [name, setName] = useState(editing?.name ?? "");
+	const [scopes, setScopes] = useState<Set<Scope>>(new Set(editing?.scopes ?? ["read"]));
+	const [every, setEvery] = useState(editing?.allMailboxes ?? false);
+	const [picked, setPicked] = useState<Set<string>>(new Set(editing ? editing.mailboxes : mailboxes.length === 1 ? mailboxes : []));
 	const [error, setError] = useState<string | null>(null);
 	const [saving, setSaving] = useState(false);
 	const submit = async (e: FormEvent) => {
@@ -306,8 +320,13 @@ function NewKeyDialog({ mailboxes, onClose, onMade }: { mailboxes: string[]; onC
 		setError(null);
 		setSaving(true);
 		try {
-			const r = await api.createApiKey({ name: name.trim(), scopes: [...scopes], mailboxes: [...picked] });
-			onMade(r.key);
+			const input = { name: name.trim(), scopes: [...scopes], allMailboxes: every, mailboxes: every ? [] : [...picked] };
+			if (editing) {
+				await api.updateApiKey(editing.id, input);
+				onMade("");
+			} else {
+				onMade((await api.createApiKey(input)).key);
+			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Something went wrong");
 		} finally {
@@ -317,15 +336,25 @@ function NewKeyDialog({ mailboxes, onClose, onMade }: { mailboxes: string[]; onC
 	return (
 		<Dialog.Root open onOpenChange={(open) => { if (!open) onClose(); }}>
 			<Dialog size="sm" className="p-6">
-				<Dialog.Title className="text-lg font-semibold mb-4">{f.title}</Dialog.Title>
+				<Dialog.Title className="text-lg font-semibold mb-4 break-words">{editing ? fill(f.editTitle, { name: editing.name }) : f.title}</Dialog.Title>
 				<form onSubmit={submit} className="space-y-4">
 					{error && <Text variant="error">{error}</Text>}
+					{editing && <p className="text-base text-kumo-subtle">{f.editHelp}</p>}
 					<Input label={f.name} placeholder={f.namePlaceholder} value={name} onChange={(e) => setName(e.target.value)} required />
 					<Ticks label={f.can} options={SCOPES} picked={scopes} onPicked={setScopes} describe={(s) => ({ name: copy.scopes[s], help: copy.scopeHelp[s] })} />
-					<Ticks label={f.mailboxes} options={mailboxes} picked={picked} onPicked={setPicked} describe={(m) => ({ name: m })} />
+					<fieldset>
+						<legend className="mb-2 text-sm font-semibold text-kumo-default">{f.mailboxes}</legend>
+						<label className="flex items-center gap-3 py-1 text-base text-kumo-default">
+							<input type="radio" name="key-which" className="size-4 accent-kumo-brand" checked={every} onChange={() => setEvery(true)} />{f.allMailboxes}
+						</label>
+						<label className="flex items-center gap-3 py-1 text-base text-kumo-default">
+							<input type="radio" name="key-which" className="size-4 accent-kumo-brand" checked={!every} onChange={() => setEvery(false)} />{f.someMailboxes}
+						</label>
+					</fieldset>
+					{!every && <Ticks label={f.someMailboxes} options={mailboxes} picked={picked} onPicked={setPicked} describe={(m) => ({ name: m })} />}
 					<div className="flex justify-end gap-2 pt-1">
 						<Button type="button" variant="secondary" onClick={onClose}>{f.cancel}</Button>
-						<Button type="submit" variant="primary" loading={saving}>{f.make}</Button>
+						<Button type="submit" variant="primary" icon={editing ? <CheckIcon size={16} /> : <KeyIcon size={16} />} loading={saving}>{editing ? f.save : f.make}</Button>
 					</div>
 				</form>
 			</Dialog>

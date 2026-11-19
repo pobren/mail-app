@@ -12,7 +12,7 @@ https://mail.yourdomain.co.uk/api/ext/v1
 
 1. Sign in to Mail App as an admin and open **Admin › API & webhooks**. You'll see your API address there, ready to copy.
 2. If it says the API isn't switched on yet, follow [The API and download links](../README.md#the-api-and-download-links) in the README. It lets the API's address past Cloudflare sign-in (just that address; the rest of Mail App stays behind sign-in) and switches the API on.
-3. Choose **New API key**, tick what the key can do and which mailboxes it can use, and copy the key. It's shown once.
+3. Choose **New API key**, tick what the key can do and which mailboxes it can use (all of them, including ones you add later, or just some), and copy the key. It's shown once.
 4. Send the key with each request, in an `Authorization` header:
 
 ```sh
@@ -26,8 +26,9 @@ Every request and answer is JSON. Times are in UTC, written like `2026-10-15T09:
 
 Make a separate key for each app, so you can delete one without stopping the others. Each key:
 
-- only reaches the mailboxes you ticked when you made it. Any other mailbox looks as if it doesn't exist;
-- only does what you allowed, from the three permissions below;
+- only reaches its mailboxes: every mailbox, including ones added later, or just the ones you ticked. Any other mailbox looks as if it doesn't exist;
+- only does what you allowed, from the permissions below;
+- can be changed from its menu (**Change key**): its name, permissions and mailboxes. The key itself stays the same, so apps using it carry on;
 - is stored as a fingerprint (a SHA-256 hash) plus its first few characters, so you can tell your keys apart but nobody, not even an admin, can see the whole key again after it's made. Lost a key? Delete it and make a new one.
 
 | Permission | What it allows |

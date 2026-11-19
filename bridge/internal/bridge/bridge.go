@@ -34,6 +34,7 @@ type Bridge struct {
 	mu       sync.Mutex
 	accounts map[string]*store.Account
 	cancel   context.CancelFunc
+	stops    map[string]context.CancelFunc // per mailbox
 	problem  string
 	servers  []net.Listener
 	listenOK map[string]string // "IMAP" -> problem, if the port couldn't be used
@@ -171,27 +172,80 @@ func (b *Bridge) Connect(ctx context.Context) error {
 		return nil
 	}
 	runCtx, runCancel := context.WithCancel(context.Background())
-	accts := map[string]*store.Account{}
+	b.mu.Lock()
+	b.accounts, b.cancel, b.problem = map[string]*store.Account{}, runCancel, ""
+	b.stops = map[string]context.CancelFunc{}
+	b.mu.Unlock()
+	if err := b.useMailboxes(runCtx, client, boxes); err != nil {
+		runCancel()
+		b.setProblem(err.Error())
+		return err
+	}
+	// Mailboxes added to (or taken off) the key later show up without pressing Save and connect again.
+	go func() {
+		t := time.NewTicker(MailboxCheck)
+		defer t.Stop()
+		for {
+			select {
+			case <-runCtx.Done():
+				return
+			case <-t.C:
+				c, cancel := context.WithTimeout(runCtx, 30*time.Second)
+				boxes, err := client.Mailboxes(c)
+				cancel()
+				if err != nil {
+					log.Printf("checking for new mailboxes: %v", err)
+					continue
+				}
+				if err := b.useMailboxes(runCtx, client, boxes); err != nil {
+					log.Printf("adding a mailbox: %v", err)
+				}
+			}
+		}
+	}()
+	return nil
+}
+
+// MailboxCheck is how often the bridge asks Mail App which mailboxes the key can use.
+var MailboxCheck = 5 * time.Minute
+
+// useMailboxes starts keeping each new mailbox in step, and stops any the key can no longer use.
+func (b *Bridge) useMailboxes(runCtx context.Context, client *api.Client, boxes []api.Mailbox) error {
+	want := map[string]bool{}
 	for _, m := range boxes {
 		addr := strings.ToLower(m.Email)
 		if addr == "" {
 			addr = strings.ToLower(m.ID)
 		}
+		want[addr] = true
+		b.mu.Lock()
+		_, have := b.accounts[addr]
+		b.mu.Unlock()
+		if have {
+			continue
+		}
 		dir := filepath.Join(b.cacheDir, "mailboxes", safeName(client.Base+"_"+addr))
 		a, err := store.New(addr, client, dir)
 		if err != nil {
-			runCancel()
-			b.setProblem(err.Error())
 			return err
 		}
-		accts[addr] = a
-		go a.Run(runCtx)
+		ctx, stop := context.WithCancel(runCtx)
+		b.mu.Lock()
+		if runCtx.Err() != nil { // a newer Connect took over
+			b.mu.Unlock()
+			stop()
+			return nil
+		}
+		b.accounts[addr], b.stops[addr] = a, stop
+		b.mu.Unlock()
+		log.Printf("%s: keeping in step", addr)
+		go a.Run(ctx)
 		go func(a *store.Account) {
 			t := time.NewTicker(6 * time.Hour)
 			defer t.Stop()
 			for {
 				select {
-				case <-runCtx.Done():
+				case <-ctx.Done():
 					return
 				case <-t.C:
 					a.ForgetRaw()
@@ -200,8 +254,20 @@ func (b *Bridge) Connect(ctx context.Context) error {
 		}(a)
 	}
 	b.mu.Lock()
-	b.accounts, b.cancel, b.problem = accts, runCancel, ""
-	b.mu.Unlock()
+	defer b.mu.Unlock()
+	if runCtx.Err() != nil {
+		return nil
+	}
+	for addr := range b.accounts {
+		if !want[addr] {
+			log.Printf("%s: the key can no longer use this mailbox", addr)
+			if stop := b.stops[addr]; stop != nil {
+				stop()
+			}
+			delete(b.accounts, addr)
+			delete(b.stops, addr)
+		}
+	}
 	return nil
 }
 

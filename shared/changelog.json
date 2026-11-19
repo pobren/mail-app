@@ -2,6 +2,16 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.5",
+			"date": "2026-11-19",
+			"title": "Change an API Key",
+			"changes": [
+				"Change an API Key: Change a key's name, what it can do and which mailboxes it can use from its menu in Admin, API & webhooks. The key itself stays the same, so apps using it, such as the Outlook bridge, carry on without a new key.",
+				"All Mailboxes for API Keys: A key can now cover all mailboxes, including ones you add later, so a new mailbox works with your apps straight away.",
+				"Outlook Bridge 0.1.1: Mailboxes you add in Mail App now appear in the bridge on their own within five minutes, ready to add to Outlook."
+			]
+		},
+		{
 			"version": "2.4",
 			"date": "2026-11-18",
 			"title": "Use Mail App in Outlook",
