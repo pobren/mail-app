@@ -63,6 +63,8 @@ Snoozed and scheduled mail stay in Mail App, and show in Outlook again when they
 
 **How quickly does new mail show up?** The bridge asks Mail App what changed every 20 seconds, and straight away whenever Outlook checks for mail.
 
+**More than one mailbox?** Each mailbox the API key can use is its own account in Outlook, with the same bridge password. Make the key with **All mailboxes, including new ones** and mailboxes you add in Mail App later appear in the bridge within five minutes. Then add them to Outlook as another account.
+
 **Where does the bridge keep things?** Settings are in `%APPDATA%\Mail App Bridge`, with the API key and bridge password locked to your Windows user. Each mailbox's folder list and a copy of each email Outlook has asked for are in `%LOCALAPPDATA%\Mail App Bridge`, with a log in `bridge.log`.
 
 **Port in use?** If another program uses one of the ports, the settings page says which. Close that program and restart the bridge from the tray icon.
