@@ -147,6 +147,24 @@ These are what the [Outlook bridge](../bridge/README.md) uses, and they suit any
 
 Each email appears once, as it is now. Keep the new `cursor`, and ask again straight away while `more` is `true`. Deletions are remembered for 30 days: if `since` is older than that, the answer is `410`, and you start again from `index`.
 
+## JMAP for mail apps
+
+Mail App also speaks [JMAP](https://jmap.io) (RFC 8620 and RFC 8621), the modern standard for mail apps. Any app that lets you type in a JMAP server can use your mailboxes.
+
+| Setting | What to enter |
+| --- | --- |
+| Server (session address) | `https://mail.example.com/api/ext/jmap/session` |
+| User name | Anything, for example your email address |
+| Password | An API key |
+
+Apps that send a token instead send it as `Authorization: Bearer mailapp_…`. It sits under `/api/ext/`, so the Access bypass that opens the API opens JMAP too, and `PUBLIC_API` must be `on`.
+
+**Accounts.** Each mailbox the key can use is one JMAP account. The key's permissions apply: Read to read, Organise to mark and move, Send to save drafts and send, and Delete to delete for good, which only works on mail in the Bin or Spam. Drafts an app saved can always be replaced.
+
+**What's there.** `Mailbox/get`, `/set`, `/query` and `/changes`; `Email/get`, `/query`, `/set`, `/changes` and `/import`; `Thread/get` and `/changes`; `Identity/get` and `/set`; `EmailSubmission/set` (with `FUTURERELEASE` for scheduled sending); `SearchSnippet/get`; uploads, downloads and push through the event source. Push looks for changes every 10 seconds.
+
+**How Mail App differs.** An email is in one folder at a time, so `mailboxIds` always has one entry, and folders can't go inside other folders. The keywords kept are `$seen`, `$flagged` and `$draft`; others are ignored. Filters can use AND but not OR or NOT. Sending files Mail App's own copy in Sent (or Scheduled), so the draft is removed once it's sent, whatever `onSuccessUpdateEmail` asks for. Uploads are kept for a day.
+
 ## Webhooks
 
 A webhook tells another app's web address the moment something happens, so it doesn't have to keep asking. Add one in **Admin › API & webhooks › New webhook**: give its `https://` address, tick when to send it, and choose all mailboxes or just some.

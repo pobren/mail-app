@@ -89,7 +89,7 @@ These parts of Mail App open without signing in, so they need their own Access a
 | Path | What it's for | Setting |
 | --- | --- | --- |
 | `mail.example.com/f/` | Download links for big files you send | `PUBLIC_LINKS` = `on` |
-| `mail.example.com/api/ext/` | The API (each request still needs an API key) | `PUBLIC_API` = `on` |
+| `mail.example.com/api/ext/` | The API and JMAP for mail apps (each request still needs an API key) | `PUBLIC_API` = `on` |
 
 Passkey sign-in needs more set-up in Access, so it's easiest with the installer.
 

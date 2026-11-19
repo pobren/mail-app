@@ -569,4 +569,27 @@ export const mailboxMigrations: Migration[] = [
             END;
         `,
 	},
+	{
+		// Mail App 2.6: JMAP (workers/jmap/) tells apps which emails are new since they last looked, as well as
+		// which changed. email_born keeps the change number each email was added at. The insert trigger from
+		// migration 28 is made again so both happen in one step, in a known order.
+		name: "29_add_email_born",
+		sql: `
+            CREATE TABLE IF NOT EXISTS email_born (
+                email_id TEXT PRIMARY KEY,
+                seq INTEGER NOT NULL
+            );
+            DROP TRIGGER IF EXISTS email_changes_insert;
+            CREATE TRIGGER email_changes_insert AFTER INSERT ON emails
+            BEGIN
+                DELETE FROM email_changes WHERE email_id = NEW.id;
+                INSERT INTO email_changes (email_id, at) VALUES (NEW.id, CAST(strftime('%s','now') AS INTEGER) * 1000);
+                INSERT OR REPLACE INTO email_born (email_id, seq) VALUES (NEW.id, (SELECT seq FROM email_changes WHERE email_id = NEW.id));
+            END;
+            CREATE TRIGGER IF NOT EXISTS email_born_delete AFTER DELETE ON emails
+            BEGIN
+                DELETE FROM email_born WHERE email_id = OLD.id;
+            END;
+        `,
+	},
 ];
