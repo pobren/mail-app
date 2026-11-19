@@ -17,7 +17,7 @@ The bridge only listens on your own computer (127.0.0.1), and talks to Mail App 
 
 ## Set it up
 
-1. **Make an API key.** In Mail App, open **Admin › API & webhooks › New API key**. Call it "Outlook bridge", tick **Read**, **Send**, **Organise** and **Delete**, and tick your mailbox. Copy the key; it's shown once.
+1. **Make an API key.** In Mail App, open **Admin › API & webhooks › New API key**. Call it "Outlook bridge", tick **Read**, **Send**, **Organise** and **Delete**, and choose **All mailboxes, including new ones** (Mail App 2.5 or newer; on 2.4, tick each mailbox). Copy the key; it's shown once.
    *Delete only lets the bridge empty mail that's already in the Bin or Spam, the same as emptying the Bin in Mail App.*
 2. **Install the bridge.** Download `Mail-App-Bridge-Setup-<version>.exe` from the newest **Mail App Bridge** [release](https://github.com/pobren/mail-app/releases) and run it. It installs just for you, so it doesn't need an administrator. Its settings page opens in your browser.
 3. **Connect it.** On the settings page, enter your Mail App web address (such as `mail.yourdomain.co.uk`) and the API key, and choose **Save and connect**. Each mailbox the key can use appears under **Your mailboxes**; give it a minute to get your folders ready.
@@ -63,7 +63,7 @@ Snoozed and scheduled mail stay in Mail App, and show in Outlook again when they
 
 **How quickly does new mail show up?** The bridge asks Mail App what changed every 20 seconds, and straight away whenever Outlook checks for mail.
 
-**More than one mailbox?** Each mailbox the API key can use is its own account in Outlook, with the same bridge password. Make the key with **All mailboxes, including new ones** and mailboxes you add in Mail App later appear in the bridge within five minutes. Then add them to Outlook as another account.
+**More than one mailbox?** Each mailbox the API key can use is its own account in Outlook, with the same bridge password. With a key for **All mailboxes, including new ones**, mailboxes you add in Mail App later appear in the bridge within five minutes. A key for chosen mailboxes can be changed in Mail App (**Change key** in its menu) without a new key. Then add them to Outlook as another account.
 
 **Where does the bridge keep things?** Settings are in `%APPDATA%\Mail App Bridge`, with the API key and bridge password locked to your Windows user. Each mailbox's folder list and a copy of each email Outlook has asked for are in `%LOCALAPPDATA%\Mail App Bridge`, with a log in `bridge.log`.
 

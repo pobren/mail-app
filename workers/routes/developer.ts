@@ -1,10 +1,10 @@
 // Mail App addition (not part of upstream Agentic Inbox).
-// Admin > API & webhooks: making and deleting API keys, and adding, pausing, testing and deleting
+// Admin > API & webhooks: making, changing and deleting API keys, and adding, pausing, testing and deleting
 // webhooks. Admins only. The API itself is in workers/lib/api.ts, the rules in shared/api.ts.
 
 import { Hono } from "hono";
 import { z } from "zod";
-import { API_PREFIX, MAX_KEYS, MAX_WEBHOOKS, SCOPES, WEBHOOK_EVENTS, keyProblem, newKey, newWebhook, webhookProblem, type Scope, type WebhookEvent } from "../../shared/api";
+import { API_PREFIX, MAX_KEYS, MAX_WEBHOOKS, SCOPES, WEBHOOK_EVENTS, keyAccess, keyProblem, newKey, newWebhook, webhookProblem, type Scope, type WebhookEvent } from "../../shared/api";
 import { apiSwitchedOn, clearDeliveries, loadApiBook, recentDeliveries, sendTest, updateApiBook } from "../lib/api";
 import { listMailboxes } from "../lib/email-helpers";
 import { requireAdmin } from "../lib/people";
@@ -28,7 +28,8 @@ developer.get("/api/v1/developer", requireAdmin, async (c) => {
 
 const KeyBody = z.object({
 	name: z.string().max(200),
-	mailboxes: z.array(z.string().max(254)).max(500),
+	mailboxes: z.array(z.string().max(254)).max(500).default([]),
+	allMailboxes: z.boolean().default(false),
 	scopes: z.array(z.string().max(20)).max(SCOPES.length),
 });
 
@@ -37,10 +38,29 @@ developer.post("/api/v1/developer/keys", requireAdmin, async (c) => {
 	const [book, mailboxes] = await Promise.all([loadApiBook(c.env.BUCKET), listMailboxes(c.env.BUCKET)]);
 	const problem = keyProblem(input, mailboxes.map((m) => m.email), book.keys.length);
 	if (problem) return c.json({ error: problem }, 400);
-	const { key, record } = await newKey({ name: input.name.trim(), mailboxes: input.mailboxes, scopes: input.scopes as Scope[], by: c.var.person.email, now: new Date().toISOString() });
+	const { key, record } = await newKey({ name: input.name.trim(), mailboxes: input.mailboxes, allMailboxes: input.allMailboxes, scopes: input.scopes as Scope[], by: c.var.person.email, now: new Date().toISOString() });
 	await updateApiBook(c.env.BUCKET, (b) => { b.keys.push(record); });
 	const { hash: _hash, ...shown } = record;
 	return c.json({ key, record: shown }, 201);
+});
+
+// Changing a key's name, permissions or mailboxes keeps the key itself, so apps using it carry on.
+developer.patch("/api/v1/developer/keys/:id", requireAdmin, async (c) => {
+	const id = c.req.param("id");
+	const input = KeyBody.parse(await c.req.json());
+	const mailboxes = await listMailboxes(c.env.BUCKET);
+	const problem = keyProblem(input, mailboxes.map((m) => m.email), 0);
+	if (problem) return c.json({ error: problem }, 400);
+	const now = new Date().toISOString();
+	const changed = await updateApiBook(c.env.BUCKET, (b) => {
+		const k = b.keys.find((x) => x.id === id);
+		if (!k) return null;
+		delete k.allMailboxes;
+		Object.assign(k, { name: input.name.trim(), ...keyAccess(input), updatedAt: now, updatedBy: c.var.person.email });
+		const { hash: _hash, ...shown } = k;
+		return shown;
+	});
+	return changed ? c.json(changed) : c.json({ error: "Not found" }, 404);
 });
 
 developer.delete("/api/v1/developer/keys/:id", requireAdmin, async (c) => {

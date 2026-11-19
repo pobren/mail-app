@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-	emptyBook, findKey, isPrivateHost, keyFromHeaders, keyId, keyProblem, mailboxIn, newKey, newWebhook, routeFor,
+	emptyBook, findKey, isPrivateHost, keyAccess, keyFromHeaders, keyId, keyMailboxes, keyProblem, mailboxIn, newKey, newWebhook, routeFor,
 	shouldMarkUsed, signature, verifySignature, webhookProblem, webhooksFor, worthRetrying,
 } from "../shared/api.ts";
 
@@ -19,6 +19,21 @@ test("a new key is shown once and stored as a hash", async () => {
 	assert.equal((await findKey(book, key))?.id, record.id);
 	assert.equal(await findKey(book, `${key.slice(0, -1)}${key.endsWith("a") ? "b" : "a"}`), null);
 	assert.equal(await findKey(book, "nonsense"), null);
+});
+
+test("a key for all mailboxes covers mailboxes added later, and a key can be changed", async () => {
+	const { record } = await newKey({ name: "Outlook bridge", mailboxes: ["a@b.com"], allMailboxes: true, scopes: ["read"], by: "a@b.c", now });
+	assert.equal(record.allMailboxes, true);
+	assert.deepEqual(record.mailboxes, []);
+	assert.deepEqual(keyMailboxes(record, ["A@b.com"]), ["a@b.com"]);
+	assert.deepEqual(keyMailboxes(record, ["a@b.com", "New@c.com"]), ["a@b.com", "new@c.com"]);
+	const some = keyAccess({ mailboxes: ["B@c.com", "b@c.com"], scopes: ["send", "read", "admin"] });
+	assert.deepEqual(some, { mailboxes: ["b@c.com"], scopes: ["read", "send"] });
+	assert.equal("allMailboxes" in some, false);
+	assert.deepEqual(keyMailboxes(some, ["a@b.com", "b@c.com"]), ["b@c.com"]);
+	assert.equal(keyProblem({ name: "x", mailboxes: [], allMailboxes: true, scopes: ["read"] }, [], 0), null);
+	assert.match(keyProblem({ name: "x", mailboxes: [], allMailboxes: true, scopes: ["read"] }, [], 25)!, /up to 25/);
+	assert.match(keyProblem({ name: "x", mailboxes: [], allMailboxes: true, scopes: [] }, [], 0)!, /tick what/);
 });
 
 test("keys come from Authorization: Bearer or X-API-Key", () => {

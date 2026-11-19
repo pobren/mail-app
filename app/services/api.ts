@@ -383,8 +383,10 @@ const api = {
 
 	// Mail App: API & webhooks
 	getDeveloper: () => get<DeveloperView>("/api/v1/developer"),
-	createApiKey: (input: { name: string; mailboxes: string[]; scopes: Scope[] }) =>
+	createApiKey: (input: { name: string; mailboxes: string[]; allMailboxes: boolean; scopes: Scope[] }) =>
 		post<{ key: string; record: Omit<ApiKey, "hash"> }>("/api/v1/developer/keys", input),
+	updateApiKey: (id: string, input: { name: string; mailboxes: string[]; allMailboxes: boolean; scopes: Scope[] }) =>
+		patch<Omit<ApiKey, "hash">>(`/api/v1/developer/keys/${encodeURIComponent(id)}`, input),
 	deleteApiKey: (id: string) => del<void>(`/api/v1/developer/keys/${encodeURIComponent(id)}`),
 	createWebhook: (input: { name: string; url: string; events: WebhookEvent[]; mailboxes: string[] }) =>
 		post<Webhook>("/api/v1/developer/webhooks", input),

@@ -4,10 +4,11 @@
 // and sending webhook events. The rules themselves are in shared/api.ts.
 
 import {
-	API_PREFIX, LOG_LENGTH, MAX_TRIES, emptyBook, findKey, mailboxIn, routeFor, shouldMarkUsed, signature, webhooksFor, worthRetrying,
+	API_PREFIX, LOG_LENGTH, MAX_TRIES, emptyBook, findKey, keyMailboxes, mailboxIn, routeFor, shouldMarkUsed, signature, webhooksFor, worthRetrying,
 	type ApiBook, type ApiKey, type Delivery, type Webhook, type WebhookEvent,
 } from "../../shared/api";
 import type { Person } from "../../shared/people";
+import { listMailboxes } from "./email-helpers";
 import type { Env } from "../types";
 
 export const API_BOOK_KEY = "api/book.json";
@@ -38,12 +39,12 @@ export function apiSwitchedOn(env: Env, dev = false): boolean {
 }
 
 /** Who a key acts as: someone who uses just the key's mailboxes, never an admin. */
-export function keyPerson(key: ApiKey): Person {
+export function keyPerson(key: ApiKey, mailboxes: string[] = key.mailboxes): Person {
 	return {
 		email: `api-key-${key.id}@mailapp.invalid`,
 		name: key.name,
 		role: "member",
-		mailboxes: key.mailboxes,
+		mailboxes,
 		adminAccess: [],
 		status: "active",
 		invitedAt: key.createdAt,
@@ -74,8 +75,10 @@ export async function admitApiRequest(req: Request, env: Env, ctx: ExecutionCont
 	const route = routeFor(req.method, path);
 	if (!route) return apiError(404, `The API doesn't have that request. See ${API_DOCS} for the list.`);
 	if (!record.scopes.includes(route.scope)) return apiError(403, `This key can't ${route.scope === "read" ? "read mail" : route.scope === "send" ? "send mail" : route.scope === "delete" ? "delete mail" : "move or label mail"}. An admin can make a new key that can.`);
+	// A key for all mailboxes covers whatever mailboxes there are now, including ones added after it was made.
+	const mailboxes = record.allMailboxes ? keyMailboxes(record, (await listMailboxes(env.BUCKET)).map((m) => m.email)) : record.mailboxes;
 	const mailbox = mailboxIn(path);
-	if (mailbox && !record.mailboxes.includes(mailbox)) return apiError(404, "Not found");
+	if (mailbox && !mailboxes.includes(mailbox)) return apiError(404, "Not found");
 
 	if (shouldMarkUsed(record, new Date())) {
 		ctx.waitUntil(updateApiBook(env.BUCKET, (b) => {
@@ -92,7 +95,7 @@ export async function admitApiRequest(req: Request, env: Env, ctx: ExecutionCont
 	headers.delete("x-api-key");
 	headers.delete("cookie");
 	const request = new Request(inner, { method: req.method, headers, body: req.body, redirect: "manual" });
-	return { request, person: keyPerson(record) };
+	return { request, person: keyPerson(record, mailboxes) };
 }
 
 // -- Webhooks ---------------------------------------------------------------------
