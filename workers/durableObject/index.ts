@@ -13,6 +13,8 @@ import type { Env } from "../types";
 import { applyMigrations, mailboxMigrations } from "./migrations";
 import { AutoEmpty } from "./auto-empty";
 import { Sync } from "./sync";
+import { JmapStore } from "./jmap";
+import type { EmailFilter, EmailSort } from "../../shared/jmap";
 import { sendLimitError } from "../lib/send-limit";
 import { buildContacts, cleanSenderName, displayName, type SavedContactRow } from "../../shared/contacts";
 import { MAX_LABELS, type Label, type LabelColor } from "../../shared/labels";
@@ -182,6 +184,7 @@ export class MailboxDO extends DurableObject<Env> {
 	autoEmpty: AutoEmpty;
 	/** Mail App: the change log for apps that keep in step, such as the Outlook bridge (see sync.ts). */
 	sync: Sync;
+	jmap: JmapStore;
 
 	constructor(state: DurableObjectState, env: Env) {
 		super(state, env);
@@ -198,6 +201,7 @@ export class MailboxDO extends DurableObject<Env> {
 		this.spamLearning = new SpamLearning(this.ctx);
 		this.autoEmpty = new AutoEmpty(this.ctx, env);
 		this.sync = new Sync(this.ctx, env);
+		this.jmap = new JmapStore(this.ctx);
 	}
 
 	// ── Mail App: keeping other apps in step (the Outlook bridge) ───────
@@ -206,6 +210,16 @@ export class MailboxDO extends DurableObject<Env> {
 	async syncChanges(since: number, limit?: number) { return this.sync.changes(since, limit); }
 	async syncIndex(folder: string, offset?: number, limit?: number) { return this.sync.index(folder, offset, limit); }
 	async sweepRaw() { return this.sync.sweepRaw(); }
+
+	// ── Mail App: JMAP (workers/jmap/) ──────────────────────────────────
+	async jmapMailboxes() { return { mailboxes: this.jmap.mailboxes(), folderState: this.jmap.folderState(), cursor: this.jmap.cursor() }; }
+	async jmapQuery(filter: EmailFilter, sort: EmailSort, position: number, limit: number, collapseThreads: boolean) {
+		return { ...this.jmap.query(filter, sort, position, limit, collapseThreads), cursor: this.jmap.cursor() };
+	}
+	async jmapGet(ids: string[], withBody: boolean) { return { emails: this.jmap.getEmails(ids, withBody), cursor: this.jmap.cursor() }; }
+	async jmapThreads(threadIds: string[]) { return { threads: this.jmap.threads(threadIds), cursor: this.jmap.cursor() }; }
+	async jmapChanges(since: number, max: number) { return this.jmap.changes(since, max); }
+	async jmapCursor() { return { cursor: this.jmap.cursor(), folderState: this.jmap.folderState() }; }
 	/** Adds one email to a folder as it is (the bridge's IMAP APPEND), threaded with any it replies to. */
 	async appendEmail(folderId: string, email: EmailData, attachments: AttachmentData[]): Promise<string | null> {
 		if (![...this.ctx.storage.sql.exec(`SELECT 1 FROM folders WHERE id = ?1`, folderId)].length) return null;

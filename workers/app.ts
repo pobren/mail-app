@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Cloudflare, Inc.
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-// Modified for Mail App, 2026: the agent route refuses mailboxes that have AI switched off; sign-in problems show a plain-English page; /f/ download links and /f/cal/ calendar subscribe links open without signing in; incoming mail passes its delivery address on; team access (each person signs in as themselves and only reaches their own mailboxes); the API at /api/ext/v1/, for other apps with an API key; passkey sign-in at /passkey/.
+// Modified for Mail App, 2026: the agent route refuses mailboxes that have AI switched off; sign-in problems show a plain-English page; /f/ download links and /f/cal/ calendar subscribe links open without signing in; incoming mail passes its delivery address on; team access (each person signs in as themselves and only reaches their own mailboxes); the API at /api/ext/v1/, for other apps with an API key; passkey sign-in at /passkey/; JMAP for mail apps at /api/ext/jmap/.
 
 import { routeAgentRequest } from "agents";
 import { type Context, Hono, type Next } from "hono";
@@ -18,6 +18,7 @@ import { publicFeeds } from "./lib/calendar-feeds";
 import { admit, devViewer, type PeopleVars } from "./lib/people";
 import { admitApiRequest, API_DOCS } from "./lib/api";
 import { keyFromHeaders } from "../shared/api";
+import { handleJmap, isJmapPath, type Internal } from "./jmap";
 import { canOpen, isAdmin, type Person } from "../shared/people";
 import { sameSite } from "./lib/same-site";
 import type { Env } from "./types";
@@ -95,6 +96,18 @@ app.use("*", async (c, next) => {
 		c.set("viewer", asKey.email);
 		c.set("person", asKey);
 		return next();
+	}
+	// Mail App 2.6: JMAP for mail apps (workers/jmap/). Same keys as the API; changes run through the routes below.
+	if (isJmapPath(new URL(c.req.url).pathname)) {
+		const origin = new URL(c.req.url).origin;
+		const internal: Internal = async (person, method, path, body, contentType) => {
+			const headers = new Headers();
+			if (contentType) headers.set("content-type", contentType);
+			const request = new Request(new URL(`/api/v1${path}`, origin), { method, headers, body: body ?? null, redirect: "manual" });
+			keyRequests.set(request, person);
+			return app.fetch(request, c.env, c.executionCtx as ExecutionContext);
+		};
+		return handleJmap(c.req.raw, c.env, c.executionCtx as ExecutionContext, internal, import.meta.env.DEV);
 	}
 	if (new URL(c.req.url).pathname.startsWith("/api/ext/")) {
 		const admitted = await admitApiRequest(c.req.raw, c.env, c.executionCtx as ExecutionContext, keyFromHeaders(c.req.raw.headers), import.meta.env.DEV);

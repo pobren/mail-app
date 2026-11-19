@@ -2,6 +2,16 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.6",
+			"date": "2026-11-19",
+			"title": "Use Mail App in JMAP Apps",
+			"changes": [
+				"JMAP: Mail App now speaks JMAP, the modern standard for mail apps. Apps that let you type in a JMAP server can read, search, file, flag, draft and send from your mailbox. Use your Mail App web address with /api/ext/jmap/session on the end as the server, and an API key as the password.",
+				"New Mail Straight Away: JMAP apps are told about new mail and changes within about 10 seconds, without checking over and over.",
+				"Works Like the Web App: Anything a JMAP app sends or changes goes through Mail App the same way, so Sent, webhooks and your API key's permissions all work as you'd expect."
+			]
+		},
+		{
 			"version": "2.5",
 			"date": "2026-11-19",
 			"title": "Change an API Key",
