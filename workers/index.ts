@@ -65,6 +65,7 @@ import { loadOtherAccounts } from "./lib/other-accounts";
 import { sendAsAddresses } from "../shared/other-accounts";
 import { otherAccounts as otherAccountRoutes } from "./routes/other-accounts";
 import { addDevice, listDevices, notifyDevices, publicKey as pushPublicKey, removeDevice } from "./lib/push";
+import { notifyJmapApps } from "./jmap/push";
 import { systemFolderFor } from "../shared/mbox-import";
 import { deleteLink, linksAvailable, listLinks, storeLink } from "./lib/links";
 import { emitEvent } from "./lib/api";
@@ -1607,6 +1608,8 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 	if (!quiet) ctx.waitUntil(notifyNewMail(env, stub, mailboxId, {
 		id: messageId, threadId, sender: parsedEmail.from?.name || parsedEmail.from?.address || "", subject: parsedEmail.subject || "",
 	}).catch((e) => console.error("New-mail notification failed:", (e as Error).message)));
+	// Mail App 2.8: and mail apps that asked to hear about new mail over JMAP push (workers/jmap/push.ts).
+	if (!quiet) ctx.waitUntil(notifyJmapApps(env, mailboxId).catch((e) => console.error("JMAP push failed:", (e as Error).message)));
 
 	// Mail App: out of office. Never for spam, or mail to a masked address (it would give away your real one);
 	// failures (such as the free plan's sending limits) are only logged.
