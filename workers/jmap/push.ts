@@ -20,6 +20,8 @@ export interface JmapPushSub {
 	id: string;
 	/** The API key that made it. */
 	keyId: string;
+	/** Set when the app signed in as one mailbox: only that mailbox's mail is sent to it. Otherwise every mailbox the key reaches. */
+	mailbox?: string | null;
 	deviceClientId: string;
 	url: string;
 	keys: { p256dh: string; auth: string } | null;
@@ -93,6 +95,7 @@ export async function notifyJmapApps(env: Env, mailbox: string): Promise<number>
 	const gone: string[] = [];
 	let sent = 0;
 	await Promise.all(subs.map(async (s) => {
+		if (s.mailbox && s.mailbox !== mailbox.toLowerCase()) return;
 		if (!(await reaches(s.keyId))) return;
 		const r = await postEncrypted(env, s.url, s.keys, stateChange(mailbox, s.types, state), mailbox).catch((e) => {
 			console.error("JMAP push failed:", (e as Error).message);

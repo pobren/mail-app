@@ -96,3 +96,17 @@ describe("requests", () => {
 		assert.equal(keyFromAuthorization(null), null);
 	});
 });
+
+describe("signing in as one mailbox", async () => {
+	const { mailboxesFor, userFromAuthorization } = await import("../shared/jmap.ts");
+	it("reads the Basic user name", () => {
+		assert.equal(userFromAuthorization("Basic " + btoa("Chris@Example.com:mailapp_x")), "chris@example.com");
+		assert.equal(userFromAuthorization("Bearer mailapp_x"), null);
+		assert.equal(userFromAuthorization(null), null);
+	});
+	it("puts that mailbox first, so it's the app's main account", () => {
+		assert.deepEqual(mailboxesFor("b@x.com", ["a@x.com", "B@x.com", "c@x.com"]), ["b@x.com", "a@x.com", "c@x.com"]);
+		assert.deepEqual(mailboxesFor("z@x.com", ["a@x.com", "b@x.com"]), ["a@x.com", "b@x.com"]);
+		assert.deepEqual(mailboxesFor(null, ["a@x.com"]), ["a@x.com"]);
+	});
+});

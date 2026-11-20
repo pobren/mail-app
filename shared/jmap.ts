@@ -308,6 +308,27 @@ export function jsonPointer(value: unknown, path: string): unknown {
 }
 
 /** Turns "Basic base64(user:key)" or "Bearer key" into the key. */
+/**
+ * Mail App 2.8.1: the user name an app sent with Basic sign in, lower case. When it's one of the key's mailboxes,
+ * that mailbox is the one the app sees first, so one key can be added once per mailbox.
+ */
+export function userFromAuthorization(header: string | null): string | null {
+	const basic = header ? /^basic\s+(.+)$/i.exec(header) : null;
+	if (!basic) return null;
+	let decoded = "";
+	try { decoded = atob(basic[1].trim()); } catch { return null; }
+	const colon = decoded.indexOf(":");
+	const user = (colon === -1 ? decoded : decoded.slice(0, colon)).trim().toLowerCase();
+	return user || null;
+}
+
+/** The key's mailboxes in the order an app sees them: the one it signed in as first, then the rest as they were. */
+export function mailboxesFor(user: string | null, mailboxes: string[]): string[] {
+	const list = mailboxes.map((m) => m.toLowerCase());
+	if (!user || !list.includes(user)) return list;
+	return [user, ...list.filter((m) => m !== user)];
+}
+
 export function keyFromAuthorization(header: string | null): string | null {
 	if (!header) return null;
 	const bearer = /^bearer\s+(.+)$/i.exec(header);
