@@ -2,6 +2,15 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.7",
+			"date": "2026-11-20",
+			"title": "Shorter Catch-all Settings",
+			"changes": [
+				"Catch-all and Masked Email Together: A mailbox's Addresses now lists only the domains where it has a catch-all or masked email, each with a Catch-all or Masked email choice, instead of two switches for every domain. Installs with lots of domains stay short.",
+				"Turn On for a Domain: Pick a domain and Turn on to add one. The list shows which mailbox has each domain now, so you can see what will move. Every other domain turns it on for them all at once."
+			]
+		},
+		{
 			"version": "2.6",
 			"date": "2026-11-19",
 			"title": "Use Mail App in JMAP Apps",

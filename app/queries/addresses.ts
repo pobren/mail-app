@@ -17,7 +17,7 @@ export function useAddressBook(enabled = true) {
 	return useQuery<AddressBookView>({ queryKey: queryKeys.addressBook, queryFn: () => api.getAddressBook(), enabled });
 }
 
-type Change =
+export type AddressChange =
 	| { kind: "add"; address: string; name?: string; signature?: string }
 	| { kind: "update"; address: string; name?: string; signature?: string }
 	| { kind: "remove"; address: string }
@@ -28,7 +28,7 @@ type Change =
 export function useChangeAddresses() {
 	const qc = useQueryClient();
 	return useMutation({
-		mutationFn: ({ mailboxId, change }: { mailboxId: string; change: Change }) => {
+		mutationFn: ({ mailboxId, change }: { mailboxId: string; change: AddressChange }) => {
 			switch (change.kind) {
 				case "add": return api.addAddress(mailboxId, { address: change.address, name: change.name, signature: change.signature });
 				case "update": return api.updateAddress(mailboxId, change.address, { name: change.name, signature: change.signature });
