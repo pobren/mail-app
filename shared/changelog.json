@@ -4,12 +4,14 @@
 		{
 			"version": "2.8",
 			"date": "2026-11-20",
-			"title": "Other Accounts",
+			"title": "Other Accounts and Instant Alerts",
 			"changes": [
 				"Other Accounts: Bring mail in from Gmail, iCloud, Yahoo, Fastmail, Zoho or any IMAP or POP3 account, in Settings, Other accounts. Mail App checks each one every 5 minutes and leaves your mail where it is.",
 				"Send As Them: Pick the account in the From menu and the email goes out through its own server, so it arrives properly signed. Replies to its mail come from it on their own.",
 				"Last 30 Days: When you add an IMAP account, you can bring in its last 30 days of mail too, filed quietly with no notifications.",
-				"Its Own Label: Mail from each account gets a label, such as Gmail, so you can see where it came from."
+				"Its Own Label: Mail from each account gets a label, such as Gmail, so you can see where it came from.",
+				"Instant Alerts over JMAP: Mail apps that use Mail App's JMAP, such as JMAP Connect on iPhone and iPad, can now show new mail the moment it arrives. The alert is encrypted for the app and only says that something changed. The app then fetches the email itself with its own API key.",
+				"Stops With the Key: Deleting an API key, or taking a mailbox off it, stops its alerts straight away. Never for spam, or for mail that goes straight to another folder."
 			]
 		},
 		{
