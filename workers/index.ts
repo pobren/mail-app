@@ -1583,7 +1583,7 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 	if (!quiet) ctx.waitUntil(notifyNewMail(env, stub, mailboxId, {
 		id: messageId, threadId, sender: parsedEmail.from?.name || parsedEmail.from?.address || "", subject: parsedEmail.subject || "",
 	}).catch((e) => console.error("New-mail notification failed:", (e as Error).message)));
-	// Mail App 2.8: and mail apps that asked to hear about new mail over JMAP push (workers/jmap/push.ts).
+	// Mail App 2.9: and mail apps that asked to hear about new mail over JMAP push (workers/jmap/push.ts).
 	if (!quiet) ctx.waitUntil(notifyJmapApps(env, mailboxId).catch((e) => console.error("JMAP push failed:", (e as Error).message)));
 
 	// Mail App: out of office. Never for spam, or mail to a masked address (it would give away your real one);

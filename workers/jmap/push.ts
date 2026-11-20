@@ -1,4 +1,4 @@
-// Mail App 2.8: JMAP push subscriptions (RFC 8620 section 7.2), so a mail app on a phone can show new mail the moment
+// Mail App 2.9: JMAP push subscriptions (RFC 8620 section 7.2), so a mail app on a phone can show new mail the moment
 // it arrives instead of checking every so often. The app gives an https address and its own encryption keys. Mail App
 // posts a code there to prove the address is the app's, the app sends the code back, and from then on each new
 // email (never spam) posts a short, encrypted "something changed" notice. The notice says nothing about the email;

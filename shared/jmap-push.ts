@@ -1,4 +1,4 @@
-// Mail App 2.8: the checks behind JMAP push subscriptions (workers/jmap/push.ts), kept here so they can be tested.
+// Mail App 2.9: the checks behind JMAP push subscriptions (workers/jmap/push.ts), kept here so they can be tested.
 
 /** Longest a subscription lasts before the app must stretch it again (the same as Fastmail). */
 export const MAX_LIFE_MS = 30 * 24 * 60 * 60 * 1000;

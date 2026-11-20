@@ -5,7 +5,7 @@
 //   GET  /api/ext/jmap/download/{accountId}/{blobId}/{name}     an email file, attachment or upload
 //   POST /api/ext/jmap/upload/{accountId}                       a file to attach (kept 24 hours)
 //   GET  /api/ext/jmap/eventsource                              push: a "state" event when mail changes
-//   PushSubscription/get and /set (2.8)                         push to a phone app's https address (workers/jmap/push.ts)
+//   PushSubscription/get and /set (2.9)                         push to a phone app's https address (workers/jmap/push.ts)
 //
 // Sign-in is an API key (Admin > API & webhooks), as Bearer or as the password with Basic. Each mailbox the
 // key reaches is one JMAP account, and the key's permissions apply: read to read, organise to mark and

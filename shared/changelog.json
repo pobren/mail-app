@@ -2,7 +2,7 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
-			"version": "2.8",
+			"version": "2.9",
 			"date": "2026-11-20",
 			"title": "Instant Alerts in Mail Apps",
 			"changes": [
