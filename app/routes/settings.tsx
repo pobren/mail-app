@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Cloudflare, Inc.
 // Licensed under the Apache 2.0 license found in the LICENSE file or at:
 //     https://opensource.org/licenses/Apache-2.0
-// Modified for Mail App, 2026: AI assistant on/off switch (off by default), what it does and keeps, and model choice; blocked senders; signature; templates; out of office; contacts and contact photos; backup & export; extra addresses; who can open this mailbox and admin access log; your own sign-off in a shared mailbox; inbox rules; automatic forwarding; masked email; passkeys; long lists fold to their first few; wording in app/copy/settings.en-GB.json.
+// Modified for Mail App, 2026: AI assistant on/off switch (off by default), what it does and keeps, and model choice; blocked senders; signature; templates; out of office; contacts and contact photos; backup & export; extra addresses; who can open this mailbox and admin access log; your own sign-off in a shared mailbox; inbox rules; automatic forwarding; masked email; other accounts (IMAP and POP3); passkeys; long lists fold to their first few; wording in app/copy/settings.en-GB.json.
 
 import { Badge, Button, Input, Loader, Switch, Text, useKumoToastManager } from "@cloudflare/kumo";
 import { AirplaneTakeoffIcon, AppWindowIcon, ArchiveBoxIcon, DownloadSimpleIcon, AddressBookIcon, UserCircleIcon, RobotIcon, ArrowCounterClockwiseIcon, NotepadIcon, PencilSimpleIcon, PlusIcon, ProhibitIcon, SignatureIcon, TrashIcon, UploadSimpleIcon, XIcon } from "@phosphor-icons/react";
@@ -25,6 +25,7 @@ import SpamLearningNote from "~/components/SpamLearningNote";
 import AppearanceSettings from "~/components/AppearanceSettings";
 import AutoEmptySettings from "~/components/AutoEmptySettings";
 import ForwardingSettings from "~/components/ForwardingSettings";
+import OtherAccounts from "~/components/OtherAccounts";
 import PersonalSignOff from "~/components/PersonalSignOff";
 import Passkeys from "~/components/Passkeys";
 import { isValidSenderEntry } from "shared/spam";
@@ -37,7 +38,7 @@ import { FindBox, ShowMoreButton, useShowMore } from "~/components/ShowMore";
 // The authoritative default prompt lives in workers/agent/index.ts (DEFAULT_SYSTEM_PROMPT).
 const PROMPT_PLACEHOLDER = `You are an email assistant that helps manage this inbox. You read emails, draft replies, and help organise conversations.\n\nWrite like a real person. Short, direct, flowing prose. Plain text only.\n\n(Leave empty to use the full built-in default prompt)`;
 
-const TABS = ["account", "addresses", "masked", "writing", "contacts", "rules", "forwarding", "spam", "backup", "ai"] as const;
+const TABS = ["account", "addresses", "accounts", "masked", "writing", "contacts", "rules", "forwarding", "spam", "backup", "ai"] as const;
 type Tab = (typeof TABS)[number];
 const SAVED_TABS = new Set<Tab>(["account", "writing", "contacts", "ai"]);
 
@@ -185,6 +186,7 @@ export default function SettingsRoute() {
 				{tab === "addresses" && mailboxId && (
 					<AddressSettings mailboxId={mailboxId} mainName={mailbox.settings?.fromName || mailbox.name} settings={mailbox.settings} />
 				)}
+				{tab === "accounts" && mailboxId && <OtherAccounts mailboxId={mailboxId} />}
 				{tab === "masked" && mailboxId && <MaskedSettings mailboxId={mailboxId} settings={mailbox.settings} />}
 				{tab === "writing" && (<>
 				{/* Mail App: in a shared mailbox, your own name and signature */}

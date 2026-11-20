@@ -248,7 +248,8 @@ export function useComposeForm(mailboxId?: string, _folder?: string) {
 
 	const sigBlock = useMemo(() => getSignatureBlock(currentMailbox?.settings), [currentMailbox]);
 	// Mail App: the addresses this mailbox can send from, and the name and signature that go with each.
-	const book = useMemo<AddressBook>(() => ({ aliases: addresses?.aliases ?? [], catchAll: {} }), [addresses]);
+	// Other accounts (Gmail, say) join the list, so they're in the From menu and replies to their mail come from them.
+	const book = useMemo<AddressBook>(() => ({ aliases: [...(addresses?.aliases ?? []), ...(addresses?.others ?? [])], catchAll: {} }), [addresses]);
 	// Mail App: a reply to mail that came to a masked address comes from that masked address, so the website
 	// never sees your real one. Only that one is offered, not every masked address you have.
 	const maskedCandidate = (composeOptions.draftEmail?.sender ?? deliveredTo(composeOptions.originalEmail?.raw_headers) ?? "").toLowerCase();

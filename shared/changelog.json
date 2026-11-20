@@ -2,6 +2,17 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.8",
+			"date": "2026-11-20",
+			"title": "Other Accounts",
+			"changes": [
+				"Other Accounts: Bring mail in from Gmail, iCloud, Yahoo, Fastmail, Zoho or any IMAP or POP3 account, in Settings, Other accounts. Mail App checks each one every 5 minutes and leaves your mail where it is.",
+				"Send As Them: Pick the account in the From menu and the email goes out through its own server, so it arrives properly signed. Replies to its mail come from it on their own.",
+				"Last 30 Days: When you add an IMAP account, you can bring in its last 30 days of mail too, filed quietly with no notifications.",
+				"Its Own Label: Mail from each account gets a label, such as Gmail, so you can see where it came from."
+			]
+		},
+		{
 			"version": "2.7",
 			"date": "2026-11-20",
 			"title": "Shorter Catch-all Settings",

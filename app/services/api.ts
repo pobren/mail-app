@@ -34,6 +34,13 @@ export interface SharedCalendar extends Calendar {
 }
 import type { Alias } from "shared/addresses";
 import type { MaskedAddress } from "shared/masked";
+import type { NewAccountInput, OtherAccountView } from "shared/other-accounts";
+
+export interface OtherAccountsView {
+	off: boolean;
+	max: number;
+	accounts: OtherAccountView[];
+}
 import type { FileItem, FileListing, FileUsage } from "shared/files";
 import type { Note, NoteInput } from "shared/notes";
 import type { CompanyDetails } from "shared/company";
@@ -53,6 +60,8 @@ export interface AddressesView {
 	/** Each of your domains, and the mailbox that gets masked email there (null: none). */
 	masked?: { domain: string; mailbox: string | null }[];
 	domains: string[];
+	/** Other accounts (Settings > Other accounts) this mailbox can send as, for the From menu. */
+	others?: Alias[];
 }
 
 /** Mail App: a mailbox's masked addresses, and the domains it has masked email at. */
@@ -513,6 +522,20 @@ const api = {
 		post<{ settings: unknown }>(`/api/v1/mailboxes/${mailboxId}/spam/${action}`, { sender, emailId }),
 	saveRules: (mailboxId: string, rules: unknown[]) =>
 		put<{ settings: unknown }>(`/api/v1/mailboxes/${mailboxId}/rules`, { rules }),
+	// Other accounts (added for Mail App)
+	getOtherAccounts: (mailboxId: string) =>
+		get<OtherAccountsView>(`/api/v1/mailboxes/${mailboxId}/other-accounts`),
+	addOtherAccount: (mailboxId: string, input: NewAccountInput) =>
+		post<OtherAccountsView>(`/api/v1/mailboxes/${mailboxId}/other-accounts`, input),
+	changeOtherAccount: (mailboxId: string, id: string, change: { name?: string; label?: string; password?: string }) =>
+		patch<OtherAccountsView>(`/api/v1/mailboxes/${mailboxId}/other-accounts/${encodeURIComponent(id)}`, change),
+	removeOtherAccount: (mailboxId: string, id: string) =>
+		del<OtherAccountsView>(`/api/v1/mailboxes/${mailboxId}/other-accounts/${encodeURIComponent(id)}`),
+	checkOtherAccount: (mailboxId: string, id: string) =>
+		post<OtherAccountsView>(`/api/v1/mailboxes/${mailboxId}/other-accounts/${encodeURIComponent(id)}/check`, {}),
+	getOtherAccountsSwitch: () => get<{ off: boolean; admin: boolean; total: number }>(`/api/v1/other-accounts/switch`),
+	setOtherAccountsSwitch: (off: boolean) => put<{ off: boolean; admin: boolean; total: number }>(`/api/v1/other-accounts/switch`, { off }),
+
 	getForwarding: (mailboxId: string) =>
 		get<{ forwarding: ForwardingSettings; status: ForwardingStatus | null }>(`/api/v1/mailboxes/${mailboxId}/forwarding`),
 	saveForwarding: (mailboxId: string, forwarding: ForwardingSettings) =>

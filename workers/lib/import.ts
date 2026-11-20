@@ -69,6 +69,11 @@ async function labelIds(stub: Stub, names: string[]): Promise<Map<string, string
 	return out;
 }
 
+/** Mail App: one label by name, made if it isn't there yet. Null when there's no room for another. */
+export async function labelIdFor(stub: Stub, name: string): Promise<string | null> {
+	return (await labelIds(stub, [name])).get(name) ?? null;
+}
+
 export async function importMessages(env: Env, stub: Stub, mailboxId: string, raws: Uint8Array[], fallback: Placement["folder"]): Promise<ImportResult> {
 	const result: ImportResult = { added: 0, skipped: 0, failed: 0 };
 	const parsed: { email: Awaited<ReturnType<PostalMime["parse"]>>; place: Placement; messageId: string | null }[] = [];

@@ -28,6 +28,8 @@ export interface SendEmailParams {
 		contentId?: string;
 	}[];
 	headers?: Record<string, string>;
+	/** Mail App: the Message-ID filed in Sent, used when sending through another account's server. */
+	messageId?: string;
 }
 
 /**

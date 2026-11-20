@@ -26,6 +26,7 @@ import type { Env } from "./types";
 export { MailboxDO } from "./durableObject";
 export { EmailAgent } from "./agent";
 export { EmailMCP } from "./mcp";
+export { OtherAccountsDO } from "./durableObject/other-accounts";
 
 declare module "react-router" {
 	export interface AppLoadContext {
