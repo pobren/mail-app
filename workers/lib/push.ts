@@ -171,7 +171,7 @@ export async function notifyDevices(env: Env, mailboxId: string, message: PushMe
 }
 
 /**
- * Mail App 2.9: posts one JMAP push notice (RFC 8620 section 7.2) to the address a mail app gave. Encrypted for the
+ * Mail App 2.8: posts one JMAP push notice (RFC 8620 section 7.2) to the address a mail app gave. Encrypted for the
  * app when it gave keys (RFC 8291), plain JSON when it didn't, and signed with this install's VAPID key either way.
  * "gone" means the address no longer wants posts (404 or 410), so the subscription can be dropped.
  */
