@@ -169,3 +169,32 @@ export async function notifyDevices(env: Env, mailboxId: string, message: PushMe
 	for (const s of gone) await removeDevice(env, mailboxId, s.endpoint);
 	return list.length - gone.length;
 }
+
+/**
+ * Mail App 2.8: posts one JMAP push notice (RFC 8620 section 7.2) to the address a mail app gave. Encrypted for the
+ * app when it gave keys (RFC 8291), plain JSON when it didn't, and signed with this install's VAPID key either way.
+ * "gone" means the address no longer wants posts (404 or 410), so the subscription can be dropped.
+ */
+export async function postEncrypted(env: Env, url: string, keys: { p256dh: string; auth: string } | null, notice: unknown, contact: string): Promise<"sent" | "gone" | "failed"> {
+	const plain = enc.encode(JSON.stringify(notice));
+	const headers: Record<string, string> = {
+		Authorization: await vapidHeader(env, url, contact),
+		TTL: String(24 * 3600),
+		Urgency: "high",
+	};
+	let body: Bytes = plain;
+	if (keys) {
+		body = await encryptForDevice(keys, plain);
+		headers["Content-Encoding"] = "aes128gcm";
+		headers["Content-Type"] = "application/octet-stream";
+	} else {
+		headers["Content-Type"] = "application/json; charset=utf-8";
+	}
+	const res = await fetch(url, { method: "POST", headers, body, redirect: "manual" });
+	if (res.status === 404 || res.status === 410) return "gone";
+	if (!res.ok) {
+		console.error(`JMAP push to ${new URL(url).host} failed: ${res.status}`);
+		return "failed";
+	}
+	return "sent";
+}
