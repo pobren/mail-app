@@ -60,7 +60,10 @@ import { domainAgeDays } from "./lib/domain-age";
 import { RULE_BOUNCE, applyRules, cleanRules, type InboxRule } from "shared/rules";
 import { cleanForwarding, forwardingProblem, shouldForward, FORWARDED_HEADER } from "shared/forwarding";
 import { forwardEmail, loadForwardingStatus } from "./lib/forwarding";
-import { importMessages } from "./lib/import";
+import { importMessages, labelIdFor } from "./lib/import";
+import { loadOtherAccounts } from "./lib/other-accounts";
+import { sendAsAddresses } from "../shared/other-accounts";
+import { otherAccounts as otherAccountRoutes } from "./routes/other-accounts";
 import { addDevice, listDevices, notifyDevices, publicKey as pushPublicKey, removeDevice } from "./lib/push";
 import { systemFolderFor } from "../shared/mbox-import";
 import { deleteLink, linksAvailable, listLinks, storeLink } from "./lib/links";
@@ -437,7 +440,7 @@ app.delete("/api/v1/mailboxes/:mailboxId", requireAdmin, async (c) => {
 // The mailbox's extra addresses, the domains it catches mail for every other address at (and which
 // mailbox does for the rest), and the domains an address can be at.
 async function addressesFor(env: Env, mailboxId: string) {
-	const [book, masked] = await Promise.all([loadAddressBook(env.BUCKET), loadMasked(env.BUCKET)]);
+	const [book, masked, others] = await Promise.all([loadAddressBook(env.BUCKET), loadMasked(env.BUCKET), loadOtherAccounts(env.BUCKET)]);
 	const { mailboxes, domains } = await installDomains(env);
 	const id = mailboxId.toLowerCase();
 	return { book, masked, mailboxes, domains, view: {
@@ -446,6 +449,11 @@ async function addressesFor(env: Env, mailboxId: string) {
 		// Mail App: which mailbox gets masked email at each domain.
 		masked: domains.map((domain) => ({ domain, mailbox: masked.domains[domain] ?? null })),
 		domains,
+		// Mail App: other accounts this mailbox can send as (Settings > Other accounts), for the From menu.
+		others: sendAsAddresses(others, id).map((address) => {
+			const a = others.accounts.find((x) => x.address === address && x.mailbox === id);
+			return { address, mailbox: id, ...(a?.name ? { name: a.name } : {}) };
+		}),
 	} };
 }
 
@@ -629,6 +637,8 @@ app.route("/", developerRoutes);
 app.route("/", adminBackups);
 // Mail App: Settings > Account > Passkeys.
 app.route("/", passkeyRoutes);
+// Mail App: Settings > Other accounts.
+app.route("/", otherAccountRoutes);
 
 // -- Emails ---------------------------------------------------------
 
@@ -711,6 +721,7 @@ app.post("/api/v1/mailboxes/:mailboxId/emails", async (c: AppContext) => {
 		to, cc, bcc, from, subject, html, text,
 		attachments: attachments?.map((att) => ({ content: att.content, filename: att.filename, type: att.type, disposition: att.disposition || "attachment" as const, contentId: att.contentId })),
 		...(in_reply_to ? { headers: buildThreadingHeaders(in_reply_to, references || []) } : {}),
+		messageId: outgoingMessageId,
 	};
 	const event = {
 		id: messageId, thread_id: thread_id || in_reply_to || messageId, folder: Folders.SENT, subject, from: fromEmail, to: toStr,
@@ -1366,7 +1377,12 @@ async function spamSettingsFor(bucket: R2Bucket, mailboxId: string): Promise<Spa
 	}
 }
 
-async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: string; setReject?: (reason: string) => void; forward?: (rcptTo: string, headers?: Headers) => Promise<void> }, env: Env, ctx: ExecutionContext) {
+/**
+ * Mail App: `fetched` is set for mail brought in from one of the mailbox's other accounts
+ * (workers/durableObject/other-accounts.ts): it goes straight to that mailbox, as if sent to that
+ * account's address, gets the account's label, and never gets an out-of-office reply.
+ */
+async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: string; setReject?: (reason: string) => void; forward?: (rcptTo: string, headers?: Headers) => Promise<void>; fetched?: { mailbox: string; address: string; label?: string } }, env: Env, ctx: ExecutionContext) {
 	const rawEmail = await streamToArrayBuffer(event.raw, event.rawSize);
 	const parsedEmail = await new PostalMime().parse(rawEmail);
 
@@ -1387,7 +1403,9 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 	// address, or any other address at your domains when a mailbox catches all of them.
 	const { mailboxes, domains } = await installDomains(env);
 	const [book, masked] = await Promise.all([loadAddressBook(env.BUCKET), loadMasked(env.BUCKET)]);
-	const route = routeIncoming(candidates, mailboxes, book, masked, domains);
+	const route: ReturnType<typeof routeIncoming> = event.fetched
+		? { mailbox: event.fetched.mailbox.toLowerCase(), deliveredTo: event.fetched.address.toLowerCase() }
+		: routeIncoming(candidates, mailboxes, book, masked, domains);
 	if (!route) { console.log(`Ignoring email: none of ${candidates.length} recipient(s) is a mailbox or address here.`); return; }
 	// A masked address that's off or has ended: the email goes back to whoever sent it.
 	if ("reject" in route) { event.setReject?.(route.reject); return; }
@@ -1422,6 +1440,10 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 
 	const messageId = crypto.randomUUID();
 	const stub = env.MAILBOX.get(env.MAILBOX.idFromName(mailboxId));
+
+	// Mail App: mail from another account that's already here (it was forwarded here too, say) is skipped.
+	const extractId = (s: string) => { const m = s.match(/<([^>]+)>/); return m ? m[1] : s.trim().split(/\s+/)[0]; };
+	if (event.fetched && parsedEmail.messageId && (await (stub as any).knownMessageIds([extractId(parsedEmail.messageId)])).length) return;
 
 	const attachmentData: StoredAttachment[] = [];
 	if (parsedEmail.attachments) {
@@ -1559,7 +1581,10 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 		thread_id: threadId, message_id: originalMessageId, raw_headers: JSON.stringify(headers),
 		read: markRead, starred: rules.star,
 	}, attachmentData);
-	if (rules.labels.length) await stub.setConversationLabels(messageId, rules.labels, []);
+	// Mail App: mail from another account gets that account's label, such as "Gmail".
+	const viaLabel = event.fetched?.label ? await labelIdFor(stub as any, event.fetched.label).catch(() => null) : null;
+	const labels = [...rules.labels, ...(viaLabel && !rules.labels.includes(viaLabel) ? [viaLabel] : [])];
+	if (labels.length) await stub.setConversationLabels(messageId, labels, []);
 	// Mail App: Admin > Reports: count it, and why it went to Spam.
 	const spamWhy: SpamWhy | null = folder !== Folders.SPAM ? null : listed ?? (reasons.length ? "checks" : "rule");
 	ctx.waitUntil((stub as any).countMail(spamWhy ? ["received", `spam:${spamWhy}`] : ["received"]).catch(() => {}));
@@ -1585,7 +1610,7 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number; to?: 
 
 	// Mail App: out of office. Never for spam, or mail to a masked address (it would give away your real one);
 	// failures (such as the free plan's sending limits) are only logged.
-	if (!isSpam && !delivery.masked) {
+	if (!isSpam && !delivery.masked && !event.fetched) {
 		ctx.waitUntil(sendAutoReply(env, spamSettings as Record<string, unknown> | null, {
 			mailboxId, replyAs: book.aliases.find((a) => a.address === delivery.deliveredTo && a.mailbox === mailboxId),
 			sender, subject: parsedEmail.subject || "", headers: parsedEmail.headers,

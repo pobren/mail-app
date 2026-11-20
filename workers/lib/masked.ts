@@ -4,6 +4,7 @@
 import { sendableAddresses } from "../../shared/addresses";
 import { MASKED_KEY, cleanMaskedFile, sendableMasked, type MaskedFile } from "../../shared/masked";
 import { loadAddressBook } from "./addresses";
+import { otherSendable } from "./other-accounts";
 
 export async function loadMasked(bucket: R2Bucket): Promise<MaskedFile> {
 	try {
@@ -18,8 +19,8 @@ export async function saveMasked(bucket: R2Bucket, file: MaskedFile): Promise<vo
 	await bucket.put(MASKED_KEY, JSON.stringify(cleanMaskedFile(file)), { httpMetadata: { contentType: "application/json" } });
 }
 
-/** The mailbox's own address, its extra addresses, then the masked addresses it can reply from. */
+/** The mailbox's own address, its extra addresses, the masked addresses it can reply from, then its other accounts. */
 export async function sendableFor(bucket: R2Bucket, mailboxId: string): Promise<string[]> {
-	const [book, masked] = await Promise.all([loadAddressBook(bucket), loadMasked(bucket)]);
-	return [...sendableAddresses(book, mailboxId), ...sendableMasked(masked, mailboxId)];
+	const [book, masked, others] = await Promise.all([loadAddressBook(bucket), loadMasked(bucket), otherSendable(bucket, mailboxId)]);
+	return [...sendableAddresses(book, mailboxId), ...sendableMasked(masked, mailboxId), ...others];
 }

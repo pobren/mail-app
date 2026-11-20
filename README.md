@@ -9,6 +9,7 @@
 Mail App gives you private email at your own domain. It installs into your own Cloudflare account, so your mail, contacts and files stay there, and nothing depends on anyone else to keep running. Every feature is in the free app. There's nothing to unlock.
 
 - **Email:** conversations, labels, folders, search, rules, scheduled send, snooze, templates, signatures, auto-replies and forwarding.
+- **Other accounts:** bring mail in from Gmail, iCloud, Yahoo or any IMAP or POP3 account, and send as it through its own server.
 - **Teams:** up to 50 people, each signing in as themselves, with shared mailboxes like sales@ and extra addresses.
 - **Spam filter:** dozens of checks that run inside your account, and it learns from what you mark. An optional AI check uses Cloudflare Workers AI in your own account.
 - **Calendar, contacts, notes and files**, with invites that work with Google, Outlook and Apple.
@@ -96,6 +97,15 @@ Passkey sign-in needs more set-up in Access, so it's easiest with the installer.
 ## Sending email
 
 Sending to other people needs Cloudflare's Workers Paid plan ($5 a month) and your domain switched on for sending in **Email › Email Sending**, which adds the SPF and DKIM records. Mail App's **Setup** page checks your records and says what to fix. Receiving works on the free plan.
+
+## Other accounts
+
+Each mailbox can bring in mail from up to 3 outside accounts (Gmail, iCloud, Yahoo, Fastmail, Zoho, your internet provider and so on) in **Settings › Other accounts**, and send as them. Mail App checks each account every 5 minutes over IMAP or POP3, leaves the mail where it is (nothing is marked as read, moved or deleted there), and sends through the account's own SMTP server, so emails arrive signed by that provider. Most providers need an app password; the form links to where to make one.
+
+- Passwords are checked when you add the account, then encrypted (AES-GCM) before they're stored in your own R2 bucket. To use your own key instead of the one Mail App makes, add a Worker secret called `OTHER_ACCOUNTS_KEY` before adding any accounts.
+- Checks run in a small Durable Object per mailbox. A few accounts fit well inside the Workers Paid plan's included allowance. An account that keeps failing is checked hourly until it's fixed.
+- Outlook.com, Hotmail and Microsoft 365 need a Sign in with Microsoft button, which isn't in Mail App yet. Proton Mail and Tuta don't allow other apps to check mail.
+- Admins can switch the feature off for the whole install from the same page.
 
 ## Adding domains
 

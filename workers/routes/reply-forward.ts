@@ -121,6 +121,7 @@ export async function handleReplyEmail(c: AppContext) {
 			contentId: att.contentId,
 		})),
 		headers: buildThreadingHeaders(originalMsgId, references),
+		messageId: outgoingMessageId,
 	};
 	const event = {
 		id: messageId, thread_id: thread_id, folder: Folders.SENT, subject, from: fromEmail, to: toStr,
@@ -228,6 +229,7 @@ export async function handleForwardEmail(c: AppContext) {
 			disposition: att.disposition,
 			contentId: att.contentId,
 		})),
+		messageId: outgoingMessageId,
 	};
 	const event = {
 		id: messageId, thread_id: messageId, folder: Folders.SENT, subject, from: fromEmail, to: toStr,

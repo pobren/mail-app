@@ -26,6 +26,7 @@
 	"tabs": {
 		"account": "Account",
 		"addresses": "Addresses",
+		"accounts": "Other accounts",
 		"masked": "Masked email",
 		"writing": "Writing",
 		"contacts": "Contacts",

@@ -7,6 +7,7 @@ import { sendEmail, type SendEmailParams } from "../email-sender";
 import { CHECK_SUBJECT, afterCheck, afterSend, sendFailureText, type SendingStatus } from "../../shared/sending";
 import type { Env } from "../types";
 import { loadAddressBook } from "./addresses";
+import { sendThroughAccount, sendingAccount } from "./other-accounts";
 
 /** Where a send is counted for Admin > Reports. Inside a mailbox, its own tally (calling itself could stall). */
 export interface SendTally {
@@ -39,7 +40,21 @@ function fromAddress(from: SendEmailParams["from"]): string {
  * sendEmail, plus a note of any setup problem the send runs into (so admins are told), and a count for
  * Admin > Reports. Throws the send's own error as before.
  */
-export async function sendTracked(env: Env, params: SendEmailParams, tally?: SendTally): Promise<{ messageId: string }> {
+export async function sendTracked(env: Env, params: SendEmailParams & { messageId?: string }, tally?: SendTally): Promise<{ messageId: string }> {
+	// Mail App: from one of the mailbox's other accounts (Gmail, say): sent through that provider's own server.
+	const other = await sendingAccount(env, fromAddress(params.from)).catch(() => null);
+	if (other) {
+		try {
+			const sent = await sendThroughAccount(env, other, params, !!import.meta.env?.DEV);
+			await countSend(env, params, null, tally, other.mailbox);
+			return sent;
+		} catch (e) {
+			const said = (e as Error)?.message || "The other account's server didn't take it.";
+			const plain = new Error(said.startsWith("Not sent.") ? said : `Not sent. Sending through ${other.address} didn't work. ${said}`);
+			await countSend(env, params, plain, tally, other.mailbox);
+			throw plain;
+		}
+	}
 	try {
 		const sent = await sendEmail(env.EMAIL, params);
 		await countSend(env, params, null, tally);
@@ -57,12 +72,12 @@ export async function sendTracked(env: Env, params: SendEmailParams, tally?: Sen
 const listOf = (v: string | string[] | undefined) => (Array.isArray(v) ? v : v ? [v] : []);
 
 /** Counts a send in the mailbox it came from (an extra address counts for its mailbox). Never throws. */
-async function countSend(env: Env, params: SendEmailParams, error: unknown, tally?: SendTally): Promise<void> {
+async function countSend(env: Env, params: SendEmailParams, error: unknown, tally?: SendTally, knownMailbox?: string): Promise<void> {
 	try {
 		let target = tally;
 		if (!target) {
 			const from = fromAddress(params.from);
-			const mailbox = (await loadAddressBook(env.BUCKET)).aliases.find((a) => a.address === from)?.mailbox ?? from;
+			const mailbox = knownMailbox ?? (await loadAddressBook(env.BUCKET)).aliases.find((a) => a.address === from)?.mailbox ?? from;
 			// Only real mailboxes: this mustn't make an empty one for an address that isn't.
 			if (!(await env.BUCKET.head(`mailboxes/${mailbox}.json`))) return;
 			target = env.MAILBOX.get(env.MAILBOX.idFromName(mailbox)) as unknown as SendTally;

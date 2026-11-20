@@ -85,6 +85,8 @@ function errorText(e: unknown): string {
 export function sendFailureText(e: unknown): string {
 	const code = String((e as { code?: unknown })?.code ?? "");
 	const message = String((e as { message?: unknown })?.message ?? e ?? "").trim();
+	// Mail App: other accounts' own servers (workers/lib/other-accounts.ts) already say it plainly.
+	if (!code && message.startsWith("Not sent.")) return message;
 	switch (code) {
 		case "E_SENDER_NOT_VERIFIED":
 		case "E_SENDER_DOMAIN_NOT_AVAILABLE":
