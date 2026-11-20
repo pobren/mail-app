@@ -19,7 +19,7 @@
 import {
 	CAP_CORE, CAP_MAIL, CAP_SUBMISSION, CORE_LIMITS, JMAP_PREFIX,
 	addressesOf, attachmentBlobId, bodyBlobId, emailBlobId, flagsFromPatch, flattenFilter, folderFromPatch, fromJmapId,
-	isHtmlBody, keyFromAuthorization, keywordsOf, parseBlobId, previewOf, resolveBackRefs, roleOf, sortOf, sortOrderOf,
+	isHtmlBody, keyFromAuthorization, keywordsOf, mailboxesFor, userFromAuthorization, parseBlobId, previewOf, resolveBackRefs, roleOf, sortOf, sortOrderOf,
 	textOf, toJmapId, type EmailAddress, type Invocation,
 } from "../../shared/jmap";
 import { findKey, keyFromHeaders, keyMailboxes, shouldMarkUsed, type ApiKey, type Scope } from "../../shared/api";
@@ -50,6 +50,8 @@ interface Ctx {
 	/** accountId → mailbox address */
 	accounts: Map<string, string>;
 	scopes: Set<Scope>;
+	/** The mailbox the app signed in as (Basic user name), when it's one of the key's. */
+	signedInAs: string | null;
 }
 
 const UPLOADS = "jmap-uploads/";
@@ -97,8 +99,12 @@ async function signIn(req: Request, env: Env, ctx: ExecutionContext, internal: I
 		}).catch(() => {}));
 	}
 	const accounts = new Map<string, string>();
-	for (const m of mailboxes) accounts.set(toJmapId(m.toLowerCase()), m.toLowerCase());
-	return { env, ctx, internal, origin: new URL(req.url).origin, key, person: keyPerson(key, mailboxes), accounts, scopes: new Set(key.scopes) };
+	// Mail App 2.8.1: signing in as one of the key's mailboxes puts that one first, so it's the app's main account.
+	const user = userFromAuthorization(req.headers.get("authorization"));
+	const ordered = mailboxesFor(user, mailboxes);
+	for (const m of ordered) accounts.set(toJmapId(m), m);
+	const signedInAs = user && ordered[0] === user ? user : null;
+	return { env, ctx, internal, origin: new URL(req.url).origin, key, person: keyPerson(key, mailboxes), accounts, scopes: new Set(key.scopes), signedInAs };
 }
 
 // -- Entry -----------------------------------------------------------------------------------------
@@ -154,7 +160,7 @@ async function session(c: Ctx) {
 		capabilities,
 		accounts,
 		primaryAccounts: primary,
-		username: c.key.name,
+		username: c.signedInAs ?? c.key.name,
 		apiUrl: `${base}/api`,
 		downloadUrl: `${base}/download/{accountId}/{blobId}/{name}?type={type}`,
 		uploadUrl: `${base}/upload/{accountId}`,
@@ -220,7 +226,7 @@ async function pushSet(c: Ctx, args: Args): Promise<MethodResult> {
 			if (list.filter((s) => s.keyId === c.key.id).length >= MAX_PER_KEY) { notCreated[cid] = { type: "overQuota", description: `An API key can have up to ${MAX_PER_KEY} push subscriptions.` }; continue; }
 			const keys = raw.keys ? { p256dh: String((raw.keys as Record<string, unknown>).p256dh), auth: String((raw.keys as Record<string, unknown>).auth) } : null;
 			const sub: JmapPushSub = {
-				id: crypto.randomUUID(), keyId: c.key.id, deviceClientId: raw.deviceClientId, url: raw.url as string, keys,
+				id: crypto.randomUUID(), keyId: c.key.id, mailbox: c.signedInAs, deviceClientId: raw.deviceClientId, url: raw.url as string, keys,
 				verificationCode: newCode(), verified: false, expires: clampExpires(raw.expires, now.getTime()),
 				types: Array.isArray(raw.types) ? (raw.types as string[]).filter((t) => PUSH_TYPES.includes(t)) : null,
 				created: now.toISOString(),
