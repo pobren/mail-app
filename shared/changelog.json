@@ -2,6 +2,15 @@
 	"_note": "Mail App's version history, newest first. Add an entry for each release: 1.1 → 1.2 for small updates, 1.x → 2.0 for big ones. Installs are told about an update when the top version goes up.",
 	"releases": [
 		{
+			"version": "2.8",
+			"date": "2026-11-20",
+			"title": "Instant Alerts in Mail Apps",
+			"changes": [
+				"Instant Alerts over JMAP: Mail apps that use Mail App's JMAP, such as JMAP Connect on iPhone and iPad, can now show new mail the moment it arrives. The alert is encrypted for the app and says only that something changed; the app fetches the email itself with its own API key.",
+				"Stops With the Key: Deleting an API key, or taking a mailbox off it, stops its alerts straight away. Never for spam, or for mail that goes straight to another folder."
+			]
+		},
+		{
 			"version": "2.7",
 			"date": "2026-11-20",
 			"title": "Shorter Catch-all Settings",

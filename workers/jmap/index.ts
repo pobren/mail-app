@@ -5,6 +5,7 @@
 //   GET  /api/ext/jmap/download/{accountId}/{blobId}/{name}     an email file, attachment or upload
 //   POST /api/ext/jmap/upload/{accountId}                       a file to attach (kept 24 hours)
 //   GET  /api/ext/jmap/eventsource                              push: a "state" event when mail changes
+//   PushSubscription/get and /set (2.8)                         push to a phone app's https address (workers/jmap/push.ts)
 //
 // Sign-in is an API key (Admin > API & webhooks), as Bearer or as the password with Basic. Each mailbox the
 // key reaches is one JMAP account, and the key's permissions apply: read to read, organise to mark and
@@ -30,6 +31,10 @@ import { listMailboxes } from "../lib/email-helpers";
 import { sendableFor } from "../lib/masked";
 import { loadAddressBook } from "../lib/addresses";
 import type { JmapEmailRow } from "../durableObject/jmap";
+import {
+	MAX_PER_KEY, PUSH_TYPES, clampExpires, loadPushSubs, newCode, pushKeysProblem, pushUrlProblem, sendVerification, typesProblem,
+	updatePushSubs, type JmapPushSub,
+} from "./push";
 import type { Env } from "../types";
 
 /** Runs a request through the app's own /api/v1 routes as the key's person. */
@@ -166,6 +171,105 @@ function shortHash(s: string): string {
 	return h.toString(36);
 }
 
+// -- Push subscriptions (RFC 8620 7.2) -----------------------------------------------------------------
+// They aren't in any account: they belong to the API key that made them. The url and keys an app gave are never
+// handed back.
+
+function showPush(s: JmapPushSub, props: string[] | null) {
+	const all: Record<string, unknown> = { id: s.id, deviceClientId: s.deviceClientId, verificationCode: s.verified ? s.verificationCode : null, expires: s.expires, types: s.types };
+	if (!props) return all;
+	const out: Record<string, unknown> = { id: s.id };
+	for (const p of props) if (p in all) out[p] = all[p];
+	return out;
+}
+
+async function pushGet(c: Ctx, args: Args): Promise<MethodResult> {
+	const ids = idsArg(args);
+	const props = Array.isArray(args.properties) ? (args.properties as string[]) : null;
+	const mine = (await loadPushSubs(c.env.BUCKET)).filter((s) => s.keyId === c.key.id && Date.parse(s.expires) > Date.now());
+	const list = ids ? mine.filter((s) => ids.includes(s.id)) : mine;
+	const notFound = ids ? ids.filter((id) => !mine.some((s) => s.id === id)) : [];
+	return [["PushSubscription/get", { list: list.map((s) => showPush(s, props)), notFound }, ""]];
+}
+
+async function pushSet(c: Ctx, args: Args): Promise<MethodResult> {
+	if (!c.scopes.has("read")) throw new MethodError("forbidden", "This API key can't do that. It needs read permission.");
+	const create = (args.create ?? {}) as Record<string, Record<string, unknown>>;
+	const update = (args.update ?? {}) as Record<string, Record<string, unknown>>;
+	const destroy = Array.isArray(args.destroy) ? (args.destroy as string[]) : [];
+	const created: Record<string, unknown> = {}, notCreated: Record<string, unknown> = {};
+	const updated: Record<string, unknown> = {}, notUpdated: Record<string, unknown> = {};
+	const destroyed: string[] = [], notDestroyed: Record<string, unknown> = {};
+	const verify: JmapPushSub[] = [];
+	const now = new Date();
+
+	await updatePushSubs(c.env.BUCKET, (list) => {
+		for (const [cid, raw] of Object.entries(create)) {
+			if (!raw || typeof raw !== "object") { notCreated[cid] = { type: "invalidProperties" }; continue; }
+			const bad = (property: string, description: string) => { notCreated[cid] = { type: "invalidProperties", properties: [property], description }; };
+			if (typeof raw.deviceClientId !== "string" || !raw.deviceClientId || raw.deviceClientId.length > 255) { bad("deviceClientId", "deviceClientId is needed."); continue; }
+			const urlWhy = pushUrlProblem(raw.url);
+			if (urlWhy) { bad("url", urlWhy); continue; }
+			const keysWhy = pushKeysProblem(raw.keys);
+			if (keysWhy) { bad("keys", keysWhy); continue; }
+			const typesWhy = typesProblem(raw.types);
+			if (typesWhy) { bad("types", typesWhy); continue; }
+			if (raw.verificationCode != null) { bad("verificationCode", "verificationCode can't be set when creating."); continue; }
+			// The same device asking again replaces its old subscription.
+			for (let i = list.length - 1; i >= 0; i--) if (list[i].keyId === c.key.id && list[i].deviceClientId === raw.deviceClientId) list.splice(i, 1);
+			if (list.filter((s) => s.keyId === c.key.id).length >= MAX_PER_KEY) { notCreated[cid] = { type: "overQuota", description: `An API key can have up to ${MAX_PER_KEY} push subscriptions.` }; continue; }
+			const keys = raw.keys ? { p256dh: String((raw.keys as Record<string, unknown>).p256dh), auth: String((raw.keys as Record<string, unknown>).auth) } : null;
+			const sub: JmapPushSub = {
+				id: crypto.randomUUID(), keyId: c.key.id, deviceClientId: raw.deviceClientId, url: raw.url as string, keys,
+				verificationCode: newCode(), verified: false, expires: clampExpires(raw.expires, now.getTime()),
+				types: Array.isArray(raw.types) ? (raw.types as string[]).filter((t) => PUSH_TYPES.includes(t)) : null,
+				created: now.toISOString(),
+			};
+			list.push(sub);
+			verify.push(sub);
+			created[cid] = { id: sub.id, expires: sub.expires };
+		}
+		for (const [id, patch] of Object.entries(update)) {
+			const sub = list.find((s) => s.id === id && s.keyId === c.key.id);
+			if (!sub) { notUpdated[id] = { type: "notFound" }; continue; }
+			if (!patch || typeof patch !== "object") { notUpdated[id] = { type: "invalidProperties" }; continue; }
+			const change: Record<string, unknown> = {};
+			if ("verificationCode" in patch) {
+				if (patch.verificationCode !== sub.verificationCode) { notUpdated[id] = { type: "invalidProperties", properties: ["verificationCode"], description: "That isn't the code Mail App sent." }; continue; }
+				sub.verified = true;
+			}
+			if ("expires" in patch) {
+				sub.expires = clampExpires(patch.expires, now.getTime());
+				if (sub.expires !== patch.expires) change.expires = sub.expires;
+			}
+			if ("types" in patch) {
+				const why = typesProblem(patch.types);
+				if (why) { notUpdated[id] = { type: "invalidProperties", properties: ["types"], description: why }; continue; }
+				sub.types = Array.isArray(patch.types) ? (patch.types as string[]).filter((t) => PUSH_TYPES.includes(t)) : null;
+			}
+			for (const p of Object.keys(patch)) {
+				if (!["verificationCode", "expires", "types"].includes(p)) { notUpdated[id] = { type: "invalidProperties", properties: [p], description: `${p} can't be changed.` }; break; }
+			}
+			if (notUpdated[id]) continue;
+			updated[id] = Object.keys(change).length ? change : null;
+		}
+		for (const id of destroy) {
+			const i = list.findIndex((s) => s.id === id && s.keyId === c.key.id);
+			if (i < 0) { notDestroyed[id] = { type: "notFound" }; continue; }
+			list.splice(i, 1);
+			destroyed.push(id);
+		}
+	});
+
+	const contact = [...c.accounts.values()][0] ?? "postmaster@invalid";
+	for (const sub of verify) c.ctx.waitUntil(sendVerification(c.env, sub, contact).catch((e) => console.error("Push verification failed:", (e as Error).message)));
+	return [["PushSubscription/set", {
+		created: Object.keys(created).length ? created : null, notCreated: Object.keys(notCreated).length ? notCreated : null,
+		updated: Object.keys(updated).length ? updated : null, notUpdated: Object.keys(notUpdated).length ? notUpdated : null,
+		destroyed: destroyed.length ? destroyed : null, notDestroyed: Object.keys(notDestroyed).length ? notDestroyed : null,
+	}, ""]];
+}
+
 // -- API -------------------------------------------------------------------------------------------
 
 type Args = Record<string, unknown>;
@@ -260,6 +364,8 @@ async function run(c: Ctx, st: RequestState, name: string, args: Args): Promise<
 		case "Identity/changes": throw new MethodError("cannotCalculateChanges");
 		case "Identity/set": return identitySet(c, st, args);
 		case "EmailSubmission/set": return submissionSet(c, st, args);
+		case "PushSubscription/get": return pushGet(c, args);
+		case "PushSubscription/set": return pushSet(c, args);
 		case "EmailSubmission/get": need(c, "send"); { const { accountId } = accountOf(c, args); return [["EmailSubmission/get", { accountId, state: "0", list: [], notFound: idsArg(args) ?? [] }, ""]]; }
 		default: throw new MethodError("unknownMethod", `${name} isn't supported.`);
 	}
